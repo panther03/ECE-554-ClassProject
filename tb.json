@@ -1,0 +1,15 @@
+{
+    "spart": {
+        "top": "spart_tb",
+        "files": [
+            "rtl/spart/spart.sv",
+            "rtl/spart/UART_rx.sv",
+            "rtl/spart/UART_tx.sv",
+            "rtl/spart/queue.sv"
+        ],
+        "tb_pkgs": [
+            "generic_tasks",
+            "spart_tb_tasks"
+        ]
+    }
+}

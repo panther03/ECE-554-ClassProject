@@ -1,0 +1,17 @@
+out/
+
+fpga/*/*
+!fpga/*/Makefile
+!fpga/*/*.qsf
+!fpga/*/*.qpf
+!fpga/*/*.sdc
+!fpga/*/*.qip
+!fpga/*/*.sip
+!fpga/*/*.v
+
+tb/*/*
+!tb/*/*.v
+!tb/*/*.sv
+!tb/*/wave.do
+
+transcript
