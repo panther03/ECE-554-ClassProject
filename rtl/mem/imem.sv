@@ -1,15 +1,18 @@
 module imem 
-import wi23_defs::IMEM_DEPTH;
+import wi23_defs::*;
 (
    input                   clk,
    input  [IMEM_DEPTH-1:0] addr_i,
-   output [15:0]           inst_o
+   input  [IMEM_DEPTH-1:0] daddr_i,
+   output [IMEM_WIDTH-1:0] inst_o,
+   output [IMEM_WIDTH-1:0] data_o
 );
 
    localparam IMEM_ENTRIES = 1 << IMEM_DEPTH;
    
-   reg [15:0] mem_r [IMEM_ENTRIES-1:0];
-   reg [15:0] inst_r;
+   reg [IMEM_WIDTH-1:0] mem_r [IMEM_ENTRIES-1:0];
+   reg [IMEM_WIDTH-1:0] inst_r;
+   reg [IMEM_WIDTH-1:0] data_r;
 
    initial begin
       $readmemh("../../out/out.hex", mem_r);
@@ -19,7 +22,12 @@ import wi23_defs::IMEM_DEPTH;
    always @(negedge clk) begin
       inst_r <= mem_r[addr_i];
    end
+   
+   always @(negedge clk) begin
+      data_r <= mem_r[daddr_i];
+   end
 
    assign inst_o = inst_r;
+   assign data_o = data_r;
 
 endmodule

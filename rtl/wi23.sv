@@ -28,7 +28,8 @@ import wi23_defs::*;
 
 logic [15:0] iaddr;
 logic [15:0] daddr;
-logic [15:0] inst;
+logic [IMEM_WIDTH-1:0] inst;
+logic [IMEM_WIDTH-1:0] im_data;
 logic [15:0] data_mem_to_proc_map;
 logic [15:0] data_mem_to_proc_dmem;
 logic [15:0] data_proc_to_mem;
@@ -79,8 +80,10 @@ proc PROC (
 imem IMEM (
   .clk(clk),
   // We truncate address here but this is OK. It will just fetch 0s (HALT) if out of range
-  .addr_i(iaddr[IMEM_DEPTH-1:0]),
-  .inst_o(inst)
+  .addr_i   (iaddr[IMEM_DEPTH-1:0]),
+  .daddr_i  (daddr[IMEM_DEPTH-1:0]),
+  .inst_o   (inst[IMEM_WIDTH-1:0]),
+  .data_o   (im_data[IMEM_WIDTH-1:0])
 );
 
 //////////////////

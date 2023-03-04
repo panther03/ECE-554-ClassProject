@@ -1,30 +1,35 @@
-module fetch (pc_inc_in, pc_inc_out, iaddr,
-              reg1, ofs, imm, stall, flush,
-              JType, CondOp, Halt, Rtn, Exc,
-              clk, rst_n, fetch_err);
-
-	input clk, rst_n;
+module fetch
+import wi23_defs::*;
+(
+    // Inputs
+	input logic         clk,
+    input logic         rst_n,
     
-    input [15:0] reg1, imm, ofs;
-    input [15:0] pc_inc_in;
-    input stall;
-
-    output [15:0] iaddr;
-    output [15:0] pc_inc_out;
-    output flush;
-    output fetch_err;
-
     //////////////////////
     // control signals //
     ////////////////////
-
-    input Halt, Rtn, Exc;
-    input [1:0] JType, CondOp;
-
+    input logic [15:0]  reg1, 
+    input logic [15:0]  imm, 
+    input logic [15:0]  ofs,
+    input logic [15:0]  pc_inc_in,
+    input logic         stall,
+    
     /////////////////////////
     // comparator section //
     ///////////////////////
-    
+    input logic         Halt, 
+    input logic         Rtn, 
+    input logic         Exc,
+    input logic [1:0]   JType, 
+    input logic [1:0]   CondOp,
+
+    // Outputs
+    output logic [15:0] iaddr,
+    output logic [15:0] pc_inc_out,
+    output logic        flush,
+    output logic        fetch_err
+);
+
     reg CmpOut;
 
     always @* case (CondOp)
@@ -64,10 +69,10 @@ module fetch (pc_inc_in, pc_inc_out, iaddr,
 
     reg [15:0] pc, epc;
 
-    wire [15:0] pc_exc = Exc ? 16'h2 : (Rtn ? epc : (stall ? pc : pc_target));
+    wire [15:0] pc_exc = Exc ? 16'h4 : (Rtn ? epc : (stall ? pc : pc_target));
 
 
-    always @(posedge clk, negedge rst_n)
+    always @(posedge clk, negedge rst_n) begin
         if (!rst_n) begin
             pc <= 0;
             epc <= 0;
@@ -75,6 +80,7 @@ module fetch (pc_inc_in, pc_inc_out, iaddr,
             pc <= pc_exc;
             epc <= Exc ? pc : epc;
         end
+    end
 
     assign iaddr = pc;
 
@@ -82,7 +88,7 @@ module fetch (pc_inc_in, pc_inc_out, iaddr,
     // pc_inc (adder) logic //
     /////////////////////////
 
-	assign pc_inc_out = pc + (Halt ? 16'h0 : 16'h2);
+	assign pc_inc_out = pc + (Halt ? 16'h0 : 16'h4);
 
 	// we don't consider an error case for fetch,
    	// so err is tied low.

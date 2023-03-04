@@ -1,10 +1,16 @@
 package wi23_defs;
 
     /////////////
-    // MEMORY //
-    ///////////
-    localparam IMEM_DEPTH = 14;
+    // MEMORY ///
+    /////////////
+
+    // IMEM = 32kB
+    localparam IMEM_DEPTH = 13;
+    localparam IMEM_WIDTH = 32;
+
+    // DMEM = 16kB
     localparam DMEM_DEPTH = 13;
+    localparam DMEM_WIDTH = 16;
 
     ////////////
     // SPART //

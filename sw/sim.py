@@ -16,6 +16,8 @@ import os.path
 import shutil
 from pathlib import Path
 
+from generate_control import gen_control
+
 # too lazy to put it in the json
 BLACKLIST = ["top.sv", "rst_synch.sv"]
 
@@ -57,6 +59,16 @@ def scan_files(tb_dir, fileset, tb_pkgs):
     return all_files
 
 def clean(tb_dir, tb_name):
+    # Remove auto-generated control files
+    control_file = "control.sv"
+    control_pkg_file = "control_defs_pkg.sv"
+    rtl_cpu_dir = "rtl/cpu"
+    rtl_pkg_dir = "rtl/pkg"
+    if os.path.exists(os.path.join(rtl_cpu_dir, control_file)):
+        os.remove(os.path.join(rtl_cpu_dir, control_file))
+    if os.path.exists(os.path.join(rtl_pkg_dir, control_pkg_file)):
+        os.remove(os.path.join(rtl_pkg_dir, control_pkg_file))
+    # Remove modelsim junk
     modelsim_junk = [f"{tb_name}.mpf", f"{tb_name}.cr.mti", "transcript", "modelsim.ini", "vsim.wlf", "vsim_stacktrace.wlf"]
     for junk in modelsim_junk:
         if os.path.exists(os.path.join(tb_dir,junk)):
@@ -109,6 +121,11 @@ def test(tb_dir, tb_name, top):
 def run_flow(flow, tb, tb_cfg):
     tb_dir = f"tb/{tb}/"
 
+    control_file = "control.sv"
+    control_pkg_file = "control_defs_pkg.sv"
+    rtl_cpu_dir = "rtl/cpu"
+    rtl_pkg_dir = "rtl/pkg"
+
     if not os.path.exists(tb_dir):
         raise RuntimeError(f"tb directory {tb_dir} doesn't exist. Quitting.")
 
@@ -122,6 +139,18 @@ def run_flow(flow, tb, tb_cfg):
 
     # always clean first
     clean(tb_dir, tb)
+
+    # Generate the control.sv and control_defs_pkg.sv
+    instr_file = open('sw/instr_control.csv', 'r')
+    gen_control(instr_file)
+    instr_file.close()
+    if os.path.exists(os.path.join(rtl_cpu_dir, control_file)):
+        os.remove(os.path.join(rtl_cpu_dir, control_file))
+    if os.path.exists(os.path.join(rtl_pkg_dir, control_pkg_file)):
+        os.remove(os.path.join(rtl_pkg_dir, control_pkg_file))
+    shutil.move(control_pkg_file,os.path.join(rtl_pkg_dir, control_pkg_file))
+    shutil.move(control_file,os.path.join(rtl_cpu_dir, control_file))
+
     # quit here if we're just doing a clean
     if flow == "clean":
         return

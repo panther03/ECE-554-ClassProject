@@ -267,13 +267,13 @@ def second_pass(imem, labels):
                 label_addr = labels.get(label)
                 if label_addr is None:
                     raise ValueError(f"Invalid instruction label {label} provided.")
-                offset = label_addr - (pc + 2)
+                offset = label_addr - (pc + 4)
                 imm_val = parse_imm(str(offset), imm_bits = 16 - len(inst))
 
             new_inst += imm_val 
 
         new_imem.append(new_inst)
-        pc += 2
+        pc += 4
 
     return new_imem
 
@@ -317,7 +317,7 @@ if __name__ == "__main__":
                 debug_out.writelines([inst_val_str[:2] + "\n", inst_val_str[2:] + "\n"])
             else:
                 print(hex_str)
-            addr += 2
+            addr += 4
 
         if args.out_file:
             hex_out.close()

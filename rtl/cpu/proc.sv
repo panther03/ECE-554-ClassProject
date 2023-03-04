@@ -1,10 +1,13 @@
-module proc (
+module proc 
+import control_defs_pkg::*;
+import wi23_defs::*;
+(
    // Clock and reset
    input         clk,
    input         rst_n,
    // Instruction memory signals
    output [15:0] iaddr_o,
-   input  [15:0] inst_i,
+   input  [IMEM_WIDTH-1:0] inst_i,
    // Data memory signals
    output [15:0] daddr_o,
    output        we_o,
@@ -63,6 +66,7 @@ module proc (
    // ID_EX transition wires //
    ///////////////////////////
 
+   op_word_t ID_EX_Op_in, ID_EX_Op_out;
    logic ID_EX_ctrl_RegWrite_in, ID_EX_ctrl_RegWrite_out;
    logic ID_EX_ctrl_MemWrite_in, ID_EX_ctrl_MemWrite_out;
    logic ID_EX_ctrl_MemRead_in, ID_EX_ctrl_MemRead_out;
@@ -188,7 +192,7 @@ module proc (
       .RegWrite(RegWrite), .MemWrite(MemWrite), .MemRead(MemRead),
       .InstFmt(InstFmt), .MemToReg(MemToReg), .AluSrc(AluSrc),
       .AluOp(AluOp), .CondOp(CondOp), .JType(JType),
-      .XtendSel(XtendSel), .Rtn(Rtn), .Exc(Exc), .Halt(Halt));
+      .XtendSel(XtendSel), .Rtn(Rtn), .Exc(Exc), .Halt(Halt), .ID_EX_Op_in(ID_EX_Op_in));
 
    ///////////////////
    // decode block //
@@ -227,6 +231,7 @@ module proc (
 
    always @(posedge clk, negedge rst_n) 
       if (!rst_n) begin
+         ID_EX_Op_out <= NOP;
          ID_EX_ctrl_RegWrite_out <= 0;
          ID_EX_ctrl_MemWrite_out <= 0;
          ID_EX_ctrl_MemRead_out <= 0;
@@ -242,6 +247,7 @@ module proc (
          ID_EX_inst_out <= 0;
          ID_EX_ctrl_Halt_out <= 0;
       end else begin
+         ID_EX_Op_out <= ID_EX_Op_in;
          ID_EX_ctrl_RegWrite_out <= ID_EX_ctrl_RegWrite_in;
          ID_EX_ctrl_MemWrite_out <= ID_EX_ctrl_MemWrite_in;
          ID_EX_ctrl_MemRead_out <= ID_EX_ctrl_MemRead_in;
