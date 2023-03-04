@@ -45,15 +45,16 @@ import wi23_defs::*;
    // control block wires //
    ////////////////////////
 
-   wire [6:0] op_word;
+   wire [7:0] op_word;
    wire ctrl_err;
 
    wire [3:0] AluOp;
    wire [1:0] InstFmt, JType, CondOp;
    wire RegWrite, MemWrite, MemRead,
         MemToReg, AluSrc, XtendSel,
-        Exc, Rtn, Halt;
-
+        Exc, Rtn, Halt, FPInst;
+   wire [1:0] FPIntCvtReg;
+   
    /////////////////////////
    // decode block wires //
    ///////////////////////
@@ -187,12 +188,12 @@ import wi23_defs::*;
    // From the schematic, this is part of decode stage,
    // but listed as top level for convenience.
 
-   assign op_word = {IF_ID_inst_out[15:11],IF_ID_inst_out[1:0]};
+   assign op_word = {1'b0, IF_ID_inst_out[15:11],IF_ID_inst_out[1:0]};
    control iCONTROL(.op_word(op_word), .ctrl_err(ctrl_err),
       .RegWrite(RegWrite), .MemWrite(MemWrite), .MemRead(MemRead),
       .InstFmt(InstFmt), .MemToReg(MemToReg), .AluSrc(AluSrc),
       .AluOp(AluOp), .CondOp(CondOp), .JType(JType),
-      .XtendSel(XtendSel), .Rtn(Rtn), .Exc(Exc), .Halt(Halt), .ID_EX_Op_in(ID_EX_Op_in));
+      .XtendSel(XtendSel), .Rtn(Rtn), .Exc(Exc), .Halt(Halt), .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg), .ID_EX_Op_in(ID_EX_Op_in));
 
    ///////////////////
    // decode block //
@@ -277,12 +278,14 @@ import wi23_defs::*;
       .AluOp(ID_EX_ctrl_AluOp_out), .JType(ID_EX_ctrl_JType_out),
       .InstFmt(ID_EX_ctrl_InstFmt_out), .AluSrc(ID_EX_ctrl_AluSrc_out));
 
-   always @* case (ID_EX_ctrl_InstFmt_out)
-        2'b00 : writesel = (ID_EX_ctrl_JType_out == 2'b01) ? 3'h7 : ID_EX_inst_out[10:8];
-        2'b01 : writesel = (ID_EX_inst_out[15:11] == 5'b10011) ? ID_EX_inst_out[10:8] : ID_EX_inst_out[7:5]; // exception case for STU (needs to write to Rs)
-        2'b10 : writesel = ID_EX_inst_out[4:2];
-        2'b11 : writesel = 3'h7;
-    endcase
+   always_comb begin
+      case (ID_EX_ctrl_InstFmt_out)
+         2'b00 : writesel = (ID_EX_ctrl_JType_out == 2'b01) ? 3'h7 : ID_EX_inst_out[10:8];
+         2'b01 : writesel = (ID_EX_inst_out[15:11] == 5'b10011) ? ID_EX_inst_out[10:8] : ID_EX_inst_out[7:5]; // exception case for STU (needs to write to Rs)
+         2'b10 : writesel = ID_EX_inst_out[4:2];
+         2'b11 : writesel = 3'h7;
+      endcase
+   end
 
    ////////////////////////
    // EX/MEM transition //

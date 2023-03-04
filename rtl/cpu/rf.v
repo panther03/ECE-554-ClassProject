@@ -18,19 +18,20 @@ module rf (
    wire [7:0] write_sel;
 
    // We had to add this synthesis directive becasue Quartus was inferring the small memory as registers
-   (* ramstyle = "m10k" *) reg [15:0] rf1 [7:0];
-   (* ramstyle = "m10k" *) reg [15:0] rf2 [7:0];
+   (* ramstyle = "m10k" *) reg [31:0] rf1 [31:0];
+   (* ramstyle = "m10k" *) reg [31:0] rf2 [31:0];
 
    // Write and read register results on the negative edge.
    // Register bypass happens outside of this module so
    // we do not need to worry about that write-during-read here.
+   // TODO 32-bit registers
    always @(negedge clk) begin
       if (write) begin
-         rf1[writeregsel] <= writedata;
-         rf2[writeregsel] <= writedata;
+         rf1[writeregsel] <= {16'b0, writedata};
+         rf2[writeregsel] <= {16'b0, writedata};
       end
-      read1data <= rf1[read1regsel];
-      read2data <= rf2[read2regsel];
+      read1data <= rf1[read1regsel][15:0];
+      read2data <= rf2[read2regsel][15:0];
    end
 
    // we don't consider an error case for rf,

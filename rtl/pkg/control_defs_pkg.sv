@@ -43,7 +43,22 @@ typedef enum logic [6:0] {
     JAL,
     JALR,
     siic,
-    rti
+    rti,
+    LDCR,
+    FADD,
+    FSUB,
+    FMUL,
+    FDIV,
+    FEQ,
+    FLE,
+    FLT,
+    FCVTI,
+    ICVTF,
+    FMOVI,
+    IMOVF,
+    FST,
+    FLD,
+    FCLASS
 } op_word_t;
 
 endpackage

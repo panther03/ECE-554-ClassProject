@@ -3,11 +3,11 @@ import sys
 import os
 
 def generate_module(row, names, control_file):
-    module_interface = "module control\nimport control_defs_pkg::*;\n(\n    //Inputs\n    input logic [6:0]  op_word,\n\n    //Outputs\n"
+    module_interface = "module control\nimport control_defs_pkg::*;\n(\n    //Inputs\n    input logic [7:0]  op_word,\n\n    //Outputs\n"
     # Find Signal Width and print the output interface signals
     for i in range(len(row)-3):
         signal_name = names[i+3]
-        if (signal_name == "InstFmt" or signal_name == "CondOp" or signal_name == "JType") :
+        if (signal_name == "InstFmt" or signal_name == "CondOp" or signal_name == "JType" or signal_name == "FPIntCvtReg") :
             signal_width = 2
         elif (signal_name == "AluOp") :
             signal_width = 4
@@ -22,7 +22,7 @@ def generate_module(row, names, control_file):
 
 def end_module(control_file):
     ## Default Case Statement
-    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Halt = 0; ctrl_err = 1; ID_EX_Op_in = NOP; end // error case (default)\n")
+    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; ctrl_err = 1; ID_EX_Op_in = NOP; end // error case (default)\n")
     control_file.write("    endcase\nend")
     control_file.write("\n\nendmodule")
 
