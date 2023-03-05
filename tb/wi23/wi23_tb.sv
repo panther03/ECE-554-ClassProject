@@ -35,8 +35,9 @@ initial begin
     rst_n = 1'b0;
     repeat (2) @ (negedge clk);
     rst_n = 1'b1;
-    repeat (50) @ (negedge clk);
-    $display("\nYahoo!!! All Tests Passed\n");
+    repeat (20) @ (negedge clk);
+    if (WI23.PROC.iDECODE.iRF.rf1[1] == WI23.PROC.iDECODE.iRF.rf1[3])
+        $display("\nYahoo!!! All Tests Passed\n");
     $finish();
 end
 

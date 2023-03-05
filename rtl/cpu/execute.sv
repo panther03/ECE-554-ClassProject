@@ -1,9 +1,13 @@
-module execute (reg1, reg2, imm, pc_inc, alu_out,
-                AluOp, JType, InstFmt, AluSrc,
-                ex_err); 
+module execute 
+import wi23_defs::*;
+(
+    reg1, reg2, imm, pc_inc, alu_out,
+    AluOp, JType, InstFmt, AluSrc,
+    ex_err
+); 
 
-    input [15:0] reg1, reg2, imm, pc_inc;
-    output [15:0] alu_out;
+    input [REGFILE_WIDTH-1:0] reg1, reg2, imm, pc_inc;
+    output [REGFILE_WIDTH-1:0] alu_out;
     output ex_err;
 
     //////////////////////
@@ -18,7 +22,7 @@ module execute (reg1, reg2, imm, pc_inc, alu_out,
     // main ALU section //
     /////////////////////
 
-    wire [15:0] aluA, aluB;
+    wire [REGFILE_WIDTH-1:0] aluA, aluB;
     wire alu_err;
 
     assign aluA = ^JType ? pc_inc : reg1;

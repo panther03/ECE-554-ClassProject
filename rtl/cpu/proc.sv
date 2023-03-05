@@ -6,14 +6,15 @@ import wi23_defs::*;
    input         clk,
    input         rst_n,
    // Instruction memory signals
-   output [15:0] iaddr_o,
+   output [IMEM_WIDTH-1:0] iaddr_o,             // Output full 32-bit address
+   output                  ldcr_o,
    input  [IMEM_WIDTH-1:0] inst_i,
    // Data memory signals
-   output [15:0] daddr_o,
+   output [DMEM_WIDTH-1:0] daddr_o,             // Output full 32-bit address
    output        we_o,
    output        re_o,
-   output [15:0] data_proc_to_mem_o,
-   input  [15:0] data_mem_to_proc_i,
+   output [DMEM_WIDTH-1:0] data_proc_to_mem_o,
+   input  [DMEM_WIDTH-1:0] data_mem_to_proc_i,
    // Error and Halt status,
    output        err_o,
    output        halt_o
@@ -30,7 +31,7 @@ import wi23_defs::*;
    ////////////////////////
    // fetch block wires //
    //////////////////////
-   wire [15:0] pc_inc;
+   wire [IMEM_WIDTH-1:0] pc_inc;
    wire stall, flush;
    wire fetch_err;
 
@@ -38,8 +39,8 @@ import wi23_defs::*;
    // IF_ID transition wires //
    ///////////////////////////
 
-   logic [15:0] IF_ID_pc_inc_in, IF_ID_pc_inc_out;
-   logic [15:0] IF_ID_inst_in, IF_ID_inst_out, IF_ID_inst_out_temp;
+   logic [IMEM_WIDTH-1:0] IF_ID_pc_inc_in, IF_ID_pc_inc_out;
+   logic [IMEM_WIDTH-1:0] IF_ID_inst_in, IF_ID_inst_out, IF_ID_inst_out_temp;
 
    //////////////////////////
    // control block wires //
@@ -59,7 +60,7 @@ import wi23_defs::*;
    // decode block wires //
    ///////////////////////
 
-   wire [15:0] reg1, reg2, imm, ofs;
+   wire [REGFILE_WIDTH-1:0] reg1, reg2, imm, ofs;
    wire bypass_reg1, bypass_reg2;
    wire decode_err;
 
@@ -79,19 +80,19 @@ import wi23_defs::*;
 
    logic ID_EX_ctrl_Halt_in, ID_EX_ctrl_Halt_out;
 
-   logic [15:0] ID_EX_reg1_in, ID_EX_reg1_out;
-   logic [15:0] ID_EX_reg2_in, ID_EX_reg2_out;
-   logic [15:0] ID_EX_imm_in, ID_EX_imm_out;
+   logic [REGFILE_WIDTH-1:0] ID_EX_reg1_in, ID_EX_reg1_out;
+   logic [REGFILE_WIDTH-1:0] ID_EX_reg2_in, ID_EX_reg2_out;
+   logic [REGFILE_WIDTH-1:0] ID_EX_imm_in, ID_EX_imm_out;
 
-   logic [15:0] ID_EX_pc_inc_in, ID_EX_pc_inc_out;
-   logic [15:0] ID_EX_inst_in, ID_EX_inst_out;
+   logic [IMEM_WIDTH-1:0] ID_EX_pc_inc_in, ID_EX_pc_inc_out;
+   logic [IMEM_WIDTH-1:0] ID_EX_inst_in, ID_EX_inst_out;
 
    //////////////////////////
    // execute block wires //
    ////////////////////////
 
-   wire [15:0] alu_out;
-   wire [15:0] reg1_frwrd, reg2_frwrd;
+   wire [REGFILE_WIDTH-1:0] alu_out;
+   wire [REGFILE_WIDTH-1:0] reg1_frwrd, reg2_frwrd;
    reg [2:0] writesel;
    wire ex_err;
 
@@ -106,8 +107,8 @@ import wi23_defs::*;
 
    logic EX_MEM_ctrl_Halt_in, EX_MEM_ctrl_Halt_out;
 
-   logic [15:0] EX_MEM_alu_out_in,  EX_MEM_alu_out_out;
-   logic [15:0] EX_MEM_reg2_in, EX_MEM_reg2_out;
+   logic [REGFILE_WIDTH-1:0] EX_MEM_alu_out_in,  EX_MEM_alu_out_out;
+   logic [REGFILE_WIDTH-1:0] EX_MEM_reg2_in, EX_MEM_reg2_out;
    logic [2:0] EX_MEM_writesel_in, EX_MEM_writesel_out;
 
    //////////////////////////////
@@ -120,14 +121,14 @@ import wi23_defs::*;
    logic MEM_WB_ctrl_Halt_in, MEM_WB_ctrl_Halt_out;
 
    logic [2:0] MEM_WB_writesel_in, MEM_WB_writesel_out;
-   logic [15:0] MEM_WB_alu_out_in, MEM_WB_alu_out_out;
-   logic [15:0] MEM_WB_mem_out_in, MEM_WB_mem_out_out;
+   logic [REGFILE_WIDTH-1:0] MEM_WB_alu_out_in, MEM_WB_alu_out_out;
+   logic [REGFILE_WIDTH-1:0] MEM_WB_mem_out_in, MEM_WB_mem_out_out;
 
    ////////////////////////////
    // writeback block wires //
    //////////////////////////
 
-   wire [15:0] write_in;
+   wire [REGFILE_WIDTH-1:0] write_in;
 
    ////////////////////////////
    // forwarding unit wires //
@@ -144,7 +145,7 @@ import wi23_defs::*;
    // Don't use the normal reg_frwrd signal here,
    // we are only interested in the special EX->ID forward case,
    // and standard RF bypass case.
-   wire [15:0] reg1_frwrd_fetch = frwrd_EX_ID_opA ? EX_MEM_alu_out_out : reg1;
+   wire [REGFILE_WIDTH-1:0] reg1_frwrd_fetch = frwrd_EX_ID_opA ? EX_MEM_alu_out_out : reg1;
 
    // halt from all stages is passed to stop PC increment,
    // but the testbench should only see Halt from MEM_WB.
@@ -160,12 +161,12 @@ import wi23_defs::*;
    /////////////////////
 
    // flip bit 11 to default to NOP instead of HALT when we stall
-   assign IF_ID_inst_in = inst_i ^ 16'h0800;
+   assign IF_ID_inst_in = inst_i ^ 32'h0800;
    assign IF_ID_pc_inc_in = pc_inc;   
    
    // If we get a stall or halt, we recirculate values here.
    // If we get a flush, we load in 0 (nop) for the instruction.
-   wire [31:0] IF_ID_reg_in = (all_halts | stall) ? {IF_ID_pc_inc_out,IF_ID_inst_out_temp}
+   wire [((2*IMEM_WIDTH)-1):0] IF_ID_reg_in = (all_halts | stall) ? {IF_ID_pc_inc_out,IF_ID_inst_out_temp}
                             : (flush ? {IF_ID_pc_inc_out,16'h0} : {IF_ID_pc_inc_in, IF_ID_inst_in});
 
    always @(posedge clk, negedge rst_n)
@@ -173,12 +174,12 @@ import wi23_defs::*;
          IF_ID_inst_out_temp <= 0;
          IF_ID_pc_inc_out <= 0;
       end else begin
-         IF_ID_inst_out_temp <= IF_ID_reg_in[15:0];
-         IF_ID_pc_inc_out <= IF_ID_reg_in[31:16];
+         IF_ID_inst_out_temp <= IF_ID_reg_in[IMEM_WIDTH-1:0];
+         IF_ID_pc_inc_out <= IF_ID_reg_in[((2*IMEM_WIDTH)-1):IMEM_WIDTH];
       end
 
    // Since we flipped at input, flip at output as well.
-   assign IF_ID_inst_out = IF_ID_inst_out_temp ^ 16'h0800;
+   assign IF_ID_inst_out = IF_ID_inst_out_temp ^ 32'h0800;
 
 
    ////////////////////
@@ -203,7 +204,7 @@ import wi23_defs::*;
       .inst(IF_ID_inst_out), .writesel(MEM_WB_writesel_out),
       .bypass_reg1(bypass_reg1), .bypass_reg2(bypass_reg2),
       .write_in(write_in), .reg1(reg1), .reg2(reg2), .imm(imm), .ofs(ofs),
-      .InstFmt(InstFmt), .JType(JType), .XtendSel(XtendSel), .RegWrite(MEM_WB_ctrl_RegWrite_out));
+      .InstFmt(InstFmt), .JType(JType), .XtendSel(XtendSel), .RegWrite(MEM_WB_ctrl_RegWrite_out), .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg));
 
    ///////////////////////
    // ID/EX transition //
@@ -333,6 +334,7 @@ import wi23_defs::*;
    assign data_proc_to_mem_o = EX_MEM_reg2_out;
    assign we_o = EX_MEM_ctrl_MemWrite_out;
    assign re_o = EX_MEM_ctrl_MemRead_out;
+   assign ldcr_o = 1'b0;   // TODO madrat
 
    ////////////////////////
    // MEM/WB transition //

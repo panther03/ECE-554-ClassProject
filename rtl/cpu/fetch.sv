@@ -8,10 +8,10 @@ import wi23_defs::*;
     //////////////////////
     // control signals //
     ////////////////////
-    input logic [15:0]  reg1, 
-    input logic [15:0]  imm, 
-    input logic [15:0]  ofs,
-    input logic [15:0]  pc_inc_in,
+    input logic [DMEM_WIDTH-1:0]  reg1, 
+    input logic [DMEM_WIDTH-1:0]  imm, 
+    input logic [DMEM_WIDTH-1:0]  ofs,
+    input logic [IMEM_WIDTH-1:0]  pc_inc_in,
     input logic         stall,
     
     /////////////////////////
@@ -24,8 +24,8 @@ import wi23_defs::*;
     input logic [1:0]   CondOp,
 
     // Outputs
-    output logic [15:0] iaddr,
-    output logic [15:0] pc_inc_out,
+    output logic [IMEM_WIDTH-1:0] iaddr,
+    output logic [IMEM_WIDTH-1:0] pc_inc_out,
     output logic        flush,
     output logic        fetch_err
 );
@@ -35,8 +35,8 @@ import wi23_defs::*;
     always @* case (CondOp)
         2'b00 : CmpOut = ~|reg1;
         2'b01 : CmpOut = |reg1;
-        2'b10 : CmpOut = reg1[15];
-        default : CmpOut = ~reg1[15]; // 2'b11
+        2'b10 : CmpOut = reg1[DMEM_WIDTH];
+        default : CmpOut = ~reg1[DMEM_WIDTH]; // 2'b11
     endcase
 
     // Only flush if we are doing a branch and it's taken
@@ -48,13 +48,13 @@ import wi23_defs::*;
     // branch address calculation logic //
     /////////////////////////////////////
 
-    wire [15:0] addr_base, addr_ofs, addr;
+    wire [IMEM_WIDTH-1:0] addr_base, addr_ofs, addr;
 
     assign addr_base = JType[1] ? pc_inc_in : reg1;
     assign addr_ofs = JType[0] ? imm : ofs;
     assign addr = addr_base + addr_ofs;
 
-    reg [15:0] pc_target;
+    reg [IMEM_WIDTH-1:0] pc_target;
 
     always @* case (JType)
         2'b00 : pc_target = pc_inc_out;
@@ -67,9 +67,9 @@ import wi23_defs::*;
     // PC & EPC register //
     //////////////////////
 
-    reg [15:0] pc, epc;
+    reg [IMEM_WIDTH-1:0] pc, epc;
 
-    wire [15:0] pc_exc = Exc ? 16'h4 : (Rtn ? epc : (stall ? pc : pc_target));
+    wire [IMEM_WIDTH-1:0] pc_exc = Exc ? 16'h4 : (Rtn ? epc : (stall ? pc : pc_target));
 
 
     always @(posedge clk, negedge rst_n) begin

@@ -26,13 +26,14 @@ import wi23_defs::*;
 // memory signals //
 ///////////////////
 
-logic [15:0] iaddr;
-logic [15:0] daddr;
-logic [IMEM_WIDTH-1:0] inst;
-logic [IMEM_WIDTH-1:0] im_data;
-logic [15:0] data_mem_to_proc_map;
-logic [15:0] data_mem_to_proc_dmem;
-logic [15:0] data_proc_to_mem;
+logic [IMEM_WIDTH-1:0]  iaddr;
+logic [IMEM_WIDTH-1:0]  inst;
+logic [IMEM_WIDTH-1:0]  inst_mem_to_proc;
+logic [DMEM_WIDTH-1:0]  daddr;
+logic [DMEM_WIDTH-1:0]  data_mem_to_proc_map;
+logic [DMEM_WIDTH-1:0]  data_mem_to_proc_dmem;
+logic [DMEM_WIDTH-1:0]  data_proc_to_mem;
+logic                   ldcr, ldcr_r;
 
 logic we_map;
 logic re_map;
@@ -66,7 +67,7 @@ proc PROC (
    // Error and halt status
    .err_o(), .halt_o(halt), 
    // Instruction memory signals
-   .iaddr_o(iaddr), .inst_i(inst),
+   .iaddr_o(iaddr), .inst_i(inst), .ldcr_o(ldcr),
    // Data memory signals
    .daddr_o(daddr), .we_o(we_map), .re_o(re_map),
    .data_proc_to_mem_o(data_proc_to_mem), 
@@ -83,7 +84,7 @@ imem IMEM (
   .addr_i   (iaddr[IMEM_DEPTH-1:0]),
   .daddr_i  (daddr[IMEM_DEPTH-1:0]),
   .inst_o   (inst[IMEM_WIDTH-1:0]),
-  .data_o   (im_data[IMEM_WIDTH-1:0])
+  .data_o   (inst_mem_to_proc[IMEM_WIDTH-1:0])
 );
 
 //////////////////
@@ -132,14 +133,22 @@ always_ff @(posedge clk, negedge rst_n)
 
 
 ///////////////////////
-// Memory map logic //
-/////////////////////
+// LDCR logic       ///
+///////////////////////
+always_ff @ (posedge clk, negedge rst_n)
+  if (~rst_n)
+    ldcr_r <= 1'b0;
+  else
+    ldcr_r <= ldcr;
+
+///////////////////////
+// Memory map logic ///
+///////////////////////
 
 // TODO Aidan - Hoffman doesn't like the always_comb.
 // Probably better to do assigns with individual ternaries.
 // He also commented to use wi23_defs.sv to declare memory addresses.
 
-/*
 always_comb begin
   // Initialize all control signals
   // Physical memory
@@ -157,53 +166,48 @@ always_comb begin
 
   // Handle physical memory range primarily
   // Checks that none of the bits are set.
-  if (~|daddr[15:DMEM_DEPTH]) begin
-  
-  we_dmem = we_map;
-  data_mem_to_proc_map = data_mem_to_proc_dmem;
-
+  if (~|daddr[15:13]) begin
+    we_dmem = we_map;
+    data_mem_to_proc_map = ldcr_r ? inst_mem_to_proc : data_mem_to_proc_dmem;
   end else begin
-
-  // Otherwise we map to the remaining peripherals
-  casez (daddr)
-    // LED
-    16'hC000: begin 
-      if (we_map)
-        LEDR_en = 1;
-    end
-    // Switches
-    16'hC001: begin
-      data_mem_to_proc_map = {6'h00 , SW};
-    end
-    // SPART - TX/RX buffer
-    16'hC004: begin
-      spart_iocs_n = ~re_map && ~we_map;
-      spart_iorw_n = ~we_map;
-      // databuf ioaddr is same as default
-      data_mem_to_proc_map = {8'h0, spart_databus};
-      spart_databus_in = data_proc_to_mem[7:0];
-    end
-    // SPART - Status register
-    16'hC005: begin
-      spart_iocs_n = ~re_map;
-      spart_ioaddr = ADDR_SREG;
-      data_mem_to_proc_map = {8'h0, spart_databus};
-    end
-    // SPART - DB register
-    16'hC006, 16'hC007: begin
-      spart_iocs_n = ~re_map && ~we_map;
-      spart_iorw_n = ~we_map;
-      spart_ioaddr = daddr[0] ? ADDR_DBH : ADDR_DBL; 
-      data_mem_to_proc_map = {8'h0, spart_databus};
-      spart_databus_in = data_proc_to_mem[7:0];
-    end
-    // There is no default because all of our inputs
-    // are defaulted. It would be the same thing.
-  endcase
-
+    // Otherwise we map to the remaining peripherals
+    casez (daddr)
+      // LED
+      16'hC000: begin 
+        if (we_map)
+          LEDR_en = 1;
+      end
+      // Switches
+      16'hC001: begin
+        data_mem_to_proc_map = {6'h00 , SW};
+      end
+      // SPART - TX/RX buffer
+      16'hC004: begin
+        spart_iocs_n = ~re_map && ~we_map;
+        spart_iorw_n = ~we_map;
+        // databuf ioaddr is same as default
+        data_mem_to_proc_map = {8'h0, spart_databus};
+        spart_databus_in = data_proc_to_mem[7:0];
+      end
+      // SPART - Status register
+      16'hC005: begin
+        spart_iocs_n = ~re_map;
+        spart_ioaddr = ADDR_SREG;
+        data_mem_to_proc_map = {8'h0, spart_databus};
+      end
+      // SPART - DB register
+      16'hC006, 16'hC007: begin
+        spart_iocs_n = ~re_map && ~we_map;
+        spart_iorw_n = ~we_map;
+        spart_ioaddr = daddr[0] ? ADDR_DBH : ADDR_DBL; 
+        data_mem_to_proc_map = {8'h0, spart_databus};
+        spart_databus_in = data_proc_to_mem[7:0];
+      end
+      // There is no default because all of our inputs
+      // are defaulted. It would be the same thing.
+    endcase
   end
 end
-*/
 
 /////////////////////
 // Output signals //
