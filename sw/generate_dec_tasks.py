@@ -80,7 +80,7 @@ def generate_inst_task(row, names, pkg_file):
 
     task_head = f"task automatic check_{row[2]} (ref logic clk, ref logic [31:0] IF_ID_inst_out, ref logic [31:0] rf1[32]);\n"
     ## Clear RF at the start
-    task_body = f"@ (negedge clk);"
+    task_body = f"\t@ (negedge clk);"
     task_body += f"\tfor (int i = 0; i < 30; i++)\n\t\trf1[i] = $urandom();\n"
     ## Set instruction to test
     task_body += f"\t@ (negedge clk);\n\tIF_ID_inst_out = {inst};\n"
