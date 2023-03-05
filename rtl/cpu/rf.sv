@@ -7,9 +7,9 @@ import wi23_defs::*;
    clk, rst_n, read1regsel, read2regsel, writeregsel, writedata, write
 );
    input clk, rst_n;
-   input [4:0] read1regsel;
-   input [4:0] read2regsel;
-   input [4:0] writeregsel;
+   input [REGFILE_DEPTH-1:0] read1regsel;
+   input [REGFILE_DEPTH-1:0] read2regsel;
+   input [REGFILE_DEPTH-1:0] writeregsel;
    input [REGFILE_WIDTH-1:0] writedata;
    input        write;
 
@@ -17,7 +17,7 @@ import wi23_defs::*;
    output reg [REGFILE_WIDTH-1:0] read2data;
    output err;
 
-   wire [REGFILE_DEPTH:0] write_sel;
+   wire [REGFILE_DEPTH-1:0] write_sel;
 
    localparam REGFILE_ENTRIES = 1 << REGFILE_DEPTH;
 
@@ -41,5 +41,6 @@ import wi23_defs::*;
    // we don't consider an error case for rf,
    // so err is tied low.
    assign err = 1'b0; 
+
 endmodule
 // DUMMY LINE FOR REV CONTROL :1:

@@ -16,7 +16,8 @@
         "top": "wi23_tb",
         "fw": "BasicTest.asm",
         "tb_pkgs": [
-            "generic_tasks"
+            "generic_tasks",
+            "decode_tasks_pkg"
         ]
     }
 }

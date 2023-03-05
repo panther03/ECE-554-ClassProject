@@ -2,6 +2,7 @@ module wi23_tb;
 
 import wi23_defs::*;
 import generic_tasks::*;
+import decode_tasks_pkg::*;
 
 logic       clk; // 50MHz
 logic       rst_n;
@@ -37,7 +38,10 @@ initial begin
     rst_n = 1'b1;
     repeat (20) @ (negedge clk);
     if (WI23.PROC.iDECODE.iRF.rf1[1] == WI23.PROC.iDECODE.iRF.rf1[3])
-        $display("\nYahoo!!! All Tests Passed\n");
+        $display("\nROR Test Passed\n");
+    repeat (2) @ (negedge clk);
+    check_dec_inst(clk, WI23.PROC.IF_ID_inst_out, WI23.PROC.iDECODE.iRF.rf1); 
+    $display("\nYahoo!!! All Tests Passed\n");
     $finish();
 end
 

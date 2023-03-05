@@ -18,7 +18,7 @@ import wi23_defs::*;
    wire inv_A;
 
    assign inv_A = Op[3]&Op[2];
-   assign A_inv = A ^ {REGFILE_WIDTH{inv_A}};
+   assign A_inv = A ^ {32{inv_A}};
 
    // Add 1 bit at the end so we can see the Cout result
    assign S = {1'b0, A_inv} + {1'b0, B} + {32'h0, inv_A};

@@ -6,7 +6,7 @@ import wi23_defs::*;
     input logic         rst_n,
     input logic [IMEM_WIDTH-1:0]  inst,
     input logic [REGFILE_WIDTH-1:0]  write_in,
-    input logic [REGFILE_DEPTH-1:0]   writesel,
+    input logic [REGFILE_DEPTH-1:0]  writesel,
     input logic         bypass_reg1, 
     input logic         bypass_reg2,
     input logic [1:0]   InstFmt, 
