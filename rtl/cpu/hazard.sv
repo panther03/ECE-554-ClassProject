@@ -1,8 +1,12 @@
-module hazard (IF_ID_reg1, IF_ID_reg2, ID_EX_regw, EX_MEM_regw,
-               ID_EX_ctrl_regw, EX_MEM_ctrl_regw, stall,
-               ID_EX_is_load, IF_ID_is_branch);
+module hazard 
+import wi23_defs::*;
+(
+  IF_ID_reg1, IF_ID_reg2, ID_EX_regw, EX_MEM_regw,
+  ID_EX_ctrl_regw, EX_MEM_ctrl_regw, stall,
+  ID_EX_is_load, IF_ID_is_branch
+);
 
-input [2:0] IF_ID_reg1, IF_ID_reg2, ID_EX_regw, EX_MEM_regw;
+input [REGFILE_DEPTH-1:0] IF_ID_reg1, IF_ID_reg2, ID_EX_regw, EX_MEM_regw;
 input ID_EX_ctrl_regw, EX_MEM_ctrl_regw;
 input IF_ID_is_branch, ID_EX_is_load;
 output stall;

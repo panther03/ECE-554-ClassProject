@@ -6,7 +6,7 @@ import wi23_defs::*;
     input logic         rst_n,
     input logic [IMEM_WIDTH-1:0]  inst,
     input logic [REGFILE_WIDTH-1:0]  write_in,
-    input logic [2:0]   writesel,
+    input logic [REGFILE_DEPTH-1:0]   writesel,
     input logic         bypass_reg1, 
     input logic         bypass_reg2,
     input logic [1:0]   InstFmt, 
@@ -28,11 +28,11 @@ import wi23_defs::*;
     // rf logic //
     /////////////
 
-    wire [2:0] reg1sel, reg2sel;
+    wire [REGFILE_DEPTH-1:0] reg1sel, reg2sel;
     wire [REGFILE_WIDTH-1:0] reg1raw, reg2raw;
 
-    assign reg1sel = inst[10:8];
-    assign reg2sel = inst[7:5];
+    assign reg1sel = inst[25:21];
+    assign reg2sel = inst[20:16];
 
     rf iRF (.clk(clk),.rst_n(rst_n),.write(RegWrite),.err(decode_err),
             .read1regsel(reg1sel),.read2regsel(reg2sel),.writeregsel(writesel),
@@ -47,12 +47,14 @@ import wi23_defs::*;
 
     wire [REGFILE_WIDTH-1:0] imm_sign_extend,imm_zero_extend;
 
-    assign imm_sign_extend = InstFmt[0] ? {{27{inst[4]}},inst[4:0]} : {{24{inst[7]}},inst[7:0]};
-    assign imm_zero_extend = InstFmt[0] ? {27'h0,inst[4:0]} : {24'h0,inst[7:0]};
+    // I-format
+    assign imm_sign_extend = {{16{inst[15]}},inst[15:0]};
+    assign imm_zero_extend = {16'h0,inst[15:0]};
 
     assign imm = XtendSel ? imm_zero_extend : imm_sign_extend;
 
     // sign extend for branch offset
-    assign ofs = {{21{inst[10]}},inst[10:0]};
+    // J-format
+    assign ofs = {{6{inst[25]}},inst[25:0]};
     
 endmodule

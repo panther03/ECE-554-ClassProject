@@ -7,9 +7,9 @@ import wi23_defs::*;
    clk, rst_n, read1regsel, read2regsel, writeregsel, writedata, write
 );
    input clk, rst_n;
-   input [2:0] read1regsel;
-   input [2:0] read2regsel;
-   input [2:0] writeregsel;
+   input [4:0] read1regsel;
+   input [4:0] read2regsel;
+   input [4:0] writeregsel;
    input [REGFILE_WIDTH-1:0] writedata;
    input        write;
 

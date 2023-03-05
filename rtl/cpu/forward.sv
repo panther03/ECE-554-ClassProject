@@ -1,8 +1,12 @@
-module forward (EX_MEM_regw, MEM_WB_regw, IF_ID_reg1, IF_ID_reg2, ID_EX_reg1, ID_EX_reg2,
-                frwrd_MEM_EX_opA, frwrd_MEM_EX_opB, frwrd_WB_EX_opA, frwrd_WB_EX_opB, frwrd_EX_ID_opA, 
-                bypass_reg1, bypass_reg2, EX_MEM_ctrl_regw, MEM_WB_ctrl_regw);
+module forward 
+import wi23_defs::*;
+(
+     EX_MEM_regw, MEM_WB_regw, IF_ID_reg1, IF_ID_reg2, ID_EX_reg1, ID_EX_reg2,
+     frwrd_MEM_EX_opA, frwrd_MEM_EX_opB, frwrd_WB_EX_opA, frwrd_WB_EX_opB, frwrd_EX_ID_opA, 
+     bypass_reg1, bypass_reg2, EX_MEM_ctrl_regw, MEM_WB_ctrl_regw
+);
 
-input [2:0] EX_MEM_regw, MEM_WB_regw, 
+input [REGFILE_DEPTH-1:0] EX_MEM_regw, MEM_WB_regw, 
      IF_ID_reg1, IF_ID_reg2,
      ID_EX_reg1, ID_EX_reg2;
 input EX_MEM_ctrl_regw, MEM_WB_ctrl_regw;

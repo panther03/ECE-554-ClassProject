@@ -93,7 +93,7 @@ import wi23_defs::*;
 
    wire [REGFILE_WIDTH-1:0] alu_out;
    wire [REGFILE_WIDTH-1:0] reg1_frwrd, reg2_frwrd;
-   reg [2:0] writesel;
+   reg [REGFILE_DEPTH-1:0] writesel;
    wire ex_err;
 
    //////////////////////////////
@@ -109,7 +109,7 @@ import wi23_defs::*;
 
    logic [REGFILE_WIDTH-1:0] EX_MEM_alu_out_in,  EX_MEM_alu_out_out;
    logic [REGFILE_WIDTH-1:0] EX_MEM_reg2_in, EX_MEM_reg2_out;
-   logic [2:0] EX_MEM_writesel_in, EX_MEM_writesel_out;
+   logic [REGFILE_DEPTH-1:0] EX_MEM_writesel_in, EX_MEM_writesel_out;
 
    //////////////////////////////
    // MEM_WB transition wires //
@@ -120,7 +120,7 @@ import wi23_defs::*;
 
    logic MEM_WB_ctrl_Halt_in, MEM_WB_ctrl_Halt_out;
 
-   logic [2:0] MEM_WB_writesel_in, MEM_WB_writesel_out;
+   logic [REGFILE_DEPTH-1:0] MEM_WB_writesel_in, MEM_WB_writesel_out;
    logic [REGFILE_WIDTH-1:0] MEM_WB_alu_out_in, MEM_WB_alu_out_out;
    logic [REGFILE_WIDTH-1:0] MEM_WB_mem_out_in, MEM_WB_mem_out_out;
 
@@ -160,14 +160,14 @@ import wi23_defs::*;
    // IF/ID transition //
    /////////////////////
 
-   // flip bit 11 to default to NOP instead of HALT when we stall
-   assign IF_ID_inst_in = inst_i ^ 32'h0800;
+   // flip bit 26 to default to NOP instead of HALT when we stall
+   assign IF_ID_inst_in = inst_i ^ 32'h04000000;
    assign IF_ID_pc_inc_in = pc_inc;   
    
    // If we get a stall or halt, we recirculate values here.
    // If we get a flush, we load in 0 (nop) for the instruction.
    wire [((2*IMEM_WIDTH)-1):0] IF_ID_reg_in = (all_halts | stall) ? {IF_ID_pc_inc_out,IF_ID_inst_out_temp}
-                            : (flush ? {IF_ID_pc_inc_out,16'h0} : {IF_ID_pc_inc_in, IF_ID_inst_in});
+                            : (flush ? {IF_ID_pc_inc_out,32'h0} : {IF_ID_pc_inc_in, IF_ID_inst_in});
 
    always @(posedge clk, negedge rst_n)
       if (!rst_n) begin
@@ -179,7 +179,7 @@ import wi23_defs::*;
       end
 
    // Since we flipped at input, flip at output as well.
-   assign IF_ID_inst_out = IF_ID_inst_out_temp ^ 32'h0800;
+   assign IF_ID_inst_out = IF_ID_inst_out_temp ^ 32'h04000000;
 
 
    ////////////////////
@@ -188,8 +188,8 @@ import wi23_defs::*;
 
    // From the schematic, this is part of decode stage,
    // but listed as top level for convenience.
-
-   assign op_word = {1'b0, IF_ID_inst_out[15:11],IF_ID_inst_out[1:0]};
+   
+   assign op_word = {IF_ID_inst_out[31:26],IF_ID_inst_out[1:0]};
    control iCONTROL(.op_word(op_word), .ctrl_err(ctrl_err),
       .RegWrite(RegWrite), .MemWrite(MemWrite), .MemRead(MemRead),
       .InstFmt(InstFmt), .MemToReg(MemToReg), .AluSrc(AluSrc),
@@ -279,12 +279,18 @@ import wi23_defs::*;
       .AluOp(ID_EX_ctrl_AluOp_out), .JType(ID_EX_ctrl_JType_out),
       .InstFmt(ID_EX_ctrl_InstFmt_out), .AluSrc(ID_EX_ctrl_AluSrc_out));
 
+   // Instfmt
+   // 00 - I-Format 2
+   // 01 - I-Format 1
+   // 10 - R-Format 
+   // 11 - J-Format
+
    always_comb begin
       case (ID_EX_ctrl_InstFmt_out)
-         2'b00 : writesel = (ID_EX_ctrl_JType_out == 2'b01) ? 3'h7 : ID_EX_inst_out[10:8];
-         2'b01 : writesel = (ID_EX_inst_out[15:11] == 5'b10011) ? ID_EX_inst_out[10:8] : ID_EX_inst_out[7:5]; // exception case for STU (needs to write to Rs)
-         2'b10 : writesel = ID_EX_inst_out[4:2];
-         2'b11 : writesel = 3'h7;
+         2'b00 : writesel = (ID_EX_ctrl_JType_out == 2'b01) ? 'd30 : ID_EX_inst_out[25:21];   // special case for Jump & Link, write to R30
+         2'b01 : writesel = (ID_EX_inst_out[31:26] == 6'b010011) ? ID_EX_inst_out[25:21] : ID_EX_inst_out[20:16]; // exception case for STU (needs to write to Rs)
+         2'b10 : writesel = ID_EX_inst_out[15:11];
+         2'b11 : writesel = 'd30;
       endcase
    end
 
@@ -376,7 +382,7 @@ import wi23_defs::*;
    // hazard detection unit //
    //////////////////////////
 
-   hazard iHAZARD (.IF_ID_reg1(IF_ID_inst_out[10:8]),.IF_ID_reg2(IF_ID_inst_out[7:5]),
+   hazard iHAZARD (.IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
       .IF_ID_is_branch(JType[0]),.ID_EX_is_load(ID_EX_ctrl_MemRead_out & ID_EX_ctrl_RegWrite_out),
       .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),.EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out),
       .ID_EX_regw(writesel),.EX_MEM_regw(EX_MEM_writesel_out),.stall(stall));
@@ -386,8 +392,8 @@ import wi23_defs::*;
    ////////////////////
 
    forward iFORWARD (.EX_MEM_regw(EX_MEM_writesel_out),.MEM_WB_regw(MEM_WB_writesel_out),
-      .IF_ID_reg1(IF_ID_inst_out[10:8]),.IF_ID_reg2(IF_ID_inst_out[7:5]),
-      .ID_EX_reg1(ID_EX_inst_out[10:8]),.ID_EX_reg2(ID_EX_inst_out[7:5]),
+      .IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
+      .ID_EX_reg1(ID_EX_inst_out[25:21]),.ID_EX_reg2(ID_EX_inst_out[20:16]),
       .frwrd_EX_ID_opA(frwrd_EX_ID_opA),.bypass_reg1(bypass_reg1),.bypass_reg2(bypass_reg2),
       .frwrd_MEM_EX_opA(frwrd_MEM_EX_opA),.frwrd_MEM_EX_opB(frwrd_MEM_EX_opB),
       .frwrd_WB_EX_opA(frwrd_WB_EX_opA),.frwrd_WB_EX_opB(frwrd_WB_EX_opB),
