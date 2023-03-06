@@ -7,12 +7,17 @@ import wi23_defs::*;
     input logic [IMEM_WIDTH-1:0]  inst,
     input logic [REGFILE_WIDTH-1:0]  write_in,
     input logic [REGFILE_DEPTH-1:0]  writesel,
+    input logic [REGFILE_WIDTH-1:0]  fp_write_in,
+    input logic [REGFILE_DEPTH-1:0]  fp_writesel,
     input logic         bypass_reg1, 
     input logic         bypass_reg2,
+    input logic         fp_bypass_reg1, 
+    input logic         fp_bypass_reg2,
     input logic [1:0]   InstFmt, 
     input logic [1:0]   JType,
     input logic         XtendSel, 
     input logic         RegWrite,
+    input logic         FPRegWrite,
     input logic [0:0]   FPInst,
     input logic [1:0]   FPIntCvtReg,
 
@@ -21,29 +26,52 @@ import wi23_defs::*;
     output logic [REGFILE_WIDTH-1:0] reg2,
     output logic [REGFILE_WIDTH-1:0] imm,
     output logic [REGFILE_WIDTH-1:0] ofs,
+    output logic [REGFILE_WIDTH-1:0] fp_reg1,
+    output logic [REGFILE_WIDTH-1:0] fp_reg2,
     output logic decode_err
 );
 
-    ///////////////
-    // rf logic //
-    /////////////
+    ////////////////
+    /// RF Logic ///
+    ////////////////
 
     wire [REGFILE_DEPTH-1:0] reg1sel, reg2sel;
     wire [REGFILE_WIDTH-1:0] reg1raw, reg2raw;
+    
+    wire [REGFILE_DEPTH-1:0] fp_reg1sel, fp_reg2sel;
+    wire [REGFILE_WIDTH-1:0] fp_reg1raw, fp_reg2raw;
+    
+    /////////////////////////
+    /// Int Register file ///
+    /////////////////////////
 
     assign reg1sel = inst[25:21];
     assign reg2sel = inst[20:16];
 
-    rf iRF (.clk(clk),.rst_n(rst_n),.write(RegWrite),.err(decode_err),
+    rf iRF (.clk(clk),.rst_n(rst_n),.write(RegWrite),.err(int_decode_err),
             .read1regsel(reg1sel),.read2regsel(reg2sel),.writeregsel(writesel),
             .read1data(reg1raw),.read2data(reg2raw),.writedata(write_in));
-
+    
     assign reg1 = bypass_reg1 ? write_in : reg1raw;
     assign reg2 = bypass_reg2 ? write_in : reg2raw;
+    
+    ////////////////////////
+    /// FP Register file ///
+    ////////////////////////
+
+    assign fp_reg1sel = inst[25:21];
+    assign fp_reg2sel = inst[20:16];
+    
+    rf iFPRF (.clk(clk),.rst_n(rst_n),.write(FPRegWrite),.err(fp_decode_err),
+            .read1regsel(fp_reg1sel),.read2regsel(fp_reg2sel),.writeregsel(fp_writesel),
+            .read1data(fp_reg1raw),.read2data(fp_reg2raw),.writedata(fp_write_in));
+
+    assign fp_reg1 = fp_bypass_reg1 ? fp_write_in : fp_reg1raw;
+    assign fp_reg2 = fp_bypass_reg2 ? fp_write_in : fp_reg2raw;
 
     /////////////////////////////
-    // immediate decode logic //
-    ///////////////////////////
+    // Immediate Decode Logic ///
+    /////////////////////////////
 
     wire [REGFILE_WIDTH-1:0] imm_sign_extend,imm_zero_extend;
 
@@ -56,5 +84,8 @@ import wi23_defs::*;
     // sign extend for branch offset
     // J-format
     assign ofs = {{6{inst[25]}},inst[25:0]};
+
+    // Decode Error
+    assign decode_err = int_decode_err | fp_decode_err;
     
 endmodule

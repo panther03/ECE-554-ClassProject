@@ -8,6 +8,8 @@ package control_defs_pkg;
 typedef enum logic [6:0] {
     HALT,
     NOP,
+    IRQ,
+    LDCR,
     ADDI,
     SUBI,
     XORI,
@@ -42,9 +44,6 @@ typedef enum logic [6:0] {
     JR,
     JAL,
     JALR,
-    siic,
-    rti,
-    LDCR,
     FADD,
     FSUB,
     FMUL,

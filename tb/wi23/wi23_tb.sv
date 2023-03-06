@@ -24,6 +24,10 @@ logic [7:0] VGA_R;
 logic       VGA_SYNC_N;
 logic       VGA_VS;
 
+localparam REGFILE_ENTRIES = 1 << REGFILE_DEPTH;
+
+logic [REGFILE_WIDTH-1:0] rf_tb [REGFILE_ENTRIES], fp_rf_tb [REGFILE_ENTRIES]; 
+
 
 wi23 WI23 (
     .*
@@ -40,9 +44,16 @@ initial begin
     if (WI23.PROC.iDECODE.iRF.rf1[1] == WI23.PROC.iDECODE.iRF.rf1[3])
         $display("\nROR Test Passed\n");
     repeat (2) @ (negedge clk);
-    check_dec_inst(clk, WI23.PROC.IF_ID_inst_out, WI23.PROC.iDECODE.iRF.rf1); 
+    check_dec_inst(clk, WI23.inst, rf_tb, fp_rf_tb); 
     $display("\nYahoo!!! All Tests Passed\n");
     $finish();
+end
+
+always @ (*) begin
+    WI23.PROC.iDECODE.iRF.rf1 = rf_tb;
+    WI23.PROC.iDECODE.iRF.rf2 = rf_tb;
+    WI23.PROC.iDECODE.iFPRF.rf1 = fp_rf_tb;
+    WI23.PROC.iDECODE.iFPRF.rf2 = fp_rf_tb;
 end
 
 // 50MHz clock

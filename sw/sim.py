@@ -169,6 +169,9 @@ def run_flow(flow, tb, tb_cfg):
     # quit here if we're just doing a clean
     if flow == "clean":
         return
+    # quit here after generating decode files
+    if flow == "decode":
+        return
     # otherwise assume proj by default
     proj(tb_dir, tb, fileset, tb_pkgs)
     if flow == "gui":
