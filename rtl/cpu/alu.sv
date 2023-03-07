@@ -29,11 +29,11 @@ import wi23_defs::*;
    wire SEQ, SLE, SLT;
    wire Ofl;
 
-   assign Ofl = (S[REGFILE_WIDTH] & ~A_inv[REGFILE_WIDTH] & ~B[REGFILE_WIDTH]) | (~S[REGFILE_WIDTH] & A_inv[REGFILE_WIDTH] & B[REGFILE_WIDTH]);
+   assign Ofl = (S[REGFILE_WIDTH-1] & ~A_inv[REGFILE_WIDTH-1] & ~B[REGFILE_WIDTH-1]) | (~S[REGFILE_WIDTH-1] & A_inv[REGFILE_WIDTH-1] & B[REGFILE_WIDTH-1]);
 
    assign SEQ = ~|S;
    assign SLT = SLE & ~SEQ; 
-   assign SLE = (~S[REGFILE_WIDTH] ^ Ofl);  
+   assign SLE = (~S[REGFILE_WIDTH-1] ^ Ofl);  
 
    always @* casex (Op)
       4'b0000 : begin alu_err = 1'b0; Out = S[REGFILE_WIDTH-1:0]; end

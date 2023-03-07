@@ -137,8 +137,8 @@ def run_flow(flow, tb, tb_cfg):
         raise RuntimeError(f"tb directory {tb_dir} doesn't exist. Quitting.")
 
     fw_file = tb_cfg.get("fw")
-    #if fw_file:
-    #    subprocess.run(f"python3 sw/assemble.py fw/{fw_file} -o out/out.hex", shell=True, check=True, capture_output=True)
+    if fw_file:
+        subprocess.run(f"python3 sw/assemble.py fw/{fw_file} -o out/out.hex", shell=True, check=True, capture_output=True)
 
     top = tb_cfg["top"]
     fileset = tb_cfg.get("files")
@@ -168,6 +168,9 @@ def run_flow(flow, tb, tb_cfg):
 
     # quit here if we're just doing a clean
     if flow == "clean":
+        return
+    # quit here after generating decode files
+    if flow == "decode":
         return
     # otherwise assume proj by default
     proj(tb_dir, tb, fileset, tb_pkgs)

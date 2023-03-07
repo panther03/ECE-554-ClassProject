@@ -51,7 +51,7 @@ import wi23_defs::*;
 
    wire [3:0] AluOp;
    wire [1:0] InstFmt, JType, CondOp;
-   wire RegWrite, MemWrite, MemRead,
+   wire RegWrite, MemWrite, MemRead, InstMemRead,
         MemToReg, AluSrc, XtendSel,
         Exc, Rtn, Halt, FPInst;
    wire [1:0] FPIntCvtReg;
@@ -62,6 +62,8 @@ import wi23_defs::*;
 
    wire [REGFILE_WIDTH-1:0] reg1, reg2, imm, ofs;
    wire bypass_reg1, bypass_reg2;
+   wire [REGFILE_WIDTH-1:0] fp_reg1, fp_reg2;
+   wire fp_bypass_reg1, fp_bypass_reg2;
    wire decode_err;
 
    /////////////////////////////
@@ -72,6 +74,7 @@ import wi23_defs::*;
    logic ID_EX_ctrl_RegWrite_in, ID_EX_ctrl_RegWrite_out;
    logic ID_EX_ctrl_MemWrite_in, ID_EX_ctrl_MemWrite_out;
    logic ID_EX_ctrl_MemRead_in, ID_EX_ctrl_MemRead_out;
+   logic ID_EX_ctrl_InstMemRead_in, ID_EX_ctrl_InstMemRead_out;
    logic ID_EX_ctrl_MemToReg_in, ID_EX_ctrl_MemToReg_out;
    logic ID_EX_ctrl_AluSrc_in, ID_EX_ctrl_AluSrc_out;
    logic [1:0] ID_EX_ctrl_InstFmt_in, ID_EX_ctrl_InstFmt_out;
@@ -94,14 +97,17 @@ import wi23_defs::*;
    wire [REGFILE_WIDTH-1:0] alu_out;
    wire [REGFILE_WIDTH-1:0] reg1_frwrd, reg2_frwrd;
    reg [REGFILE_DEPTH-1:0] writesel;
+   reg [REGFILE_DEPTH-1:0] fp_writesel;
    wire ex_err;
 
    //////////////////////////////
    // EX_MEM transition wires //
    ////////////////////////////
 
+   op_word_t EX_MEM_Op_in, EX_MEM_Op_out;
    logic EX_MEM_ctrl_RegWrite_in, EX_MEM_ctrl_RegWrite_out;
    logic EX_MEM_ctrl_MemRead_in,  EX_MEM_ctrl_MemRead_out;
+   logic EX_MEM_ctrl_InstMemRead_in,  EX_MEM_ctrl_InstMemRead_out;
    logic EX_MEM_ctrl_MemWrite_in, EX_MEM_ctrl_MemWrite_out;
    logic EX_MEM_ctrl_MemToReg_in, EX_MEM_ctrl_MemToReg_out;
 
@@ -115,6 +121,7 @@ import wi23_defs::*;
    // MEM_WB transition wires //
    ////////////////////////////
 
+   op_word_t MEM_WB_Op_in, MEM_WB_Op_out;
    logic MEM_WB_ctrl_RegWrite_in, MEM_WB_ctrl_RegWrite_out;
    logic MEM_WB_ctrl_MemToReg_in, MEM_WB_ctrl_MemToReg_out;
 
@@ -129,6 +136,7 @@ import wi23_defs::*;
    //////////////////////////
 
    wire [REGFILE_WIDTH-1:0] write_in;
+   wire [REGFILE_WIDTH-1:0] fp_write_in;
 
    ////////////////////////////
    // forwarding unit wires //
@@ -194,17 +202,21 @@ import wi23_defs::*;
       .RegWrite(RegWrite), .MemWrite(MemWrite), .MemRead(MemRead),
       .InstFmt(InstFmt), .MemToReg(MemToReg), .AluSrc(AluSrc),
       .AluOp(AluOp), .CondOp(CondOp), .JType(JType),
-      .XtendSel(XtendSel), .Rtn(Rtn), .Exc(Exc), .Halt(Halt), .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg), .ID_EX_Op_in(ID_EX_Op_in));
+      .XtendSel(XtendSel), .Rtn(Rtn), .Exc(Exc), .Halt(Halt), .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg), .ID_EX_Op_in(ID_EX_Op_in), .InstMemRead(InstMemRead));
 
    ///////////////////
    // decode block //
    /////////////////
 
    decode iDECODE(.clk(clk), .rst_n(rst_n), .decode_err(decode_err),
-      .inst(IF_ID_inst_out), .writesel(MEM_WB_writesel_out),
+      .inst(IF_ID_inst_out), .writesel(MEM_WB_writesel_out), .fp_writesel(5'b0),
       .bypass_reg1(bypass_reg1), .bypass_reg2(bypass_reg2),
+      .fp_bypass_reg1(fp_bypass_reg1), .fp_bypass_reg2(fp_bypass_reg2),
       .write_in(write_in), .reg1(reg1), .reg2(reg2), .imm(imm), .ofs(ofs),
-      .InstFmt(InstFmt), .JType(JType), .XtendSel(XtendSel), .RegWrite(MEM_WB_ctrl_RegWrite_out), .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg));
+      .fp_write_in(fp_write_in), .fp_reg1(fp_reg1), .fp_reg2(fp_reg2),
+      .InstFmt(InstFmt), .JType(JType), .XtendSel(XtendSel), 
+      .RegWrite(MEM_WB_ctrl_RegWrite_out), .FPRegWrite(1'b0),
+      .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg));
 
    ///////////////////////
    // ID/EX transition //
@@ -220,6 +232,7 @@ import wi23_defs::*;
    assign ID_EX_ctrl_JType_in = stall ? 0 : JType;
    assign ID_EX_ctrl_AluOp_in = stall ? 0 : AluOp;
    assign ID_EX_ctrl_Halt_in = stall ? 0 : Halt;
+   assign ID_EX_ctrl_InstMemRead_in = stall ? 0 : InstMemRead;
 
    assign ID_EX_reg1_in = reg1;
    assign ID_EX_reg2_in = reg2;
@@ -233,7 +246,6 @@ import wi23_defs::*;
 
    always @(posedge clk, negedge rst_n) 
       if (!rst_n) begin
-         ID_EX_Op_out <= NOP;
          ID_EX_ctrl_RegWrite_out <= 0;
          ID_EX_ctrl_MemWrite_out <= 0;
          ID_EX_ctrl_MemRead_out <= 0;
@@ -248,6 +260,7 @@ import wi23_defs::*;
          ID_EX_pc_inc_out <= 0;
          ID_EX_inst_out <= 0;
          ID_EX_ctrl_Halt_out <= 0;
+         ID_EX_ctrl_InstMemRead_out <= 0;
       end else begin
          ID_EX_Op_out <= ID_EX_Op_in;
          ID_EX_ctrl_RegWrite_out <= ID_EX_ctrl_RegWrite_in;
@@ -264,6 +277,7 @@ import wi23_defs::*;
          ID_EX_pc_inc_out <= ID_EX_pc_inc_in;
          ID_EX_inst_out <= ID_EX_inst_in;
          ID_EX_ctrl_Halt_out <= ID_EX_ctrl_Halt_in;
+         ID_EX_ctrl_InstMemRead_out <= ID_EX_ctrl_InstMemRead_in;
       end
 
    ////////////////////
@@ -302,12 +316,16 @@ import wi23_defs::*;
    assign EX_MEM_ctrl_MemWrite_in = ID_EX_ctrl_MemWrite_out;
    assign EX_MEM_ctrl_MemRead_in  = ID_EX_ctrl_MemRead_out;
    assign EX_MEM_ctrl_MemToReg_in = ID_EX_ctrl_MemToReg_out;
+   assign EX_MEM_ctrl_InstMemRead_in = ID_EX_ctrl_InstMemRead_out;
 
    assign EX_MEM_ctrl_Halt_in = ID_EX_ctrl_Halt_out;
+  
 
    assign EX_MEM_alu_out_in = alu_out;
    assign EX_MEM_reg2_in = reg2_frwrd;
    assign EX_MEM_writesel_in = writesel;
+
+   assign EX_MEM_Op_in = ID_EX_Op_out;
 
    always @(posedge clk, negedge rst_n)
       if (!rst_n) begin
@@ -319,7 +337,9 @@ import wi23_defs::*;
          EX_MEM_reg2_out <= 0;
          EX_MEM_writesel_out <= 0;
          EX_MEM_ctrl_Halt_out <= 0;
+         EX_MEM_ctrl_InstMemRead_out <= 0;
       end else begin
+         EX_MEM_Op_out <= EX_MEM_Op_in;
          EX_MEM_ctrl_RegWrite_out <= EX_MEM_ctrl_RegWrite_in;
          EX_MEM_ctrl_MemRead_out  <= EX_MEM_ctrl_MemRead_in;
          EX_MEM_ctrl_MemWrite_out <= EX_MEM_ctrl_MemWrite_in;
@@ -328,6 +348,7 @@ import wi23_defs::*;
          EX_MEM_reg2_out <= EX_MEM_reg2_in;
          EX_MEM_writesel_out <= EX_MEM_writesel_in;
          EX_MEM_ctrl_Halt_out <= EX_MEM_ctrl_Halt_in;
+         EX_MEM_ctrl_InstMemRead_out <= EX_MEM_ctrl_InstMemRead_in;
       end
 
    ///////////////////
@@ -340,7 +361,7 @@ import wi23_defs::*;
    assign data_proc_to_mem_o = EX_MEM_reg2_out;
    assign we_o = EX_MEM_ctrl_MemWrite_out;
    assign re_o = EX_MEM_ctrl_MemRead_out;
-   assign ldcr_o = 1'b0;   // TODO madrat
+   assign ldcr_o = EX_MEM_ctrl_InstMemRead_out;
 
    ////////////////////////
    // MEM/WB transition //
@@ -354,6 +375,8 @@ import wi23_defs::*;
    assign MEM_WB_mem_out_in = data_mem_to_proc_i;
    assign MEM_WB_writesel_in = EX_MEM_writesel_out;
 
+   assign MEM_WB_Op_in = EX_MEM_Op_out;
+
    always @(posedge clk, negedge rst_n)
       if (!rst_n) begin
          MEM_WB_ctrl_RegWrite_out <= 0;
@@ -363,6 +386,7 @@ import wi23_defs::*;
          MEM_WB_alu_out_out <= 0;
          MEM_WB_mem_out_out <= 0;
       end else begin
+         MEM_WB_Op_out <= MEM_WB_Op_in;
          MEM_WB_ctrl_RegWrite_out <= MEM_WB_ctrl_RegWrite_in;
          MEM_WB_ctrl_MemToReg_out <= MEM_WB_ctrl_MemToReg_in;
          MEM_WB_ctrl_Halt_out <= MEM_WB_ctrl_Halt_in;

@@ -1,4 +1,5 @@
-out/
+out/*
+!out/32bdecode_temp.hex
 
 fpga/*/*
 !fpga/*/Makefile

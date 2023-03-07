@@ -32,10 +32,9 @@ def generate_inst_task(row, names, pkg_file):
     if (row[16] == "1"):
         fpinst = True
 
-    ## Don't check for NOP, HALT, rti and siic
-    ## Don't check for branch, J and FP instructions
+    ## Don't check for NOP, HALT, Branch, J and IRQ
     no_check = False
-    if (row[0] == "8'b000000" or row[0] == "8'b000001" or row[0] == "8'b000010" or row[0] == "8'b000011" or jtype or fpinst or row[11] != "2'b00"):
+    if (row[0] == "8'b000000" or row[0] == "8'b000001" or row[0] == "8'b000010" or jtype or row[11] != "2'b00"):
         no_check = True
 
     if (no_check):
@@ -53,13 +52,13 @@ def generate_inst_task(row, names, pkg_file):
     imm16_b = format(imm16_n, '016b')
     imm26_n = random.getrandbits(26)
     imm26_b = format(imm26_n, '026b')
-    opcode = row[0][3:]
-    if(row[2] == "ANDN" or row[2] == "SRL"):
+    opcode = row[0][2:]
+    if(row[2] == "ANDN" or row[2] == "SRL" or row[2] == "FDIV"):
         alufn_n = 3
-    elif(row[2] == "SUB" or row[2] == "SLL"):
-        alufn_n = 1
-    elif(row[2] == "XOR" or row[2] == "ROR"):
+    elif(row[2] == "XOR" or row[2] == "ROR" or row[2] == "FMUL"):
         alufn_n = 2
+    elif(row[2] == "SUB" or row[2] == "SLL" or row[2] == "FSUB"):
+        alufn_n = 1
     else:
         alufn_n = 0
     alufn_b = format(alufn_n, '02b')
@@ -78,17 +77,17 @@ def generate_inst_task(row, names, pkg_file):
     #@ Verilog binary format
     inst = "'b"+inst[1:]
 
-    task_head = f"task automatic check_{row[2]} (ref logic clk, ref logic [31:0] IF_ID_inst_out, ref logic [31:0] rf1[32]);\n"
+    task_head = f"task automatic check_{row[2]} (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);\n"
     ## Clear RF at the start
-    task_body = f"@ (negedge clk);"
-    task_body += f"\tfor (int i = 0; i < 30; i++)\n\t\trf1[i] = $urandom();\n"
+    task_body = f"\t@ (negedge clk);\n\tinst_i = 'h04000000; // NOP\n"
+    task_body += f"\tfor (int i = 0; i < 30; i++)\n\t\trf_tb[i] = $urandom();\n"
     ## Set instruction to test
-    task_body += f"\t@ (negedge clk);\n\tIF_ID_inst_out = {inst};\n"
+    task_body += f"\t@ (negedge clk);\n\tinst_i = {inst};\n"
     ## Set instruction to NOP
-    task_body += f"\t@ (negedge clk);\n\tIF_ID_inst_out = 'h04000000; // NOP\n"
-    task_body += f"\trepeat (4) @ (negedge clk);\n"
-    task_body += f"\t$display (\"time %t : Inst {row[2]} Rs {rs_n} Value %h Rt {rt_n} Value %h Rd {rd_n} Value %h Imm16 {imm16_b} Imm26 {imm26_b}\", $time, rf1[{rs_n}], rf1[{rt_n}], rf1[{rd_n}]);\n"
-    task_body += f"\t@ (negedge clk);\n"
+    task_body += f"\t@ (negedge clk);\n\tinst_i = 'h04000000; // NOP\n"
+    task_body += f"\trepeat (4) @ (posedge clk);\n"
+    task_body += f"\t$display (\"time %t : Inst {row[2]} Rs {rs_n} Value %h Rt {rt_n} Value %h Rd {rd_n} Value %h Imm16 {imm16_b} Imm26 {imm26_b}\", $time, rf_tb[{rs_n}], rf_tb[{rt_n}], rf_tb[{rd_n}]);\n"
+    task_body += f"\t@ (posedge clk);\n"
     task_tail = f"endtask\n\n"
 
     pkg_file.write(task_head)
@@ -115,16 +114,18 @@ def generate_test_task(row, names, pkg_file):
     if (row[16] == "1"):
         fpinst = True
 
-    ## Don't check for NOP, HALT, rti and siic
-    ## Don't check for branch, J and FP instructions
+    ## Don't check for NOP, HALT, Branch, J and IRQ
     no_check = False
-    if (row[0] == "8'b000000" or row[0] == "8'b000001" or row[0] == "8'b000010" or row[0] == "8'b000011" or jtype or fpinst or row[11] != "2'b00"):
+    if (row[0] == "8'b000000" or row[0] == "8'b000001" or row[0] == "8'b000010" or jtype or row[11] != "2'b00"):
         no_check = True
 
     if (no_check):
         return
 
-    task_body = f"\tcheck_{row[2]}(clk, IF_ID_inst_out, rf1);\n"
+    if (fpinst):
+        task_body = f"\tcheck_{row[2]}(clk, inst_i, fp_rf_tb);\n"
+    else:
+        task_body = f"\tcheck_{row[2]}(clk, inst_i, rf_tb);\n"
     pkg_file.write(task_body)
 
 def gen_dec_tasks(f) :
@@ -149,7 +150,7 @@ def gen_dec_tasks(f) :
             #addr += 4
     # Generate top-level task to call all individual instruction tasks
     first = True
-    task_head = f"\n\ntask automatic check_dec_inst (ref logic clk, ref logic [31:0] IF_ID_inst_out, ref logic [31:0] rf1[32]);\n"
+    task_head = f"\n\ntask automatic check_dec_inst (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32], ref logic [31:0] fp_rf_tb [32]);\n"
     tb_tasks_file.write(task_head)
     for row in orders:
         if first:
