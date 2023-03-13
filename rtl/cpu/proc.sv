@@ -343,36 +343,19 @@ import wi23_defs::*;
    assign ID_FEX_inst_in = stall ? 0 : IF_ID_inst_out;
    assign ID_FEX_pc_inc_in = IF_ID_pc_inc_out;
 
-   always @(posedge clk, negedge rst_n) 
-      if (!rst_n) begin
-         ID_FEX_ctrl_Op_out <= NOP;
-         ID_FEX_ctrl_RegWrite_out <= 0;
-         ID_FEX_ctrl_AluSrc_out <= 0;
-         ID_FEX_ctrl_InstFmt_out <= 0;
-         ID_FEX_ctrl_AluOp_out <= 0;
-         ID_FEX_reg1_out <= 0;
-         ID_FEX_reg2_out <= 0;
-         ID_FEX_imm_out <= 0;
-         ID_FEX_pc_inc_out <= 0;
-         ID_FEX_inst_out <= 0;
-         ID_FEX_ctrl_Halt_out <= 0;
-         ID_FEX_ctrl_FpInst_out <= 0;
-         ID_FEX_ctrl_FPIntCvtReg_out <= 0;
-      end else begin
-         ID_FEX_ctrl_Op_out <= ID_FEX_ctrl_Op_in;
-         ID_FEX_ctrl_RegWrite_out <= ID_FEX_ctrl_RegWrite_in;
-         ID_FEX_ctrl_AluSrc_out <= ID_FEX_ctrl_AluSrc_in;
-         ID_FEX_ctrl_InstFmt_out <= ID_FEX_ctrl_InstFmt_in;
-         ID_FEX_ctrl_AluOp_out <= ID_FEX_ctrl_AluOp_in;
-         ID_FEX_reg1_out <= ID_FEX_reg1_in;
-         ID_FEX_reg2_out <= ID_FEX_reg2_in;
-         ID_FEX_imm_out <= ID_FEX_imm_in;
-         ID_FEX_pc_inc_out <= ID_FEX_pc_inc_in;
-         ID_FEX_inst_out <= ID_FEX_inst_in;
-         ID_FEX_ctrl_Halt_out <= ID_FEX_ctrl_Halt_in;
-         ID_FEX_ctrl_FpInst_out <= ID_FEX_ctrl_FpInst_in;
-         ID_FEX_ctrl_FPIntCvtReg_out <= ID_FEX_ctrl_FPIntCvtReg_in;
-      end
+   `PIPELINE_FF(clk, rst_n, ID_FEX_ctrl_Op_out, ID_FEX_ctrl_Op_in, NOP)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_ctrl_RegWrite_out, ID_FEX_ctrl_RegWrite_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_ctrl_AluSrc_out, ID_FEX_ctrl_AluSrc_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_ctrl_InstFmt_out, ID_FEX_ctrl_InstFmt_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_ctrl_AluOp_out, ID_FEX_ctrl_AluOp_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_reg1_out, ID_FEX_reg1_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_reg2_out, ID_FEX_reg2_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_imm_out, ID_FEX_imm_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_pc_inc_out, ID_FEX_pc_inc_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_inst_out, ID_FEX_inst_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_ctrl_Halt_out, ID_FEX_ctrl_Halt_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_ctrl_FpInst_out, ID_FEX_ctrl_FpInst_in, 0)
+   `PIPELINE_FF(clk, rst_n, ID_FEX_ctrl_FPIntCvtReg_out, ID_FEX_ctrl_FPIntCvtReg_in, 0)
 
    /////////////////////
    /// Execute Block ///
@@ -448,30 +431,16 @@ import wi23_defs::*;
 
    assign EX_MEM_ctrl_Op_in = ID_EX_ctrl_Op_out;
 
-   always @(posedge clk, negedge rst_n)
-      if (!rst_n) begin
-         EX_MEM_ctrl_Op_out <= NOP;
-         EX_MEM_ctrl_RegWrite_out <= 0;
-         EX_MEM_ctrl_MemRead_out  <= 0;
-         EX_MEM_ctrl_MemWrite_out <= 0;
-         EX_MEM_ctrl_MemToReg_out <= 0;
-         EX_MEM_alu_out_out <= 0;
-         EX_MEM_reg2_out <= 0;
-         EX_MEM_writesel_out <= 0;
-         EX_MEM_ctrl_Halt_out <= 0;
-         EX_MEM_ctrl_InstMemRead_out <= 0;
-      end else begin
-         EX_MEM_ctrl_Op_out <= EX_MEM_ctrl_Op_in;
-         EX_MEM_ctrl_RegWrite_out <= EX_MEM_ctrl_RegWrite_in;
-         EX_MEM_ctrl_MemRead_out  <= EX_MEM_ctrl_MemRead_in;
-         EX_MEM_ctrl_MemWrite_out <= EX_MEM_ctrl_MemWrite_in;
-         EX_MEM_ctrl_MemToReg_out <= EX_MEM_ctrl_MemToReg_in;
-         EX_MEM_alu_out_out <= EX_MEM_alu_out_in;
-         EX_MEM_reg2_out <= EX_MEM_reg2_in;
-         EX_MEM_writesel_out <= EX_MEM_writesel_in;
-         EX_MEM_ctrl_Halt_out <= EX_MEM_ctrl_Halt_in;
-         EX_MEM_ctrl_InstMemRead_out <= EX_MEM_ctrl_InstMemRead_in;
-      end
+   `PIPELINE_FF(clk, rst_n, EX_MEM_ctrl_Op_out, EX_MEM_ctrl_Op_in, NOP)
+   `PIPELINE_FF(clk, rst_n, EX_MEM_ctrl_RegWrite_out, EX_MEM_ctrl_RegWrite_in, 0)
+   `PIPELINE_FF(clk, rst_n, EX_MEM_ctrl_MemRead_out, EX_MEM_ctrl_MemRead_in, 0)
+   `PIPELINE_FF(clk, rst_n, EX_MEM_ctrl_MemWrite_out, EX_MEM_ctrl_MemWrite_in, 0)
+   `PIPELINE_FF(clk, rst_n, EX_MEM_ctrl_MemToReg_out, EX_MEM_ctrl_MemToReg_in, 0)
+   `PIPELINE_FF(clk, rst_n, EX_MEM_alu_out_out, EX_MEM_alu_out_in, 0)
+   `PIPELINE_FF(clk, rst_n, EX_MEM_reg2_out, EX_MEM_reg2_in, 0)
+   `PIPELINE_FF(clk, rst_n, EX_MEM_writesel_out, EX_MEM_writesel_in, 0)
+   `PIPELINE_FF(clk, rst_n, EX_MEM_ctrl_Halt_out, EX_MEM_ctrl_Halt_in, 0)
+   `PIPELINE_FF(clk, rst_n, EX_MEM_ctrl_InstMemRead_out, EX_MEM_ctrl_InstMemRead_in, 0)
 
    ////////////////////
    /// Memory Block ///
@@ -499,25 +468,14 @@ import wi23_defs::*;
 
    assign MEM_WB_ctrl_Op_in = EX_MEM_ctrl_Op_out;
 
-   always @(posedge clk, negedge rst_n)
-      if (!rst_n) begin
-         MEM_WB_ctrl_Op_out <= NOP;
-         MEM_WB_ctrl_RegWrite_out <= 0;
-         MEM_WB_ctrl_MemToReg_out <= 0;
-         MEM_WB_ctrl_Halt_out <= 0;
-         MEM_WB_writesel_out <= 0;
-         MEM_WB_alu_out_out <= 0;
-         MEM_WB_mem_out_out <= 0;
-      end else begin
-         MEM_WB_ctrl_Op_out <= MEM_WB_ctrl_Op_in;
-         MEM_WB_ctrl_RegWrite_out <= MEM_WB_ctrl_RegWrite_in;
-         MEM_WB_ctrl_MemToReg_out <= MEM_WB_ctrl_MemToReg_in;
-         MEM_WB_ctrl_Halt_out <= MEM_WB_ctrl_Halt_in;
-         MEM_WB_writesel_out <= MEM_WB_writesel_in;
-         MEM_WB_alu_out_out <= MEM_WB_alu_out_in;
-         MEM_WB_mem_out_out <= MEM_WB_mem_out_in;
-      end
-
+   `PIPELINE_FF(clk, rst_n, MEM_WB_ctrl_Op_out, MEM_WB_ctrl_Op_in, NOP)
+   `PIPELINE_FF(clk, rst_n, MEM_WB_ctrl_RegWrite_out, MEM_WB_ctrl_RegWrite_in, 0)
+   `PIPELINE_FF(clk, rst_n, MEM_WB_ctrl_MemToReg_out, MEM_WB_ctrl_MemToReg_in, 0)
+   `PIPELINE_FF(clk, rst_n, MEM_WB_ctrl_Halt_out, MEM_WB_ctrl_Halt_in, 0)
+   `PIPELINE_FF(clk, rst_n, MEM_WB_writesel_out, MEM_WB_writesel_in, 0)
+   `PIPELINE_FF(clk, rst_n, MEM_WB_alu_out_out, MEM_WB_alu_out_in, 0)
+   `PIPELINE_FF(clk, rst_n, MEM_WB_mem_out_out, MEM_WB_mem_out_in, 0)
+   
    /////////////////////////
    /// FEX/WB Transition ///
    /////////////////////////
@@ -530,44 +488,23 @@ import wi23_defs::*;
    assign FEX_WB_ctrl_FpInst_in = ID_FEX_ctrl_FpInst_out;
    assign FEX_WB_ctrl_FPIntCvtReg_in = ID_FEX_ctrl_FPIntCvtReg_out;
 
-   always_ff @(posedge clk, negedge rst_n)
-      if (!rst_n) begin
-         // 1st FEX Cycle
-         FEX_WB_ctrl_Op_r <= NOP;
-         FEX_WB_ctrl_RegWrite_r <= 0;
-         FEX_WB_ctrl_Halt_r <= 0;
-         FEX_WB_writesel_r <= 0;
-         FEX_WB_alu_out_r <= 0;
-         FEX_WB_ctrl_FpInst_r <= 0;
-         FEX_WB_ctrl_FPIntCvtReg_r <= 0;
+   // 1st FEX Cycle
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_Op_r, FEX_WB_ctrl_Op_in, NOP)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_RegWrite_r, FEX_WB_ctrl_RegWrite_in, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_Halt_r, FEX_WB_ctrl_Halt_in, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_writesel_r, FEX_WB_writesel_in, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_alu_out_r, FEX_WB_alu_out_in, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_FpInst_r, FEX_WB_ctrl_FpInst_in, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_FPIntCvtReg_r, FEX_WB_ctrl_FPIntCvtReg_in, 0)
 
-         // 2nd FEX Cycle
-         FEX_WB_ctrl_Op_out <= NOP;
-         FEX_WB_ctrl_RegWrite_out <= 0;
-         FEX_WB_ctrl_Halt_out <= 0;
-         FEX_WB_writesel_out <= 0;
-         FEX_WB_alu_out_out <= 0;
-         FEX_WB_ctrl_FpInst_out <= 0;
-         FEX_WB_ctrl_FpIntCvtReg_out <= 2'b0;
-      end else begin
-         // 1st FEX Cycle
-         FEX_WB_ctrl_Op_r <= FEX_WB_ctrl_Op_in;
-         FEX_WB_ctrl_RegWrite_r <= FEX_WB_ctrl_RegWrite_in;
-         FEX_WB_ctrl_Halt_r <= FEX_WB_ctrl_Halt_in;
-         FEX_WB_writesel_r <= FEX_WB_writesel_in;
-         FEX_WB_alu_out_r <= FEX_WB_alu_out_in;
-         FEX_WB_ctrl_FpInst_r <= FEX_WB_ctrl_FpInst_in;
-         FEX_WB_ctrl_FPIntCvtReg_r <= FEX_WB_ctrl_FPIntCvtReg_in;
-
-         // 2nd FEX Cycle
-         FEX_WB_ctrl_Op_out <= FEX_WB_ctrl_Op_r;
-         FEX_WB_ctrl_RegWrite_out <= FEX_WB_ctrl_RegWrite_r;
-         FEX_WB_ctrl_Halt_out <= FEX_WB_ctrl_Halt_r;
-         FEX_WB_writesel_out <= FEX_WB_writesel_r;
-         FEX_WB_alu_out_out <= FEX_WB_alu_out_r;
-         FEX_WB_ctrl_FpInst_out <= FEX_WB_ctrl_FpInst_r;
-         FEX_WB_ctrl_FpIntCvtReg_out <= FEX_WB_ctrl_FPIntCvtReg_r;
-      end
+   // 2nd FEX Cycle
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_Op_out, FEX_WB_ctrl_Op_r, NOP)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_RegWrite_out, FEX_WB_ctrl_RegWrite_r, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_Halt_out, FEX_WB_ctrl_Halt_r, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_writesel_out, FEX_WB_writesel_r, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_alu_out_out, FEX_WB_alu_out_r, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_FpInst_out, FEX_WB_ctrl_FpInst_r, 0)
+   `PIPELINE_FF(clk, rst_n, FEX_WB_ctrl_FpIntCvtReg_out, FEX_WB_ctrl_FPIntCvtReg_r, 0)
 
    ///////////////////////
    /// Writeback Block ///

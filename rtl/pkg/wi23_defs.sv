@@ -16,16 +16,6 @@ package wi23_defs;
     localparam REGFILE_DEPTH = 5;
     localparam REGFILE_WIDTH = 32;
 
-    //////////////
-    /// Macros ///
-    //////////////
-    `define PIPELINE_FF(clk, rst_n, out, in, def=0) \
-    always_ff @ (posedge clk, negedge rst_n) \
-        if (~rst_n) \
-            out <= def; \
-        else \
-            out <= in;
-
     /////////////
     /// SPART ///
     /////////////
