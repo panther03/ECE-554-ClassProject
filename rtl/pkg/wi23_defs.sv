@@ -16,9 +16,19 @@ package wi23_defs;
     localparam REGFILE_DEPTH = 5;
     localparam REGFILE_WIDTH = 32;
 
-    ////////////
-    // SPART //
-    //////////
+    //////////////
+    /// Macros ///
+    //////////////
+    `define PIPELINE_FF(clk, rst_n, out, in, def=0) \
+    always_ff @ (posedge clk, negedge rst_n) \
+        if (~rst_n) \
+            out <= def; \
+        else \
+            out <= in;
+
+    /////////////
+    /// SPART ///
+    /////////////
     typedef enum logic [1:0] {
         ADDR_DBUF = 2'b00,
         ADDR_SREG = 2'b01,

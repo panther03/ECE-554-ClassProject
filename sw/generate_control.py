@@ -14,7 +14,7 @@ def generate_module(row, names, control_file):
         else :
             signal_width = 1
         module_interface += "    output logic [" + str(signal_width-1) +":0]  "+signal_name+",\n" 
-    module_interface += "    output logic [0:0]  ctrl_err,\n    output op_word_t ID_EX_Op_in\n);\n\n" 
+    module_interface += "    output logic [0:0]  ctrl_err,\n    output op_word_t Op\n);\n\n" 
     control_file.write(module_interface)
     case_start = "/*\n    7 bit opcode word comprised of the 5-bit opcode,\n    and the 2 LSBs of the instruction to indicate ALU\n    operation in the R-type case (in that order.)\n*/\n"
     case_start +="always_comb begin\n    case (op_word) inside\n"
@@ -22,7 +22,7 @@ def generate_module(row, names, control_file):
 
 def end_module(control_file):
     ## Default Case Statement
-    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; ctrl_err = 1; ID_EX_Op_in = NOP; end // error case (default)\n")
+    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 1; Op = NOP; end // error case (default)\n")
     control_file.write("    endcase\nend")
     control_file.write("\n\nendmodule")
 
@@ -54,7 +54,7 @@ def generate_row(row, names, control_file, pkg_file):
         signal_name = names[i+3]
         signal_val = row[i+3]
         case_string += f"{signal_name} = {signal_val}; "
-    case_string += f"ctrl_err = 0; ID_EX_Op_in = {row[2]}; end // {row[2]}\n"
+    case_string += f"ctrl_err = 0; Op = {row[2]}; end // {row[2]}\n"
     control_file.write(case_string)
     pkg_file.write(enum_item)
 

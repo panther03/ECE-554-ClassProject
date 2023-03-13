@@ -1,4 +1,4 @@
-module alu 
+module fp_alu 
 import wi23_defs::*;
 (A, B, Op, Out, alu_err);
   ///////////////////////////
