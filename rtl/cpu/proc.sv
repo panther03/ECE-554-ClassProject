@@ -623,8 +623,9 @@ import control_defs_pkg::*;
    /////////////////////////////
 
    logic FEX_inst_to_stall;
-
-   assign FEX_inst_to_stall = (ID_FEX_ctrl_FpInst_out & ~(ID_EX_ctrl_MemRead_out | ID_EX_ctrl_MemWrite_out));
+	
+   // Stall if a) FP Inst b) Non-LD/ST FP Inst c) FEX is going to be busy next cycle
+   assign FEX_inst_to_stall = FPInst & ~(MemRead | MemWrite) & ~FEX_busy_er;
 
    hazard iHAZARD (.IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
       .IF_ID_is_branch(JType[0]),.ID_EX_is_load(ID_EX_ctrl_MemRead_out & ID_EX_ctrl_RegWrite_out),
