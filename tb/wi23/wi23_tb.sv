@@ -26,7 +26,7 @@ logic       VGA_VS;
 
 localparam REGFILE_ENTRIES = 1 << REGFILE_DEPTH;
 
-logic [REGFILE_WIDTH-1:0] rf_tb [REGFILE_ENTRIES], fp_rf_tb [REGFILE_ENTRIES]; 
+logic [REGFILE_WIDTH-1:0] rf_tb [REGFILE_ENTRIES-1:0], fp_rf_tb [REGFILE_ENTRIES-1:0]; 
 
 
 wi23 WI23 (

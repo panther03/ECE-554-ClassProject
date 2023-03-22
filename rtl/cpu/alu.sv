@@ -13,7 +13,6 @@ import wi23_defs::*;
    wire Cout;
 
    // Inversion logic for adder operand (used for subtract)
-
    wire [REGFILE_WIDTH-1:0] A_inv;
    wire inv_A;
 
