@@ -33,7 +33,7 @@ logic [DMEM_WIDTH-1:0]  daddr;
 logic [DMEM_WIDTH-1:0]  data_mem_to_proc_map;
 logic [DMEM_WIDTH-1:0]  data_mem_to_proc_dmem;
 logic [DMEM_WIDTH-1:0]  data_proc_to_mem;
-logic                   ldcr, ldcr_r;
+logic                   ldcr;
 
 logic we_map;
 logic re_map;
@@ -131,16 +131,6 @@ always_ff @(posedge clk, negedge rst_n)
   else if (LEDR_en)
     LEDR_r <= data_proc_to_mem[9:0];
 
-
-///////////////////////
-// LDCR logic       ///
-///////////////////////
-always_ff @ (posedge clk, negedge rst_n)
-  if (~rst_n)
-    ldcr_r <= 1'b0;
-  else
-    ldcr_r <= ldcr;
-
 ///////////////////////
 // Memory map logic ///
 ///////////////////////
@@ -168,7 +158,7 @@ always_comb begin
   // Checks that none of the bits are set.
   if (~|daddr[15:13]) begin
     we_dmem = we_map;
-    data_mem_to_proc_map = ldcr_r ? inst_mem_to_proc : data_mem_to_proc_dmem;
+    data_mem_to_proc_map = ldcr ? inst_mem_to_proc : data_mem_to_proc_dmem;
   end else begin
     // Otherwise we map to the remaining peripherals
     casez (daddr)
