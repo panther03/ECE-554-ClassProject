@@ -47,6 +47,8 @@ import wi23_defs::*;
     logic [REGFILE_WIDTH-1:0] dec_reg2;
     logic [REGFILE_WIDTH-1:0] dec_fp_reg1;
     logic [REGFILE_WIDTH-1:0] dec_fp_reg2;
+	 
+	 logic  int_decode_err, fp_decode_err;
     
     /////////////////////////
     /// Int Register file ///

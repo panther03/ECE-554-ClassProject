@@ -17,12 +17,12 @@ def generate_module(row, names, control_file):
     module_interface += "    output logic [0:0]  ctrl_err,\n    output op_word_t Op\n);\n\n" 
     control_file.write(module_interface)
     case_start = "/*\n    7 bit opcode word comprised of the 5-bit opcode,\n    and the 2 LSBs of the instruction to indicate ALU\n    operation in the R-type case (in that order.)\n*/\n"
-    case_start +="always_comb begin\n    case (op_word) inside\n"
+    case_start +="always_comb begin\n    casez (op_word) \n"
     control_file.write(case_start)
 
 def end_module(control_file):
     ## Default Case Statement
-    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 1; Op = NOP; end // error case (default)\n")
+    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Rtn = 0; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 1; Op = NOP; end // error case (default)\n")
     control_file.write("    endcase\nend")
     control_file.write("\n\nendmodule")
 

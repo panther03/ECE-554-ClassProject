@@ -33,7 +33,7 @@ import control_defs_pkg::*;
     operation in the R-type case (in that order.)
 */
 always_comb begin
-    case (op_word) inside
+    casez (op_word)
         8'b000000_?? : begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 0; Rtn = 0; Halt = 1; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 0; Op = HALT; end // HALT
         8'b000001_?? : begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 0; Rtn = 0; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 0; Op = NOP; end // NOP
         8'b000010_?? : begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b01; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Rtn = 0; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 0; Op = IRQ; end // IRQ
@@ -86,7 +86,7 @@ always_comb begin
         8'b110000_?? : begin RegWrite = 0; MemWrite = 1; MemRead = 0; InstFmt = 2'b01; MemToReg = 0; AluSrc = 1; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 0; Rtn = 0; Halt = 0; FPInst = 1; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 0; Op = FST; end // FST
         8'b110001_?? : begin RegWrite = 1; MemWrite = 0; MemRead = 1; InstFmt = 2'b01; MemToReg = 1; AluSrc = 1; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 0; Rtn = 0; Halt = 0; FPInst = 1; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 0; Op = FLD; end // FLD
         8'b100100_?? : begin RegWrite = 1; MemWrite = 0; MemRead = 0; InstFmt = 2'b10; MemToReg = 0; AluSrc = 0; AluOp = 4'b1000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 0; Rtn = 0; Halt = 0; FPInst = 1; FPIntCvtReg = 2'b10; InstMemRead = 0; ctrl_err = 0; Op = FCLASS; end // FCLASS
-        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 1; Op = NOP; end // error case (default)
+        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Rtn = 0; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 1; Op = NOP; end // error case (default)
     endcase
 end
 

@@ -13,7 +13,7 @@ import wi23_defs::*;
   // VGA
   // VGA clock is an input to this module because it is generated in the PLL.
   input        VGA_CLK, // 25MHz
-  output    	 VGA_BLANK_N,
+  output    	VGA_BLANK_N,
   output [7:0] VGA_B,
   output [7:0] VGA_G,
   output       VGA_HS,

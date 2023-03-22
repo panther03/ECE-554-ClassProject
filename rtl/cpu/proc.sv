@@ -1,5 +1,4 @@
 module proc 
-import control_defs_pkg::*;
 import wi23_defs::*;
 (
    // Clock and reset
@@ -20,6 +19,9 @@ import wi23_defs::*;
    output        halt_o
 );
 
+import control_defs_pkg::*;
+
+
    // Disclaimer: This codebase used dff.v modules instead of always blocks
    // due to CS552 restricting certain Verilog features
    // I have converted these into always blocks, however I have done so
@@ -27,16 +29,6 @@ import wi23_defs::*;
    // The reasoning being that this codebase will not be with us for the whole semester (it will likely have to be rewritten.)
 
    // I have also not converted the rest of the codebase to fit the style guidelines in README.md.
-
-   //////////////
-   /// Macros ///
-   //////////////
-   `define PIPELINE_FF(clk, rst_n, out, in, def=0) \
-   always_ff @ (posedge clk, negedge rst_n) \
-      if (~rst_n) \
-         out <= def; \
-      else \
-         out <= in;
 
    /////////////////////////
    /// Fetch Block wires ///
@@ -135,7 +127,7 @@ import wi23_defs::*;
    logic [REGFILE_DEPTH-1:0] writesel;
    logic [REGFILE_DEPTH-1:0] fp_writesel;
    logic ex_err, fp_ex_err;
-   logic FEX_busy;
+   logic FEX_busy, FEX_busy_er;
    logic fp_ex_inst_valid;
 
    ///////////////////////////////
@@ -323,6 +315,7 @@ import wi23_defs::*;
          ID_EX_inst_out <= 0;
          ID_EX_ctrl_Halt_out <= 0;
          ID_EX_ctrl_InstMemRead_out <= 0;
+			ID_EX_ctrl_FpInst_out <= 0;
       end else begin
          ID_EX_ctrl_Op_out <= ID_EX_ctrl_Op_in;
          ID_EX_ctrl_RegWrite_out <= ID_EX_ctrl_RegWrite_in;
@@ -340,6 +333,8 @@ import wi23_defs::*;
          ID_EX_inst_out <= ID_EX_inst_in;
          ID_EX_ctrl_Halt_out <= ID_EX_ctrl_Halt_in;
          ID_EX_ctrl_InstMemRead_out <= ID_EX_ctrl_InstMemRead_in;
+			ID_EX_ctrl_FpInst_out <= ID_EX_ctrl_FpInst_in;
+			ID_EX_ctrl_FPIntCvtReg_out <= ID_EX_ctrl_FPIntCvtReg_in;
       end
 
    /////////////////////////
@@ -440,7 +435,7 @@ import wi23_defs::*;
       .reg1(fp_reg1_frwrd), .reg2(fp_reg2_frwrd), .imm(ID_FEX_imm_out),
       .pc_inc(ID_FEX_pc_inc_out), .alu_out(fp_alu_out),
       .AluOp(ID_FEX_ctrl_AluOp_out), .fp_inst_valid(fp_ex_inst_valid),
-      .InstFmt(ID_FEX_ctrl_InstFmt_out), .AluSrc(ID_FEX_ctrl_AluSrc_out), .busy(FEX_busy));
+      .InstFmt(ID_FEX_ctrl_InstFmt_out), .AluSrc(ID_FEX_ctrl_AluSrc_out), .busy(FEX_busy), .busy_er(FEX_busy_er));
 
    // Instfmt
    // 01 - I-Format 1
@@ -462,6 +457,8 @@ import wi23_defs::*;
    assign EX_MEM_ctrl_MemRead_in  = ID_EX_ctrl_MemRead_out;
    assign EX_MEM_ctrl_MemToReg_in = ID_EX_ctrl_MemToReg_out;
    assign EX_MEM_ctrl_InstMemRead_in = ID_EX_ctrl_InstMemRead_out;
+	assign EX_MEM_ctrl_FpInst_in = ID_EX_ctrl_FpInst_out;
+	assign EX_MEM_ctrl_FPIntCvtReg_in = ID_EX_ctrl_FPIntCvtReg_out;
 
    assign EX_MEM_ctrl_Halt_in = ID_EX_ctrl_Halt_out;
   
@@ -483,6 +480,8 @@ import wi23_defs::*;
          EX_MEM_writesel_out <= 0;
          EX_MEM_ctrl_Halt_out <= 0;
          EX_MEM_ctrl_InstMemRead_out <= 0;
+			EX_MEM_ctrl_FpInst_out <= 0;
+			EX_MEM_ctrl_FPIntCvtReg_out <= 0;
       end else begin
          EX_MEM_ctrl_Op_out <= EX_MEM_ctrl_Op_in;
          EX_MEM_ctrl_RegWrite_out <= EX_MEM_ctrl_RegWrite_in;
@@ -494,6 +493,8 @@ import wi23_defs::*;
          EX_MEM_writesel_out <= EX_MEM_writesel_in;
          EX_MEM_ctrl_Halt_out <= EX_MEM_ctrl_Halt_in;
          EX_MEM_ctrl_InstMemRead_out <= EX_MEM_ctrl_InstMemRead_in;
+			EX_MEM_ctrl_FpInst_out <= EX_MEM_ctrl_FpInst_in;
+			EX_MEM_ctrl_FPIntCvtReg_out <= EX_MEM_ctrl_FPIntCvtReg_in;
       end
 
    ////////////////////
@@ -521,6 +522,9 @@ import wi23_defs::*;
    assign MEM_WB_writesel_in = EX_MEM_writesel_out;
 
    assign MEM_WB_ctrl_Op_in = EX_MEM_ctrl_Op_out;
+	
+	assign MEM_WB_ctrl_FpInst_in = EX_MEM_ctrl_FpInst_out;
+	assign MEM_WB_ctrl_FPIntCvtReg_in = EX_MEM_ctrl_FPIntCvtReg_out;
   
    always @(posedge clk, negedge rst_n)
       if (!rst_n) begin
@@ -531,6 +535,8 @@ import wi23_defs::*;
          MEM_WB_writesel_out <= 0;
          MEM_WB_alu_out_out <= 0;
          MEM_WB_mem_out_out <= 0;
+			MEM_WB_ctrl_FpInst_out <= 0;
+			MEM_WB_ctrl_FPIntCvtReg_out <= 0;
       end else begin
          MEM_WB_ctrl_Op_out <= MEM_WB_ctrl_Op_in;
          MEM_WB_ctrl_RegWrite_out <= MEM_WB_ctrl_RegWrite_in;
@@ -539,6 +545,8 @@ import wi23_defs::*;
          MEM_WB_writesel_out <= MEM_WB_writesel_in;
          MEM_WB_alu_out_out <= MEM_WB_alu_out_in;
          MEM_WB_mem_out_out <= MEM_WB_mem_out_in;
+			MEM_WB_ctrl_FpInst_out <= MEM_WB_ctrl_FpInst_in;
+			MEM_WB_ctrl_FPIntCvtReg_out <= MEM_WB_ctrl_FpInst_out;
       end
    
    /////////////////////////
@@ -614,11 +622,15 @@ import wi23_defs::*;
    /// Hazard Detection Unit ///
    /////////////////////////////
 
+   logic FEX_inst_to_stall;
+
+   assign FEX_inst_to_stall = (ID_FEX_ctrl_FpInst_out & ~(ID_EX_ctrl_MemRead_out | ID_EX_ctrl_MemWrite_out));
+
    hazard iHAZARD (.IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
       .IF_ID_is_branch(JType[0]),.ID_EX_is_load(ID_EX_ctrl_MemRead_out & ID_EX_ctrl_RegWrite_out),
       .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),.EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out),
       .ID_EX_regw(writesel),.EX_MEM_regw(EX_MEM_writesel_out), 
-      .FEX_busy(FEX_busy), .IF_FEX_is_fp_ex(ID_FEX_ctrl_FpInst_out & ~(ID_EX_ctrl_MemRead_out & ID_EX_ctrl_RegWrite_out)) ,
+      .FEX_busy(FEX_busy), .ID_FEX_is_fp_ex(FEX_inst_to_stall) ,
       .stall(stall));
 
    ///////////////////////
