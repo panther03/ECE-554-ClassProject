@@ -13,7 +13,6 @@ import wi23_defs::*;
    wire Cout;
 
    // Inversion logic for adder operand (used for subtract)
-
    wire [REGFILE_WIDTH-1:0] A_inv;
    wire inv_A;
 
@@ -44,7 +43,7 @@ import wi23_defs::*;
       4'b1000 : begin alu_err = 1'b0; Out = {A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],A[9],A[10],A[11],A[12],A[13],A[14],A[15],A[16],A[17],A[18],A[19],A[20],A[21],A[22],A[23],A[24],A[25],A[26],A[27],A[28],A[29],A[30],A[31]}; end
       4'b1001 : begin alu_err = 1'b0; Out = A; end
       4'b1010 : begin alu_err = 1'b0; Out = B; end
-      4'b1011 : begin alu_err = 1'b0; Out = (A << 8) | B; end
+      4'b1011 : begin alu_err = 1'b0; Out = (A << 16) | B; end
       4'b1100 : begin alu_err = 1'b0; Out = {31'h0, SEQ}; end
       4'b1101 : begin alu_err = 1'b0; Out = {31'h0, SLT}; end
       4'b1110 : begin alu_err = 1'b0; Out = {31'h0, SLE}; end

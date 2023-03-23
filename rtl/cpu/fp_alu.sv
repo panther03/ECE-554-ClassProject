@@ -1,5 +1,5 @@
-module alu 
-//import wi23_defs::*;
+module fp_alu 
+import wi23_defs::*;
 (A, B, Op, Out, alu_err);
   ///////////////////////////
   //  Inputs and Outputs  //

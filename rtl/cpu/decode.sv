@@ -20,6 +20,8 @@ import wi23_defs::*;
     input logic         FPRegWrite,
     input logic [0:0]   FPInst,
     input logic [1:0]   FPIntCvtReg,
+    input logic         MemRead,
+    input logic         MemWrite,
 
     // Outputs
     output logic [REGFILE_WIDTH-1:0] reg1,
@@ -40,6 +42,13 @@ import wi23_defs::*;
     
     wire [REGFILE_DEPTH-1:0] fp_reg1sel, fp_reg2sel;
     wire [REGFILE_WIDTH-1:0] fp_reg1raw, fp_reg2raw;
+
+    logic [REGFILE_WIDTH-1:0] dec_reg1;
+    logic [REGFILE_WIDTH-1:0] dec_reg2;
+    logic [REGFILE_WIDTH-1:0] dec_fp_reg1;
+    logic [REGFILE_WIDTH-1:0] dec_fp_reg2;
+	 
+	 logic  int_decode_err, fp_decode_err;
     
     /////////////////////////
     /// Int Register file ///
@@ -52,8 +61,8 @@ import wi23_defs::*;
             .read1regsel(reg1sel),.read2regsel(reg2sel),.writeregsel(writesel),
             .read1data(reg1raw),.read2data(reg2raw),.writedata(write_in));
     
-    assign reg1 = bypass_reg1 ? write_in : reg1raw;
-    assign reg2 = bypass_reg2 ? write_in : reg2raw;
+    assign dec_reg1 = bypass_reg1 ? write_in : reg1raw;
+    assign dec_reg2 = bypass_reg2 ? write_in : reg2raw;
     
     ////////////////////////
     /// FP Register file ///
@@ -66,8 +75,8 @@ import wi23_defs::*;
             .read1regsel(fp_reg1sel),.read2regsel(fp_reg2sel),.writeregsel(fp_writesel),
             .read1data(fp_reg1raw),.read2data(fp_reg2raw),.writedata(fp_write_in));
 
-    assign fp_reg1 = fp_bypass_reg1 ? fp_write_in : fp_reg1raw;
-    assign fp_reg2 = fp_bypass_reg2 ? fp_write_in : fp_reg2raw;
+    assign dec_fp_reg1 = fp_bypass_reg1 ? fp_write_in : fp_reg1raw;
+    assign dec_fp_reg2 = fp_bypass_reg2 ? fp_write_in : fp_reg2raw;
 
     /////////////////////////////
     // Immediate Decode Logic ///
@@ -88,4 +97,23 @@ import wi23_defs::*;
     // Decode Error
     assign decode_err = int_decode_err | fp_decode_err;
     
+
+    ///////////////////
+    /// Output Reg  ///   
+    ///////////////////
+
+    // Integer Regfile
+    // Reg1 is always integer register
+    assign reg1 = dec_reg1;
+    // Reg2 is overloaded with Fd for LD/ST
+    assign reg2 = FPInst & (MemRead | MemWrite) ? dec_fp_reg2 : dec_reg2;
+
+    // FP Regfile
+    // Reg1 is :
+    //      1. FP Fs except
+    //      2. FCVTI, FMOVI (FPIntCvtReg[0])
+    assign fp_reg1 = FPInst & FPIntCvtReg[0] ? dec_reg1 : dec_fp_reg1;
+    // Reg2 is always fp register
+    assign fp_reg2 = dec_fp_reg2;
+
 endmodule

@@ -16,9 +16,9 @@ package wi23_defs;
     localparam REGFILE_DEPTH = 5;
     localparam REGFILE_WIDTH = 32;
 
-    ////////////
-    // SPART //
-    //////////
+    /////////////
+    /// SPART ///
+    /////////////
     typedef enum logic [1:0] {
         ADDR_DBUF = 2'b00,
         ADDR_SREG = 2'b01,

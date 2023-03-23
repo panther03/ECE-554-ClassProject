@@ -8,12 +8,11 @@ task automatic check_LDCR (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b00001101110011000011110010000101;
+	inst_i = 'b00001100001001110100000001100000;
+	$display ("time %t : Inst LDCR Rs 1 Value %h Rt 8 Value %h Imm16 0100000001100000 Imm26 11100101100011011100100011", $time, rf_tb[1], rf_tb[8]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst LDCR Rs 14 Value %h Rt 17 Value %h Rd 12 Value %h Imm16 0011110010000101 Imm26 01000001110001100011010101", $time, rf_tb[14], rf_tb[17], rf_tb[12]);
-	@ (posedge clk);
 endtask
 
 task automatic check_ADDI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -22,12 +21,11 @@ task automatic check_ADDI (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b00100000001110101000100111110001;
+	inst_i = 'b00100010010100111101000110100000;
+	$display ("time %t : Inst ADDI Rs 18 Value %h Rt 29 Value %h Imm16 1101000110100000 Imm26 01000000000001010000001000", $time, rf_tb[18], rf_tb[29]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst ADDI Rs 1 Value %h Rt 21 Value %h Rd 26 Value %h Imm16 1000100111110001 Imm26 11001001111001011010100010", $time, rf_tb[1], rf_tb[21], rf_tb[26]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SUBI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -36,12 +34,11 @@ task automatic check_SUBI (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b00100100110011000000010011001101;
+	inst_i = 'b00100101101011011010111100101010;
+	$display ("time %t : Inst SUBI Rs 13 Value %h Rt 2 Value %h Imm16 1010111100101010 Imm26 00011111110100010010001101", $time, rf_tb[13], rf_tb[2]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SUBI Rs 6 Value %h Rt 22 Value %h Rd 12 Value %h Imm16 0000010011001101 Imm26 10110010011100110110001010", $time, rf_tb[6], rf_tb[22], rf_tb[12]);
-	@ (posedge clk);
 endtask
 
 task automatic check_XORI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -50,12 +47,11 @@ task automatic check_XORI (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b00101010111101011111001011111010;
+	inst_i = 'b00101001101000110110110111111010;
+	$display ("time %t : Inst XORI Rs 13 Value %h Rt 14 Value %h Imm16 0110110111111010 Imm26 01000001100101111001011011", $time, rf_tb[13], rf_tb[14]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst XORI Rs 23 Value %h Rt 16 Value %h Rd 21 Value %h Imm16 1111001011111010 Imm26 10010111000000101000010110", $time, rf_tb[23], rf_tb[16], rf_tb[21]);
-	@ (posedge clk);
 endtask
 
 task automatic check_ANDNI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -64,12 +60,11 @@ task automatic check_ANDNI (ref logic clk, ref logic [31:0] inst_i, ref logic [3
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b00101100111000110001000101010100;
+	inst_i = 'b00101100101101001010101111011010;
+	$display ("time %t : Inst ANDNI Rs 5 Value %h Rt 7 Value %h Imm16 1010101111011010 Imm26 11111100010101011110101000", $time, rf_tb[5], rf_tb[7]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst ANDNI Rs 7 Value %h Rt 9 Value %h Rd 3 Value %h Imm16 0001000101010100 Imm26 10011000100001111101001101", $time, rf_tb[7], rf_tb[9], rf_tb[3]);
-	@ (posedge clk);
 endtask
 
 task automatic check_ROLI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -78,12 +73,11 @@ task automatic check_ROLI (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01010010000110101110001000111101;
+	inst_i = 'b01010011010000010010010000101000;
+	$display ("time %t : Inst ROLI Rs 26 Value %h Rt 13 Value %h Imm16 0010010000101000 Imm26 00001100110000000001000110", $time, rf_tb[26], rf_tb[13]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst ROLI Rs 16 Value %h Rt 11 Value %h Rd 26 Value %h Imm16 1110001000111101 Imm26 10010010101010001111110110", $time, rf_tb[16], rf_tb[11], rf_tb[26]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SLLI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -92,12 +86,11 @@ task automatic check_SLLI (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01010100100010010111010010100000;
+	inst_i = 'b01010101010001011110100000110010;
+	$display ("time %t : Inst SLLI Rs 10 Value %h Rt 15 Value %h Imm16 1110100000110010 Imm26 01110001100011000001100010", $time, rf_tb[10], rf_tb[15]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SLLI Rs 4 Value %h Rt 5 Value %h Rd 9 Value %h Imm16 0111010010100000 Imm26 00101100101000111110010110", $time, rf_tb[4], rf_tb[5], rf_tb[9]);
-	@ (posedge clk);
 endtask
 
 task automatic check_RORI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -106,12 +99,11 @@ task automatic check_RORI (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01011011010010000110100100010101;
+	inst_i = 'b01011000011000001101011111111110;
+	$display ("time %t : Inst RORI Rs 3 Value %h Rt 25 Value %h Imm16 1101011111111110 Imm26 10100101100010011101001000", $time, rf_tb[3], rf_tb[25]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst RORI Rs 26 Value %h Rt 20 Value %h Rd 8 Value %h Imm16 0110100100010101 Imm26 10010011011011101101101101", $time, rf_tb[26], rf_tb[20], rf_tb[8]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SRLI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -120,12 +112,11 @@ task automatic check_SRLI (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01011110011001001100000110001000;
+	inst_i = 'b01011111010001101000110011010100;
+	$display ("time %t : Inst SRLI Rs 26 Value %h Rt 9 Value %h Imm16 1000110011010100 Imm26 00100000101100000111111010", $time, rf_tb[26], rf_tb[9]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SRLI Rs 19 Value %h Rt 7 Value %h Rd 4 Value %h Imm16 1100000110001000 Imm26 00000001110000010100010101", $time, rf_tb[19], rf_tb[7], rf_tb[4]);
-	@ (posedge clk);
 endtask
 
 task automatic check_ST (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -134,12 +125,11 @@ task automatic check_ST (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01000001000111000010000110111110;
+	inst_i = 'b01000010111000111101001000000011;
+	$display ("time %t : Inst ST Rs 23 Value %h Rt 0 Value %h Imm16 1101001000000011 Imm26 10101111100010011011001000", $time, rf_tb[23], rf_tb[0]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst ST Rs 8 Value %h Rt 9 Value %h Rd 28 Value %h Imm16 0010000110111110 Imm26 01101110110110010010011001", $time, rf_tb[8], rf_tb[9], rf_tb[28]);
-	@ (posedge clk);
 endtask
 
 task automatic check_LD (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -148,12 +138,11 @@ task automatic check_LD (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01000110100110111010001000010011;
+	inst_i = 'b01000101110110010000110111110000;
+	$display ("time %t : Inst LD Rs 14 Value %h Rt 5 Value %h Imm16 0000110111110000 Imm26 01110100010000110000000000", $time, rf_tb[14], rf_tb[5]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst LD Rs 20 Value %h Rt 26 Value %h Rd 27 Value %h Imm16 1010001000010011 Imm26 11100001011011111001111110", $time, rf_tb[20], rf_tb[26], rf_tb[27]);
-	@ (posedge clk);
 endtask
 
 task automatic check_STU (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -162,12 +151,11 @@ task automatic check_STU (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01001110010101001111111011100011;
+	inst_i = 'b01001110000101000110010110101110;
+	$display ("time %t : Inst STU Rs 16 Value %h Rt 0 Value %h Imm16 0110010110101110 Imm26 10000000011110011011110110", $time, rf_tb[16], rf_tb[0]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst STU Rs 18 Value %h Rt 19 Value %h Rd 20 Value %h Imm16 1111111011100011 Imm26 01000001011100110111110011", $time, rf_tb[18], rf_tb[19], rf_tb[20]);
-	@ (posedge clk);
 endtask
 
 task automatic check_BTR (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -176,12 +164,11 @@ task automatic check_BTR (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01100101111110111000000000000000;
+	inst_i = 'b01100110011100101110000000000000;
+	$display ("time %t : Inst BTR Rs 19 Value %h Rt 18 Value %h Imm16 1100110100010101 Imm26 11000001110110001011010001", $time, rf_tb[19], rf_tb[18]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst BTR Rs 15 Value %h Rt 27 Value %h Rd 16 Value %h Imm16 1001001011100111 Imm26 01111100101100101110110000", $time, rf_tb[15], rf_tb[27], rf_tb[16]);
-	@ (posedge clk);
 endtask
 
 task automatic check_ADD (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -190,12 +177,11 @@ task automatic check_ADD (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01101101100110110001100000000000;
+	inst_i = 'b01101110111110001100000000000000;
+	$display ("time %t : Inst ADD Rs 23 Value %h Rt 24 Value %h Imm16 0011111101011001 Imm26 11101010110011001100110010", $time, rf_tb[23], rf_tb[24]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst ADD Rs 12 Value %h Rt 27 Value %h Rd 3 Value %h Imm16 0101111110001001 Imm26 00111000111001111011101010", $time, rf_tb[12], rf_tb[27], rf_tb[3]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SUB (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -204,12 +190,11 @@ task automatic check_SUB (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01101111000110100110100000000001;
+	inst_i = 'b01101100000111000011100000000001;
+	$display ("time %t : Inst SUB Rs 0 Value %h Rt 28 Value %h Imm16 1101111101010011 Imm26 00011001110010101100111100", $time, rf_tb[0], rf_tb[28]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SUB Rs 24 Value %h Rt 26 Value %h Rd 13 Value %h Imm16 0101101100010001 Imm26 11111111000110011010000100", $time, rf_tb[24], rf_tb[26], rf_tb[13]);
-	@ (posedge clk);
 endtask
 
 task automatic check_XOR (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -218,12 +203,11 @@ task automatic check_XOR (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01101111011001111001000000000010;
+	inst_i = 'b01101101001100101110000000000010;
+	$display ("time %t : Inst XOR Rs 9 Value %h Rt 18 Value %h Imm16 0000100011110110 Imm26 11000000001101011011011101", $time, rf_tb[9], rf_tb[18]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst XOR Rs 27 Value %h Rt 7 Value %h Rd 18 Value %h Imm16 1001101001101011 Imm26 10001011001001000100010100", $time, rf_tb[27], rf_tb[7], rf_tb[18]);
-	@ (posedge clk);
 endtask
 
 task automatic check_ANDN (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -232,12 +216,11 @@ task automatic check_ANDN (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01101100000010010101000000000011;
+	inst_i = 'b01101101100011000100100000000011;
+	$display ("time %t : Inst ANDN Rs 12 Value %h Rt 12 Value %h Imm16 1111101100110010 Imm26 01010001110000001100011110", $time, rf_tb[12], rf_tb[12]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst ANDN Rs 0 Value %h Rt 9 Value %h Rd 10 Value %h Imm16 1100000111111100 Imm26 00001101010110011111101100", $time, rf_tb[0], rf_tb[9], rf_tb[10]);
-	@ (posedge clk);
 endtask
 
 task automatic check_ROL (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -246,12 +229,11 @@ task automatic check_ROL (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01101000011011100010100000000000;
+	inst_i = 'b01101010001010111100000000000000;
+	$display ("time %t : Inst ROL Rs 17 Value %h Rt 11 Value %h Imm16 1111010011111001 Imm26 10101001111111001000101011", $time, rf_tb[17], rf_tb[11]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst ROL Rs 3 Value %h Rt 14 Value %h Rd 5 Value %h Imm16 1001101001101010 Imm26 11111011110111100110001110", $time, rf_tb[3], rf_tb[14], rf_tb[5]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SLL (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -260,12 +242,11 @@ task automatic check_SLL (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01101000101100111001100000000001;
+	inst_i = 'b01101001101101011110100000000001;
+	$display ("time %t : Inst SLL Rs 13 Value %h Rt 21 Value %h Imm16 0101010101000001 Imm26 01101001010000100000101001", $time, rf_tb[13], rf_tb[21]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SLL Rs 5 Value %h Rt 19 Value %h Rd 19 Value %h Imm16 0100010010101100 Imm26 10010001110000111111011100", $time, rf_tb[5], rf_tb[19], rf_tb[19]);
-	@ (posedge clk);
 endtask
 
 task automatic check_ROR (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -274,12 +255,11 @@ task automatic check_ROR (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01101011100101110111000000000010;
+	inst_i = 'b01101000101001100010000000000010;
+	$display ("time %t : Inst ROR Rs 5 Value %h Rt 6 Value %h Imm16 1000110111100100 Imm26 11001110010111000101001010", $time, rf_tb[5], rf_tb[6]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst ROR Rs 28 Value %h Rt 23 Value %h Rd 14 Value %h Imm16 1100011111000010 Imm26 10011010001001111110010001", $time, rf_tb[28], rf_tb[23], rf_tb[14]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SRL (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -288,12 +268,11 @@ task automatic check_SRL (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01101010110000011101000000000011;
+	inst_i = 'b01101010110110010010000000000011;
+	$display ("time %t : Inst SRL Rs 22 Value %h Rt 25 Value %h Imm16 1101110101011001 Imm26 01110100100000010000001010", $time, rf_tb[22], rf_tb[25]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SRL Rs 22 Value %h Rt 1 Value %h Rd 26 Value %h Imm16 0010111001010011 Imm26 10001000110111101000111000", $time, rf_tb[22], rf_tb[1], rf_tb[26]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SEQ (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -302,12 +281,11 @@ task automatic check_SEQ (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01110001111100100111000000000000;
+	inst_i = 'b01110010000111001001100000000000;
+	$display ("time %t : Inst SEQ Rs 16 Value %h Rt 28 Value %h Imm16 1011100111011001 Imm26 11110000001101100010000001", $time, rf_tb[16], rf_tb[28]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SEQ Rs 15 Value %h Rt 18 Value %h Rd 14 Value %h Imm16 0000110010100100 Imm26 01011000011011100001001110", $time, rf_tb[15], rf_tb[18], rf_tb[14]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SLT (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -316,12 +294,11 @@ task automatic check_SLT (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01110101000001010100100000000000;
+	inst_i = 'b01110101011100111101000000000000;
+	$display ("time %t : Inst SLT Rs 11 Value %h Rt 19 Value %h Imm16 0101000000101101 Imm26 10110001111010110000011000", $time, rf_tb[11], rf_tb[19]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SLT Rs 8 Value %h Rt 5 Value %h Rd 9 Value %h Imm16 1011101111010111 Imm26 11011001001001000010101110", $time, rf_tb[8], rf_tb[5], rf_tb[9]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SLE (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -330,12 +307,11 @@ task automatic check_SLE (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01111011001100101000100000000000;
+	inst_i = 'b01111000001110010111100000000000;
+	$display ("time %t : Inst SLE Rs 1 Value %h Rt 25 Value %h Imm16 0100010011011111 Imm26 01110110001101010010101010", $time, rf_tb[1], rf_tb[25]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SLE Rs 25 Value %h Rt 18 Value %h Rd 17 Value %h Imm16 1101111000000101 Imm26 01011001111011100001111011", $time, rf_tb[25], rf_tb[18], rf_tb[17]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SCO (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -344,12 +320,11 @@ task automatic check_SCO (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01111101011010010000000000000000;
+	inst_i = 'b01111110101001110001100000000000;
+	$display ("time %t : Inst SCO Rs 21 Value %h Rt 7 Value %h Imm16 0010001001101000 Imm26 00111101111101101010101101", $time, rf_tb[21], rf_tb[7]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SCO Rs 11 Value %h Rt 9 Value %h Rd 0 Value %h Imm16 0110110000110110 Imm26 01100101101111000101001110", $time, rf_tb[11], rf_tb[9], rf_tb[0]);
-	@ (posedge clk);
 endtask
 
 task automatic check_LBI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -358,12 +333,11 @@ task automatic check_LBI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01100010101000110111000001100100;
+	inst_i = 'b01100010001001110010000111111101;
+	$display ("time %t : Inst LBI Rs 17 Value %h Rt 2 Value %h Imm16 0010000111111101 Imm26 01110110000001001101101100", $time, rf_tb[17], rf_tb[2]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst LBI Rs 21 Value %h Rt 18 Value %h Rd 3 Value %h Imm16 0111000001100100 Imm26 01100111111110001101111100", $time, rf_tb[21], rf_tb[18], rf_tb[3]);
-	@ (posedge clk);
 endtask
 
 task automatic check_SLBI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -372,12 +346,11 @@ task automatic check_SLBI (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b01001010011011000110011101110001;
+	inst_i = 'b01001001100011010000100101010111;
+	$display ("time %t : Inst SLBI Rs 12 Value %h Rt 15 Value %h Imm16 0000100101010111 Imm26 01110001010110001111001010", $time, rf_tb[12], rf_tb[15]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst SLBI Rs 19 Value %h Rt 11 Value %h Rd 12 Value %h Imm16 0110011101110001 Imm26 11100101111101110010111101", $time, rf_tb[19], rf_tb[11], rf_tb[12]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FADD (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -386,12 +359,11 @@ task automatic check_FADD (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b11101110100010111000100000000000;
+	inst_i = 'b11101110111100001001100000000000;
+	$display ("time %t : Inst FADD Rs 23 Value %h Rt 16 Value %h Imm16 0010101100110101 Imm26 00100100110110111101101111", $time, rf_tb[23], rf_tb[16]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FADD Rs 20 Value %h Rt 11 Value %h Rd 17 Value %h Imm16 0010011111111010 Imm26 00110110101110010001001100", $time, rf_tb[20], rf_tb[11], rf_tb[17]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FSUB (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -400,12 +372,11 @@ task automatic check_FSUB (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b11101100110010100110100000000001;
+	inst_i = 'b11101101100011111011100000000001;
+	$display ("time %t : Inst FSUB Rs 12 Value %h Rt 15 Value %h Imm16 1011000111101100 Imm26 00111001011011011011001010", $time, rf_tb[12], rf_tb[15]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FSUB Rs 6 Value %h Rt 10 Value %h Rd 13 Value %h Imm16 1011111110100000 Imm26 11001110110110011111100100", $time, rf_tb[6], rf_tb[10], rf_tb[13]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FMUL (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -414,12 +385,11 @@ task automatic check_FMUL (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b11101111001001010100000000000010;
+	inst_i = 'b11101101111010010111000000000010;
+	$display ("time %t : Inst FMUL Rs 15 Value %h Rt 9 Value %h Imm16 0101000111100011 Imm26 01110100010100111000001111", $time, rf_tb[15], rf_tb[9]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FMUL Rs 25 Value %h Rt 5 Value %h Rd 8 Value %h Imm16 1101000011010110 Imm26 01101000101001100011100000", $time, rf_tb[25], rf_tb[5], rf_tb[8]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FDIV (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -428,12 +398,11 @@ task automatic check_FDIV (ref logic clk, ref logic [31:0] inst_i, ref logic [31
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b11101100111011111001100000000011;
+	inst_i = 'b11101100000110010101100000000011;
+	$display ("time %t : Inst FDIV Rs 0 Value %h Rt 25 Value %h Imm16 0010101110111111 Imm26 11011111111100101000001110", $time, rf_tb[0], rf_tb[25]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FDIV Rs 7 Value %h Rt 15 Value %h Rd 19 Value %h Imm16 1000011100010001 Imm26 00010100111101100000110110", $time, rf_tb[7], rf_tb[15], rf_tb[19]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FEQ (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -442,12 +411,11 @@ task automatic check_FEQ (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b11110001111001000011000000000000;
+	inst_i = 'b11110010101000101011100000000000;
+	$display ("time %t : Inst FEQ Rs 21 Value %h Rt 2 Value %h Imm16 0011000011110011 Imm26 11011101001110101001011010", $time, rf_tb[21], rf_tb[2]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FEQ Rs 15 Value %h Rt 4 Value %h Rd 6 Value %h Imm16 0001100111101111 Imm26 00100001101110100001100110", $time, rf_tb[15], rf_tb[4], rf_tb[6]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FLE (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -456,12 +424,11 @@ task automatic check_FLE (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b11111000110000000100100000000000;
+	inst_i = 'b11111010001000100101100000000000;
+	$display ("time %t : Inst FLE Rs 17 Value %h Rt 2 Value %h Imm16 1001001100111001 Imm26 10000010110000000000001000", $time, rf_tb[17], rf_tb[2]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FLE Rs 6 Value %h Rt 0 Value %h Rd 9 Value %h Imm16 1110101101101000 Imm26 00100001101100011110110000", $time, rf_tb[6], rf_tb[0], rf_tb[9]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FLT (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -470,12 +437,11 @@ task automatic check_FLT (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b11111111100000011100100000000000;
+	inst_i = 'b11111110110000010010100000000000;
+	$display ("time %t : Inst FLT Rs 22 Value %h Rt 1 Value %h Imm16 0101010011110001 Imm26 01001001011111100010000100", $time, rf_tb[22], rf_tb[1]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FLT Rs 28 Value %h Rt 1 Value %h Rd 25 Value %h Imm16 1000100010101010 Imm26 00001000010101100001010100", $time, rf_tb[28], rf_tb[1], rf_tb[25]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FCVTI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -484,12 +450,11 @@ task automatic check_FCVTI (ref logic clk, ref logic [31:0] inst_i, ref logic [3
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b10000110100001001010000000000000;
+	inst_i = 'b10000101110011111011100000000000;
+	$display ("time %t : Inst FCVTI Rs 14 Value %h Rt 15 Value %h Imm16 0001101110001110 Imm26 11110000001011101100010011", $time, rf_tb[14], rf_tb[15]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FCVTI Rs 20 Value %h Rt 4 Value %h Rd 20 Value %h Imm16 1110110000101100 Imm26 10100100000010000000110100", $time, rf_tb[20], rf_tb[4], rf_tb[20]);
-	@ (posedge clk);
 endtask
 
 task automatic check_ICVTF (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -498,12 +463,11 @@ task automatic check_ICVTF (ref logic clk, ref logic [31:0] inst_i, ref logic [3
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b10000011101111010111000000000000;
+	inst_i = 'b10000001010001110100100000000000;
+	$display ("time %t : Inst ICVTF Rs 10 Value %h Rt 7 Value %h Imm16 1100100010111100 Imm26 01000000011001000101111010", $time, rf_tb[10], rf_tb[7]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst ICVTF Rs 29 Value %h Rt 29 Value %h Rd 14 Value %h Imm16 1000100001010010 Imm26 10100010011101110110000011", $time, rf_tb[29], rf_tb[29], rf_tb[14]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FMOVI (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -512,12 +476,11 @@ task automatic check_FMOVI (ref logic clk, ref logic [31:0] inst_i, ref logic [3
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b10001101010000001100000000000000;
+	inst_i = 'b10001110100101000111000000000000;
+	$display ("time %t : Inst FMOVI Rs 20 Value %h Rt 20 Value %h Imm16 0000110011100110 Imm26 00101011111001111110101001", $time, rf_tb[20], rf_tb[20]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FMOVI Rs 10 Value %h Rt 0 Value %h Rd 24 Value %h Imm16 0010110111110110 Imm26 11011110111100110001101100", $time, rf_tb[10], rf_tb[0], rf_tb[24]);
-	@ (posedge clk);
 endtask
 
 task automatic check_IMOVF (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -526,12 +489,11 @@ task automatic check_IMOVF (ref logic clk, ref logic [31:0] inst_i, ref logic [3
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b10001000011110111001000000000000;
+	inst_i = 'b10001000001101111101100000000000;
+	$display ("time %t : Inst IMOVF Rs 1 Value %h Rt 23 Value %h Imm16 1111100010110001 Imm26 00000101011110000111001001", $time, rf_tb[1], rf_tb[23]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst IMOVF Rs 3 Value %h Rt 27 Value %h Rd 18 Value %h Imm16 1011100101000101 Imm26 01010010101010010010100000", $time, rf_tb[3], rf_tb[27], rf_tb[18]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FST (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -540,12 +502,11 @@ task automatic check_FST (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b11000010001100111000010010000001;
+	inst_i = 'b11000000000011111101110010001101;
+	$display ("time %t : Inst FST Rs 0 Value %h Rt 1 Value %h Imm16 1101110010001101 Imm26 01110101110010011100100011", $time, rf_tb[0], rf_tb[1]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FST Rs 17 Value %h Rt 16 Value %h Rd 19 Value %h Imm16 1000010010000001 Imm26 00001101001000100111000100", $time, rf_tb[17], rf_tb[16], rf_tb[19]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FLD (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -554,12 +515,11 @@ task automatic check_FLD (ref logic clk, ref logic [31:0] inst_i, ref logic [31:
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b11000100111111010110110001110110;
+	inst_i = 'b11000111100001001101011010101000;
+	$display ("time %t : Inst FLD Rs 28 Value %h Rt 5 Value %h Imm16 1101011010101000 Imm26 01010110010111100110100001", $time, rf_tb[28], rf_tb[5]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FLD Rs 7 Value %h Rt 9 Value %h Rd 29 Value %h Imm16 0110110001110110 Imm26 10111000010011100100100000", $time, rf_tb[7], rf_tb[9], rf_tb[29]);
-	@ (posedge clk);
 endtask
 
 task automatic check_FCLASS (ref logic clk, ref logic [31:0] inst_i, ref logic [31:0] rf_tb [32]);
@@ -568,12 +528,11 @@ task automatic check_FCLASS (ref logic clk, ref logic [31:0] inst_i, ref logic [
 	for (int i = 0; i < 30; i++)
 		rf_tb[i] = $urandom();
 	@ (negedge clk);
-	inst_i = 'b10010000000100100110000000000000;
+	inst_i = 'b10010000000001010111100000000000;
+	$display ("time %t : Inst FCLASS Rs 0 Value %h Rt 5 Value %h Imm16 1001101000111010 Imm26 10111011101100010101000111", $time, rf_tb[0], rf_tb[5]);
 	@ (negedge clk);
 	inst_i = 'h04000000; // NOP
 	repeat (4) @ (posedge clk);
-	$display ("time %t : Inst FCLASS Rs 0 Value %h Rt 18 Value %h Rd 12 Value %h Imm16 0110001000101101 Imm26 11010000010000111100100010", $time, rf_tb[0], rf_tb[18], rf_tb[12]);
-	@ (posedge clk);
 endtask
 
 

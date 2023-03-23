@@ -35,8 +35,8 @@ import wi23_defs::*;
     always @* case (CondOp)
         2'b00 : CmpOut = ~|reg1;
         2'b01 : CmpOut = |reg1;
-        2'b10 : CmpOut = reg1[DMEM_WIDTH];
-        default : CmpOut = ~reg1[DMEM_WIDTH]; // 2'b11
+        2'b10 : CmpOut = reg1[DMEM_WIDTH-1];
+        default : CmpOut = ~reg1[DMEM_WIDTH-1]; // 2'b11
     endcase
 
     // Only flush if we are doing a branch and it's taken

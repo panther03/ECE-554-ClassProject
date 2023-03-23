@@ -83,11 +83,10 @@ def generate_inst_task(row, names, pkg_file):
     task_body += f"\tfor (int i = 0; i < 30; i++)\n\t\trf_tb[i] = $urandom();\n"
     ## Set instruction to test
     task_body += f"\t@ (negedge clk);\n\tinst_i = {inst};\n"
+    task_body += f"\t$display (\"time %t : Inst {row[2]} Rs {rs_n} Value %h Rt {rt_n} Value %h Imm16 {imm16_b} Imm26 {imm26_b}\", $time, rf_tb[{rs_n}], rf_tb[{rt_n}]);\n"
     ## Set instruction to NOP
     task_body += f"\t@ (negedge clk);\n\tinst_i = 'h04000000; // NOP\n"
     task_body += f"\trepeat (4) @ (posedge clk);\n"
-    task_body += f"\t$display (\"time %t : Inst {row[2]} Rs {rs_n} Value %h Rt {rt_n} Value %h Rd {rd_n} Value %h Imm16 {imm16_b} Imm26 {imm26_b}\", $time, rf_tb[{rs_n}], rf_tb[{rt_n}], rf_tb[{rd_n}]);\n"
-    task_body += f"\t@ (posedge clk);\n"
     task_tail = f"endtask\n\n"
 
     pkg_file.write(task_head)
