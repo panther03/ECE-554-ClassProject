@@ -84,35 +84,36 @@ module fp_preadder
   assign is_mixed = ~A_type[1] && ~B_type[1] && ((A_type[0] & B_type[2]) || (A_type[2] & B_type[0]));
   
   // count the zeros in B's mantissa
-  assign zero_count = B_mixed_inter[27:0] == 23'h0 ? 5'h1c :
-                      B_mixed_inter[27:1] == 23'h0 ? 5'h1b :
-                      B_mixed_inter[27:2] == 23'h0 ? 5'h1a :
-                      B_mixed_inter[27:3] == 23'h0 ? 5'h19 :
-                      B_mixed_inter[27:4] == 23'h0 ? 5'h18 :
-					  B_mixed_inter[27:5] == 23'h0 ? 5'h17 :
-                      B_mixed_inter[27:6] == 27'h0 ? 5'h16 :
-					  B_mixed_inter[27:7] == 21'h0 ? 5'h15 :
-					  B_mixed_inter[27:8] == 20'h0 ? 5'h14 :
-					  B_mixed_inter[27:9] == 19'h0 ? 5'h13 :
-					  B_mixed_inter[27:10] == 18'h0 ? 5'h12 :
-					  B_mixed_inter[27:11] == 17'h0 ? 5'h11 :
-					  B_mixed_inter[27:12] == 16'h0 ? 5'h10 :
-					  B_mixed_inter[27:13] == 15'h0 ? 5'h0f :
-					  B_mixed_inter[27:14] == 14'h0 ? 5'h0e :
-					  B_mixed_inter[27:15] == 13'h0 ? 5'h0d :
-					  B_mixed_inter[27:16] == 12'h0 ? 5'h0c :
-					  B_mixed_inter[27:17] == 11'h0 ? 5'h0b :
-					  B_mixed_inter[27:18] == 10'h0 ? 5'h0a :
-					  B_mixed_inter[27:19] == 9'h0 ? 5'h09 :
-					  B_mixed_inter[27:20] == 8'h0 ? 5'h08 :
-					  B_mixed_inter[27:21] == 7'h0 ? 5'h07 :
-					  B_mixed_inter[27:22] == 6'h0 ? 5'h06 :
-					  B_mixed_inter[27:23] == 5'h0 ? 5'h05 :
-					  B_mixed_inter[27:24] == 4'h0 ? 5'h04 :
-					  B_mixed_inter[27:25] == 3'h0 ? 5'h03 :
-					  B_mixed_inter[27:26] == 2'h0 ? 5'h02 :
-					  B_mixed_inter[27] == 1'h0 ? 5'h01 :
+  assign zero_count = ~|B_mixed_inter[27:0] ? 5'h1c :
+                      ~|B_mixed_inter[27:1] ? 5'h1b :
+                      ~|B_mixed_inter[27:2] ? 5'h1a :
+                      ~|B_mixed_inter[27:3] ? 5'h19 :
+                      ~|B_mixed_inter[27:4] ? 5'h18 :
+					  ~|B_mixed_inter[27:5] ? 5'h17 :
+                      ~|B_mixed_inter[27:6] ? 5'h16 :
+					  ~|B_mixed_inter[27:7] ? 5'h15 :
+					  ~|B_mixed_inter[27:8] ? 5'h14 :
+					  ~|B_mixed_inter[27:9] ? 5'h13 :
+					  ~|B_mixed_inter[27:10] ? 5'h12 :
+					  ~|B_mixed_inter[27:11] ? 5'h11 :
+					  ~|B_mixed_inter[27:12] ? 5'h10 :
+					  ~|B_mixed_inter[27:13] ? 5'h0f :
+					  ~|B_mixed_inter[27:14] ? 5'h0e :
+					  ~|B_mixed_inter[27:15] ? 5'h0d :
+					  ~|B_mixed_inter[27:16] ? 5'h0c :
+					  ~|B_mixed_inter[27:17] ? 5'h0b :
+					  ~|B_mixed_inter[27:18] ? 5'h0a :
+					  ~|B_mixed_inter[27:19] ? 5'h09 :
+					  ~|B_mixed_inter[27:20] ? 5'h08 :
+					  ~|B_mixed_inter[27:21] ? 5'h07 :
+					  ~|B_mixed_inter[27:22] ? 5'h06 :
+					  ~|B_mixed_inter[27:23] ? 5'h05 :
+					  ~|B_mixed_inter[27:24] ? 5'h04 :
+					  ~|B_mixed_inter[27:25] ? 5'h03 :
+					  ~|B_mixed_inter[27:26] ? 5'h02 :
+					  ~|B_mixed_inter[27] ? 5'h01 :
 					  5'h0;
+					  
   
   assign B_mixed = {B_mixed_inter[36], {3'h0, zero_count}, B_mixed_inter[27:0] >> zero_count};
   
