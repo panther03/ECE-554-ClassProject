@@ -21,7 +21,7 @@ typedef enum logic [6:0] {
     ST,
     LD,
     STU,
-    BTR,
+    ANDI,
     ADD,
     SUB,
     XOR,

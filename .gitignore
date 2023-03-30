@@ -1,6 +1,4 @@
 out/*
-!out/32bdecode_temp.hex
-!out/LDCRTest.hex
 
 fpga/*/*
 !fpga/*/Makefile

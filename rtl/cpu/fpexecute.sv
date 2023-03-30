@@ -9,7 +9,7 @@ import wi23_defs::*;
 
     input logic clk, rst_n;
     input [REGFILE_WIDTH-1:0] reg1, reg2, imm, pc_inc;
-    input  fp_inst_valid;
+    input logic fp_inst_valid;
     output [REGFILE_WIDTH-1:0] alu_out;
     output logic ex_err, busy, busy_er;
 
