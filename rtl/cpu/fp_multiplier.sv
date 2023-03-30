@@ -78,99 +78,92 @@ module fp_multiplier(A, B, P);
   ///////////////////////
   //  Multiplication  //
   /////////////////////
-  logic [47:0] multiplicand, mantissa;
+  logic [47:0] multiplicand;
   logic [22:0] rounded_mantissa;
   
   assign A_msb = A_type != 3'b001;
   assign B_msb = B_type != 3'b001;
   assign multiplicand = {A_msb, A_mantissa} * {B_msb, B_mantissa};
-  // assign multiplicand = {1'b1, A_mantissa} * {1'b1, B_mantissa};
-  
-  assign mantissa = multiplicand[47] ? multiplicand << 1 :
-                                       multiplicand << 2;
-  
-  //assign rounded_mantissa = mantissa[22:0] > 23'h3fffff ? mantissa[47:25] + 1'b1 :
-  //                                                        mantissa[47:25];
 															  
-  //////////////
-  //  Mixed  //
-  ////////////
+  //////////////////
+  //  Normalize  //
+  ////////////////
   logic [4:0] potential_shift_amt;
+	logic [4:0] subnormal_shift_amt;
+	logic [4:0] subnormal_shift_amt_adjusted;
   logic [47:0] mantissa_shifted;
   logic [7:0] exponent_add_val;
+	logic is_subnormal_out;
   
   // detect where most significant 1 is.
   assign potential_shift_amt = multiplicand[47] ? 5'h1 :  // +1
                                multiplicand[46] ? 5'h2 :  // +0
-							   multiplicand[45] ? 5'h3 :  // -1
-							   multiplicand[44] ? 5'h4 :  // -2
-							   multiplicand[43] ? 5'h5 :  // -3
-							   multiplicand[42] ? 5'h6 :  // -4
-							   multiplicand[41] ? 5'h7 :  // -5
-							   multiplicand[40] ? 5'h8 :  // -6
-							   multiplicand[39] ? 5'h9 :  // -7
-							   multiplicand[38] ? 5'ha :  // -8
-							   multiplicand[37] ? 5'hb :  // -9
-							   multiplicand[36] ? 5'hc :  // -a
-							   multiplicand[35] ? 5'hd :  // -b
-							   multiplicand[34] ? 5'he :  // -c
-							   multiplicand[33] ? 5'hf :  // -d
-							   multiplicand[32] ? 5'h10 : // -e
-							   multiplicand[31] ? 5'h11 : // -f
-							   multiplicand[30] ? 5'h12 : // -10
-							   multiplicand[29] ? 5'h13 : // -11
-							   multiplicand[28] ? 5'h14 : // -12
-							   multiplicand[27] ? 5'h15 : // -13
-							   multiplicand[26] ? 5'h16 : // -14
-							   multiplicand[25] ? 5'h17 : // -15
-							   multiplicand[25] ? 5'h18 : // -16
-							                      5'h19;  // -17
+							                 multiplicand[45] ? 5'h3 :  // -1
+							                 multiplicand[44] ? 5'h4 :  // -2
+							                 multiplicand[43] ? 5'h5 :  // -3
+							                 multiplicand[42] ? 5'h6 :  // -4
+							                 multiplicand[41] ? 5'h7 :  // -5
+							                 multiplicand[40] ? 5'h8 :  // -6
+							                 multiplicand[39] ? 5'h9 :  // -7
+							                 multiplicand[38] ? 5'ha :  // -8
+							                 multiplicand[37] ? 5'hb :  // -9
+							                 multiplicand[36] ? 5'hc :  // -a
+							                 multiplicand[35] ? 5'hd :  // -b
+							                 multiplicand[34] ? 5'he :  // -c
+							                 multiplicand[33] ? 5'hf :  // -d
+							                 multiplicand[32] ? 5'h10 : // -e
+							                 multiplicand[31] ? 5'h11 : // -f
+							                 multiplicand[30] ? 5'h12 : // -10
+							                 multiplicand[29] ? 5'h13 : // -11
+							                 multiplicand[28] ? 5'h14 : // -12
+							                 multiplicand[27] ? 5'h15 : // -13
+							                 multiplicand[26] ? 5'h16 : // -14
+							                 multiplicand[25] ? 5'h17 : // -15
+							                 multiplicand[25] ? 5'h18 : // -16
+							                                    5'h19;  // -17
 												  
   assign exponent_add_val = multiplicand[47] ? 8'h01 :  // +1
                             multiplicand[46] ? 8'h00 :  // +0
-							multiplicand[45] ? 8'hff :  // -1
-							multiplicand[44] ? 8'hfe :  // -2
-							multiplicand[43] ? 8'hfd :  // -3
-							multiplicand[42] ? 8'hfc :  // -4
-							multiplicand[41] ? 8'hfb :  // -5
-							multiplicand[40] ? 8'hfa :  // -6
-							multiplicand[39] ? 8'hf9 :  // -7
-							multiplicand[38] ? 8'hf8 :  // -8
-							multiplicand[37] ? 8'hf7 :  // -9
-							multiplicand[36] ? 8'hf6 :  // -a
-							multiplicand[35] ? 8'hf5 :  // -b
-							multiplicand[34] ? 8'hf4 :  // -c
-							multiplicand[33] ? 8'hf3 :  // -d
-							multiplicand[32] ? 8'hf2 : // -e
-							multiplicand[31] ? 8'hf1 : // -f
-							multiplicand[30] ? 8'hf0 : // -10
-							multiplicand[29] ? 8'hef : // -11
-							multiplicand[28] ? 8'hee : // -12
-							multiplicand[27] ? 8'hed : // -13
-							multiplicand[26] ? 8'hec : // -14
-							multiplicand[25] ? 8'heb : // -15
-							multiplicand[25] ? 8'hea : // -16
-							                   8'he9;  // -17
+							              multiplicand[45] ? 8'hff :  // -1
+							              multiplicand[44] ? 8'hfe :  // -2
+							              multiplicand[43] ? 8'hfd :  // -3
+							              multiplicand[42] ? 8'hfc :  // -4
+							              multiplicand[41] ? 8'hfb :  // -5
+							              multiplicand[40] ? 8'hfa :  // -6
+							              multiplicand[39] ? 8'hf9 :  // -7
+							              multiplicand[38] ? 8'hf8 :  // -8
+							              multiplicand[37] ? 8'hf7 :  // -9
+							              multiplicand[36] ? 8'hf6 :  // -a
+							              multiplicand[35] ? 8'hf5 :  // -b
+							              multiplicand[34] ? 8'hf4 :  // -c
+							              multiplicand[33] ? 8'hf3 :  // -d
+							              multiplicand[32] ? 8'hf2 : // -e
+							              multiplicand[31] ? 8'hf1 : // -f
+							              multiplicand[30] ? 8'hf0 : // -10
+							              multiplicand[29] ? 8'hef : // -11
+							              multiplicand[28] ? 8'hee : // -12
+							              multiplicand[27] ? 8'hed : // -13
+							              multiplicand[26] ? 8'hec : // -14
+							              multiplicand[25] ? 8'heb : // -15
+							              multiplicand[25] ? 8'hea : // -16
+							                                 8'he9;  // -17
 							   
-  assign mantissa_shifted = underflow ? multiplicand : multiplicand << potential_shift_amt;
-  assign rounded_mantissa = mantissa_shifted[24:0] > 25'h0ffffff ? mantissa_shifted[47:25] + 1'b1 :
-                                                                  mantissa_shifted[47:25];
-  
-  
-  // for subnormal output
-  assign mantissa_unshifted = mantissa[22:0] > 23'h3fffff ? mantissa[47:25] + 1'b1 :
-                                                            mantissa[47:25];
+  assign mantissa_shifted = is_subnormal_out ? multiplicand >> subnormal_shift_amt_adjusted : multiplicand << potential_shift_amt;
+  assign rounded_mantissa = mantissa_shifted[24] ? mantissa_shifted[47:25] + 1'b1 :
+                                                   mantissa_shifted[47:25];
   
   /////////////////
   //  Exponent  //
   ///////////////
   logic [7:0] A_exponent_unbiased, B_exponent_unbiased;
-  logic [7:0] exponent_sum;
+  logic [8:0] exponent_sum;
   logic [7:0] exponent_after_shift;
   logic [7:0] exponent_biased;
   logic [7:0] exponent_to_bias;
   logic A_exponent_sign, B_exponent_sign;
-  logic xtr_bit;
+  logic [1:0] xtr_bits;
+	logic can_shift;
+	logic signed [8:0] signed_exponent_for_zeroed;
   
   assign A_exponent_unbiased = A_type == 3'b001 ? 8'h82 : // -126
                                                   A_exponent - 8'h7f;
@@ -179,14 +172,24 @@ module fp_multiplier(A, B, P);
   assign A_exponent_sign = A_exponent_unbiased[7];
   assign B_exponent_sign = B_exponent_unbiased[7];
   
-  assign exponent_sum = A_exponent_unbiased + B_exponent_unbiased;
-  assign {xtr_bit, exponent_after_shift} = {exponent_sum[7], exponent_sum} + {exponent_add_val[7], exponent_add_val};
+  assign exponent_sum = {A_exponent_sign, A_exponent_unbiased} + {B_exponent_sign, B_exponent_unbiased};
+  assign {xtr_bits, exponent_after_shift} = exponent_sum + {exponent_add_val[7], exponent_add_val};
   
   assign exponent_biased = exponent_after_shift + 8'h7f;
   
   assign inf_overflow = exponent_after_shift[7] & ~A_exponent_sign & ~B_exponent_sign;
   assign underflow = ~exponent_after_shift[7] & A_exponent_sign & B_exponent_sign;
-  assign zeroed = underflow && (
+  // assign zeroed = underflow && (
+	
+	// make sure exponent_after_shift must be greater than -127
+	
+	// check if exponent gets zeroed
+	assign signed_exponent_for_zeroed = {xtr_bits[0], exponent_after_shift};
+	assign zeroed = signed_exponent_for_zeroed <= 9'sh16a; // -150
+	assign is_subnormal_out = signed_exponent_for_zeroed <= 9'sh181; // -127
+	assign subnormal_shift_amt = 9'sh181 - signed_exponent_for_zeroed;
+	assign subnormal_shift_amt_adjusted = multiplicand[47] ? subnormal_shift_amt :
+	                                                         subnormal_shift_amt - 1'b1;
   
   ///////////////
   //  Output  //
@@ -199,7 +202,7 @@ module fp_multiplier(A, B, P);
                         underflow    ? 8'h00 :
 						               exponent_biased;
 									   
-  assign Mantissa_out = inf_overflow ? 23'h0 :  
+  assign Mantissa_out = inf_overflow | zeroed ? 23'h0 :
                                        rounded_mantissa;
 									   
   assign P_normal = {Sign_out, Exponent_out, Mantissa_out};
