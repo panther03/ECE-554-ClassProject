@@ -32,6 +32,12 @@ module fp_multiplier(A, B, P);
 				  &B_exponent && ~|B_mantissa  ? 3'b010 :  // Infinity
 				  &B_exponent && |B_mantissa   ? 3'b011 :  // NaN
 				                                 3'b100;   // Normal 	
+																				
+	/////////////////
+  //  Sign_Out  //
+  ///////////////
+  logic Sign_out;
+  assign Sign_out = A_sign ^ B_sign;
   
   /////////////////////////////////////////////////
   ///////////////   Special Cases    //////////////
@@ -50,12 +56,12 @@ module fp_multiplier(A, B, P);
   
   assign is_mixed = ~A_type[1] && ~B_type[1] && ((A_type[0] & B_type[2]) || (A_type[2] & B_type[0]));
   assign is_special = (A_type == 3'b100 && B_type == 3'b100) || is_mixed ? 1'b0 : 1'b1;
-  assign P_special_sign = ~|A_type                                                   ? A_sign :  // A is 0
-						  ~|B_type                                                   ? B_sign :  // B is 0
-						  (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_sign :  // A = norm or subnorm and B = inf
-						  (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_sign :  // A = inf and B = norm or subnorm
-						  A_type == 3'b010 && B_type == 3'b010 && A_sign == B_sign   ? 1'b0 :    // both inf and same sign
-						                                                               1'b1;     // default to 1
+  assign P_special_sign = ~|A_type                                                   ? Sign_out :  // A is 0
+						              ~|B_type                                                   ? Sign_out :  // B is 0
+						              (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_sign :  // A = norm or subnorm and B = inf
+						              (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_sign :  // A = inf and B = norm or subnorm
+						              A_type == 3'b010 && B_type == 3'b010 && A_sign == B_sign   ? 1'b0 :    // both inf and same sign
+						                                                                           1'b1;     // default to 1
 						  
   assign P_special_exponent = ~|A_type                                 ? A_exponent :  // A is 0
 						      ~|B_type                                 ? B_exponent :  // B is 0
@@ -63,17 +69,11 @@ module fp_multiplier(A, B, P);
 							                                             8'hff;        // default to ff (for NaN result)
 
   assign P_special_mantissa = ~|A_type                                 ? A_mantissa :  // A is 0
-						      ~|B_type                                 ? B_mantissa :  // B is 0
-							  B_type == 3'b010                         ? B_mantissa :  // B = inf
-						      A_type == 3'b010                         ? A_mantissa :  // A = inf
-							  (A_type == 3'b001) && (B_type == 3'b001) ? 23'h0 :       // two subnorms multiply to 0
+						                  ~|B_type                                 ? B_mantissa :  // B is 0
+							                B_type == 3'b010                         ? B_mantissa :  // B = inf
+						                  A_type == 3'b010                         ? A_mantissa :  // A = inf
+							               (A_type == 3'b001) && (B_type == 3'b001) ? 23'h0 :       // two subnorms multiply to 0
 							                                             23'h000001;   // default to 1 (for NaN result)
-  
-  /////////////////
-  //  Sign_Out  //
-  ///////////////
-  logic Sign_out;
-  assign Sign_out = A_sign ^ B_sign;
   
   ///////////////////////
   //  Multiplication  //

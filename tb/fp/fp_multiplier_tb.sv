@@ -27,6 +27,8 @@ module fp_multiplier_tb();
 		
 		testA_B(clk, A, B, P, 32'h0fbbffff, 32'h27000007, 32'h00000018); // subnormal with rounding
 		
+		testA_B(clk, A, B, P, 32'h0fbfffff, 32'h25000007, 32'h00000002); // subnormal with rounding
+		
 		$stop();
 	end
 
