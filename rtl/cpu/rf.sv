@@ -11,7 +11,7 @@ import wi23_defs::*;
    input [REGFILE_DEPTH-1:0] read2regsel;
    input [REGFILE_DEPTH-1:0] writeregsel;
    input [REGFILE_WIDTH-1:0] writedata;
-   input        write;
+   input write;
 
    output reg [REGFILE_WIDTH-1:0] read1data;
    output reg [REGFILE_WIDTH-1:0] read2data;

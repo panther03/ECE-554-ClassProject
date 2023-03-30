@@ -257,15 +257,19 @@ import control_defs_pkg::*;
    ////////////////////
    /// Decode Block ///
    ////////////////////
+   
+   logic IntRegWrite, FPRegWrite;
+   assign IntRegWrite = MEM_WB_ctrl_RegWrite_out & ~MEM_WB_ctrl_FpInst_out;
+   assign FPRegWrite = FEX_WB_ctrl_RegWrite_out & FEX_WB_ctrl_FpInst_out;
 
    decode iDECODE(.clk(clk), .rst_n(rst_n), .decode_err(decode_err),
-      .inst(IF_ID_inst_out), .writesel(MEM_WB_writesel_out), .fp_writesel(5'b0),
+      .inst(IF_ID_inst_out), .writesel(MEM_WB_writesel_out), .fp_writesel(FEX_WB_writesel_out),
       .bypass_reg1(bypass_reg1), .bypass_reg2(bypass_reg2),
       .fp_bypass_reg1(fp_bypass_reg1), .fp_bypass_reg2(fp_bypass_reg2),
       .write_in(write_in), .reg1(reg1), .reg2(reg2), .imm(imm), .ofs(ofs),
       .fp_write_in(fp_write_in), .fp_reg1(fp_reg1), .fp_reg2(fp_reg2),
       .InstFmt(InstFmt), .JType(JType), .XtendSel(XtendSel), 
-      .RegWrite(MEM_WB_ctrl_RegWrite_out), .FPRegWrite(1'b0),
+      .RegWrite(IntRegWrite), .FPRegWrite(FPRegWrite),
       .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg), .MemRead(MemRead), .MemWrite(MemWrite));
 
    ////////////////////////
@@ -273,7 +277,7 @@ import control_defs_pkg::*;
    ////////////////////////
 
    // squash all control signals to 0 if we stall
-   assign ID_EX_ctrl_RegWrite_in = stall ? 0 : RegWrite;
+   assign ID_EX_ctrl_RegWrite_in = stall ? 0 : RegWrite;  // MemRead, MemWrite for FP
    assign ID_EX_ctrl_MemWrite_in = stall ? 0 : MemWrite;
    assign ID_EX_ctrl_MemRead_in = stall ? 0 : MemRead;
    assign ID_EX_ctrl_MemToReg_in = stall ? 0 : MemToReg;
@@ -443,8 +447,8 @@ import control_defs_pkg::*;
 
    always_comb begin
       case (ID_FEX_ctrl_InstFmt_out)
-         2'b01 : fp_writesel = ID_EX_inst_out[20:16];    // FP LD/ST, Not written through FP pipeline
-         default : fp_writesel = ID_EX_inst_out[15:11];  // 2'b10 : R-Format 
+         2'b01 : fp_writesel = ID_FEX_inst_out[20:16];    // FP LD/ST, Not written through FP pipeline
+         default : fp_writesel = ID_FEX_inst_out[15:11];  // 2'b10 : R-Format 
       endcase
    end
 
@@ -622,16 +626,16 @@ import control_defs_pkg::*;
    /// Hazard Detection Unit ///
    /////////////////////////////
 
-   logic FEX_inst_to_stall;
+   logic IF_ID_is_fp_ex;
 	
-   // Stall if a) FP Inst b) Non-LD/ST FP Inst c) FEX is going to be busy next cycle
-   assign FEX_inst_to_stall = FPInst & ~(MemRead | MemWrite) & ~FEX_busy_er;
+   // FP instruction to FEX a) FP Inst b) Non-LD/ST FP Inst
+   assign IF_ID_is_fp_ex = FPInst & ~(MemRead | MemWrite);
 
    hazard iHAZARD (.IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
       .IF_ID_is_branch(JType[0]),.ID_EX_is_load(ID_EX_ctrl_MemRead_out & ID_EX_ctrl_RegWrite_out),
-      .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),.EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out),
-      .ID_EX_regw(writesel),.EX_MEM_regw(EX_MEM_writesel_out), 
-      .FEX_busy(FEX_busy), .ID_FEX_is_fp_ex(FEX_inst_to_stall) ,
+      .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),.EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out), .ID_FEX_ctrl_regw(ID_FEX_ctrl_RegWrite_out),
+      .ID_EX_regw(writesel),.ID_FEX_regw(fp_writesel),.EX_MEM_regw(EX_MEM_writesel_out), .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
+      .FEX_busy(FEX_busy), .IF_ID_is_fp_ex(IF_ID_is_fp_ex), .FEX_busy_er(FEX_busy_er),
       .stall(stall));
 
    ///////////////////////
@@ -641,7 +645,7 @@ import control_defs_pkg::*;
    // TODO Op[5] to determine FP
    // TODO Op[xx] to determine write to Int from FP or FP from Int
    // TODO FP register indexes
-   // TODO Forward from MEM->FEX1, FEX2->FEX1, FEX2->EX
+   // TODO Forward from MEM->FEX1, FEX2->FEX1, FEX2->EX, EX->FEX1
    forward iFORWARD (.EX_MEM_regw(EX_MEM_writesel_out),.MEM_WB_regw(MEM_WB_writesel_out),
       .IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
       .ID_EX_reg1(ID_EX_inst_out[25:21]),.ID_EX_reg2(ID_EX_inst_out[20:16]),
