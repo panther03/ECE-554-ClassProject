@@ -36,7 +36,6 @@ typedef enum logic [6:0] {
     SEQ,
     SLT,
     SLE,
-    SCO,
     BEQZ,
     BNEZ,
     BLTZ,

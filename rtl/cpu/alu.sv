@@ -38,7 +38,6 @@ import wi23_defs::*;
    alu_err = 1'b0;
       casex (Op)
          5'b00000 : begin Out = S[REGFILE_WIDTH-1:0]; end
-         5'b00001 : begin Out = {31'h0, Cout}; end
          5'b00010 : begin Out = A ^ B; end
          5'b00011 : begin Out = A & ~B; end
          5'b001?? : begin Out = shft; end
