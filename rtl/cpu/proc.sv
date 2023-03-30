@@ -51,7 +51,7 @@ import control_defs_pkg::*;
    logic [7:0] op_word;
    logic ctrl_err;
 
-   logic [3:0] AluOp;
+   logic [4:0] AluOp;
    logic [1:0] InstFmt, JType, CondOp;
    logic RegWrite, MemWrite, MemRead, InstMemRead,
         MemToReg, AluSrc, XtendSel,
@@ -82,7 +82,7 @@ import control_defs_pkg::*;
    logic ID_EX_ctrl_AluSrc_in, ID_EX_ctrl_AluSrc_out;
    logic [1:0] ID_EX_ctrl_InstFmt_in, ID_EX_ctrl_InstFmt_out;
    logic [1:0] ID_EX_ctrl_JType_in, ID_EX_ctrl_JType_out;
-   logic [3:0] ID_EX_ctrl_AluOp_in, ID_EX_ctrl_AluOp_out;
+   logic [4:0] ID_EX_ctrl_AluOp_in, ID_EX_ctrl_AluOp_out;
    logic ID_EX_ctrl_FpInst_in, ID_EX_ctrl_FpInst_out;
    logic [1:0] ID_EX_ctrl_FPIntCvtReg_in, ID_EX_ctrl_FPIntCvtReg_out;
 
@@ -103,7 +103,7 @@ import control_defs_pkg::*;
    logic ID_FEX_ctrl_RegWrite_in, ID_FEX_ctrl_RegWrite_out;
    logic ID_FEX_ctrl_AluSrc_in, ID_FEX_ctrl_AluSrc_out;
    logic [1:0] ID_FEX_ctrl_InstFmt_in, ID_FEX_ctrl_InstFmt_out;
-   logic [3:0] ID_FEX_ctrl_AluOp_in, ID_FEX_ctrl_AluOp_out;
+   logic [4:0] ID_FEX_ctrl_AluOp_in, ID_FEX_ctrl_AluOp_out;
    logic ID_FEX_ctrl_FpInst_in, ID_FEX_ctrl_FpInst_out;
    logic [1:0] ID_FEX_ctrl_FPIntCvtReg_in, ID_FEX_ctrl_FPIntCvtReg_out;
 

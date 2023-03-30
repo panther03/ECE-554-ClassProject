@@ -14,7 +14,7 @@ import wi23_defs::*;
     // control signals //
     ////////////////////
 
-    input [3:0] AluOp;
+    input [4:0] AluOp;
     input [1:0] JType, InstFmt;
     input AluSrc;
 

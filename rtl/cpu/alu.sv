@@ -4,7 +4,7 @@ import wi23_defs::*;
    
    input [REGFILE_WIDTH-1:0] A;
    input [REGFILE_WIDTH-1:0] B;
-   input [3:0] Op;
+   input [4:0] Op;
    output reg [REGFILE_WIDTH-1:0] Out;
    output reg alu_err;
 
@@ -34,22 +34,27 @@ import wi23_defs::*;
    assign SLT = SLE & ~SEQ; 
    assign SLE = (~S[REGFILE_WIDTH-1] ^ Ofl);  
 
-   always @* casex (Op)
-      4'b0000 : begin alu_err = 1'b0; Out = S[REGFILE_WIDTH-1:0]; end
-      4'b0001 : begin alu_err = 1'b0; Out = {31'h0, Cout}; end
-      4'b0010 : begin alu_err = 1'b0; Out = A ^ B; end
-      4'b0011 : begin alu_err = 1'b0; Out = A & ~B; end
-      4'b01?? : begin alu_err = 1'b0; Out = shft; end
-      4'b1000 : begin alu_err = 1'b0; Out = {A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],A[9],A[10],A[11],A[12],A[13],A[14],A[15],A[16],A[17],A[18],A[19],A[20],A[21],A[22],A[23],A[24],A[25],A[26],A[27],A[28],A[29],A[30],A[31]}; end
-      4'b1001 : begin alu_err = 1'b0; Out = A; end
-      4'b1010 : begin alu_err = 1'b0; Out = B; end
-      4'b1011 : begin alu_err = 1'b0; Out = (A << 16) | B; end
-      4'b1100 : begin alu_err = 1'b0; Out = {31'h0, SEQ}; end
-      4'b1101 : begin alu_err = 1'b0; Out = {31'h0, SLT}; end
-      4'b1110 : begin alu_err = 1'b0; Out = {31'h0, SLE}; end
-      4'b1111 : begin alu_err = 1'b0; Out = S[REGFILE_WIDTH-1:0]; end
-      default: begin  alu_err = 1'b1; Out = 32'hx; end
-   endcase
+   always_comb begin
+   alu_err = 1'b0;
+      casex (Op)
+         5'b00000 : begin Out = S[REGFILE_WIDTH-1:0]; end
+         5'b00001 : begin Out = {31'h0, Cout}; end
+         5'b00010 : begin Out = A ^ B; end
+         5'b00011 : begin Out = A & ~B; end
+         5'b001?? : begin Out = shft; end
+         5'b01000 : begin Out = {A[0],A[1],A[2],A[3],A[4],A[5],A[6],A[7],A[8],A[9],A[10],A[11],A[12],A[13],A[14],A[15],A[16],A[17],A[18],A[19],A[20],A[21],A[22],A[23],A[24],A[25],A[26],A[27],A[28],A[29],A[30],A[31]}; end
+         5'b01001 : begin Out = A; end
+         5'b01010 : begin Out = B; end
+         5'b01011 : begin Out = (A << 16) | B; end
+         5'b01100 : begin Out = {31'h0, SEQ}; end
+         5'b01101 : begin Out = {31'h0, SLT}; end
+         5'b01110 : begin Out = {31'h0, SLE}; end
+         5'b01111 : begin Out = S[REGFILE_WIDTH-1:0]; end
+         5'b10011 : begin Out = A & B; end
+         5'b10010 : begin Out = A | B; end 
+         default: begin  alu_err = 1'b1; Out = 32'hx; end
+      endcase
+   end
 
     
 endmodule

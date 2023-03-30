@@ -10,7 +10,7 @@ def generate_module(row, names, control_file):
         if (signal_name == "InstFmt" or signal_name == "CondOp" or signal_name == "JType" or signal_name == "FPIntCvtReg") :
             signal_width = 2
         elif (signal_name == "AluOp") :
-            signal_width = 4
+            signal_width = 5
         else :
             signal_width = 1
         module_interface += "    output logic [" + str(signal_width-1) +":0]  "+signal_name+",\n" 
@@ -22,7 +22,7 @@ def generate_module(row, names, control_file):
 
 def end_module(control_file):
     ## Default Case Statement
-    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Rtn = 0; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 1; Op = NOP; end // error case (default)\n")
+    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 5'b00000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Rtn = 0; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; UnsignedOp = 0; ctrl_err = 1; Op = NOP; end // error case (default)\n")
     control_file.write("    endcase\nend")
     control_file.write("\n\nendmodule")
 

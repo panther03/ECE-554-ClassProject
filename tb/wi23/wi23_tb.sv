@@ -44,7 +44,7 @@ initial begin
     if (WI23.PROC.iDECODE.iRF.rf1[1] == WI23.PROC.iDECODE.iRF.rf1[3])
         $display("\nROR Test Passed\n");
     repeat (2) @ (negedge clk);
-    //check_dec_inst(clk, WI23.inst, rf_tb, fp_rf_tb); 
+    check_dec_inst(clk, WI23.inst, rf_tb, fp_rf_tb); 
     $display("\nYahoo!!! All Tests Passed\n");
     $finish();
 end
