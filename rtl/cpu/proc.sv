@@ -5,15 +5,15 @@ import wi23_defs::*;
    input         clk,
    input         rst_n,
    // Instruction memory signals
-   output [IMEM_WIDTH-1:0] iaddr_o,             // Output full 32-bit address
+   output [PC_WIDTH-1:0]   iaddr_o,             // Output full 32-bit address
    output                  ldcr_o,
-   input  [IMEM_WIDTH-1:0] inst_i,
+   input  [PC_WIDTH-1:0]   inst_i,
    // Data memory signals
-   output [DMEM_WIDTH-1:0] daddr_o,             // Output full 32-bit address
+   output [DATA_WIDTH-1:0] daddr_o,             // Output full 32-bit address
    output        we_o,
    output        re_o,
-   output [DMEM_WIDTH-1:0] data_proc_to_mem_o,
-   input  [DMEM_WIDTH-1:0] data_mem_to_proc_i,
+   output [DATA_WIDTH-1:0] data_proc_to_mem_o,
+   input  [DATA_WIDTH-1:0] data_mem_to_proc_i,
    // Error and Halt status,
    output        err_o,
    output        halt_o
@@ -33,7 +33,7 @@ import control_defs_pkg::*;
    /////////////////////////
    /// Fetch Block wires ///
    /////////////////////////
-   logic [IMEM_WIDTH-1:0] pc_inc;
+   logic [PC_WIDTH-1:0] pc_inc;
    logic stall, flush;
    logic fetch_err;
 
@@ -41,8 +41,8 @@ import control_defs_pkg::*;
    // IF_ID Transition wires ///
    /////////////////////////////
 
-   logic [IMEM_WIDTH-1:0] IF_ID_pc_inc_in, IF_ID_pc_inc_out;
-   logic [IMEM_WIDTH-1:0] IF_ID_inst_in, IF_ID_inst_out, IF_ID_inst_out_temp;
+   logic [PC_WIDTH-1:0] IF_ID_pc_inc_in, IF_ID_pc_inc_out;
+   logic [PC_WIDTH-1:0] IF_ID_inst_in, IF_ID_inst_out, IF_ID_inst_out_temp;
 
    /////////////////////////////////
    /// Early Control Block wires ///
@@ -101,8 +101,8 @@ import control_defs_pkg::*;
    logic [REGFILE_WIDTH-1:0] ID_EX_reg2_in, ID_EX_reg2_out;
    logic [REGFILE_WIDTH-1:0] ID_EX_imm_in, ID_EX_imm_out;
 
-   logic [IMEM_WIDTH-1:0] ID_EX_pc_inc_in, ID_EX_pc_inc_out;
-   logic [IMEM_WIDTH-1:0] ID_EX_inst_in, ID_EX_inst_out;
+   logic [PC_WIDTH-1:0] ID_EX_pc_inc_in, ID_EX_pc_inc_out;
+   logic [PC_WIDTH-1:0] ID_EX_inst_in, ID_EX_inst_out;
 
    ///////////////////////////////
    /// ID_FEX Transition wires ///
@@ -123,8 +123,8 @@ import control_defs_pkg::*;
    logic [REGFILE_WIDTH-1:0] ID_FEX_reg2_in, ID_FEX_reg2_out;
    logic [REGFILE_WIDTH-1:0] ID_FEX_imm_in, ID_FEX_imm_out;
 
-   logic [IMEM_WIDTH-1:0] ID_FEX_inst_in, ID_FEX_inst_out;
-   logic [IMEM_WIDTH-1:0] ID_FEX_pc_inc_in, ID_FEX_pc_inc_out;
+   logic [PC_WIDTH-1:0] ID_FEX_inst_in, ID_FEX_inst_out;
+   logic [PC_WIDTH-1:0] ID_FEX_pc_inc_in, ID_FEX_pc_inc_out;
 
    ///////////////////////////
    /// Execute Block wires ///
@@ -239,7 +239,7 @@ import control_defs_pkg::*;
    
    // If we get a stall or halt, we recirculate values here.
    // If we get a flush, we load in 0 (nop) for the instruction.
-   logic [((2*IMEM_WIDTH)-1):0] IF_ID_reg_in;
+   logic [((2*PC_WIDTH)-1):0] IF_ID_reg_in;
    assign IF_ID_reg_in =    (all_halts | stall) ? {IF_ID_pc_inc_out,IF_ID_inst_out_temp}    :   
                             (flush ? {IF_ID_pc_inc_out,32'h0} : {IF_ID_pc_inc_in, IF_ID_inst_in});
 
@@ -248,8 +248,8 @@ import control_defs_pkg::*;
          IF_ID_inst_out_temp <= 0;
          IF_ID_pc_inc_out <= 0;
       end else begin
-         IF_ID_inst_out_temp <= IF_ID_reg_in[IMEM_WIDTH-1:0];
-         IF_ID_pc_inc_out <= IF_ID_reg_in[((2*IMEM_WIDTH)-1):IMEM_WIDTH];
+         IF_ID_inst_out_temp <= IF_ID_reg_in[PC_WIDTH-1:0];
+         IF_ID_pc_inc_out <= IF_ID_reg_in[((2*PC_WIDTH)-1):PC_WIDTH];
       end
 
    // Since we flipped at input, flip at output as well.
@@ -263,7 +263,7 @@ import control_defs_pkg::*;
       .ctrl_err(), .RegWrite(),
       .InstFmt(), .MemToReg(), .AluSrc(),
       .AluOp(), .CondOp(), .JType(),
-      .XtendSel(), .Rtn(), .Exc(), .Halt(), .Op(), .InstMemRead());
+      .XtendSel(), .Rtn(), .Exc(), .Halt(), .Op(), .InstMemRead(), .UnsignedOp());
 
    always_ff @ (posedge clk, negedge rst_n) begin
       if (~rst_n) begin
@@ -291,7 +291,7 @@ import control_defs_pkg::*;
       .RegWrite(RegWrite), .MemWrite(MemWrite), .MemRead(MemRead),
       .InstFmt(InstFmt), .MemToReg(MemToReg), .AluSrc(AluSrc),
       .AluOp(AluOp), .CondOp(CondOp), .JType(JType),
-      .XtendSel(XtendSel), .Rtn(Rtn), .Exc(Exc), .Halt(Halt), .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg), .Op(Op), .InstMemRead(InstMemRead));
+      .XtendSel(XtendSel), .Rtn(Rtn), .Exc(Exc), .Halt(Halt), .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg), .Op(Op), .InstMemRead(InstMemRead), .UnsignedOp());
 
    ////////////////////
    /// Decode Block ///

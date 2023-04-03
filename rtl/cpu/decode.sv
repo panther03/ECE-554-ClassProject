@@ -4,7 +4,7 @@ import wi23_defs::*;
     // Inputs
     input logic         clk, 
     input logic         rst_n,
-    input logic [IMEM_WIDTH-1:0]  inst,
+    input logic [PC_WIDTH-1:0]  inst,
     input logic [REGFILE_WIDTH-1:0]  write_in,
     input logic [REGFILE_DEPTH-1:0]  writesel,
     input logic [REGFILE_WIDTH-1:0]  fp_write_in,
@@ -48,7 +48,7 @@ import wi23_defs::*;
     logic [REGFILE_WIDTH-1:0] dec_fp_reg1;
     logic [REGFILE_WIDTH-1:0] dec_fp_reg2;
 	 
-	 logic  int_decode_err, fp_decode_err;
+	logic  int_decode_err, fp_decode_err;
     
     /////////////////////////
     /// Int Register file ///

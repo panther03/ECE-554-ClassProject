@@ -26,13 +26,13 @@ import wi23_defs::*;
 // memory signals //
 ///////////////////
 
-logic [IMEM_WIDTH-1:0]  iaddr;
-logic [IMEM_WIDTH-1:0]  inst;
-logic [IMEM_WIDTH-1:0]  inst_mem_to_proc;
-logic [DMEM_WIDTH-1:0]  daddr;
-logic [DMEM_WIDTH-1:0]  data_mem_to_proc_map;
-logic [DMEM_WIDTH-1:0]  data_mem_to_proc_dmem;
-logic [DMEM_WIDTH-1:0]  data_proc_to_mem;
+logic [PC_WIDTH-1:0]  iaddr;
+logic [PC_WIDTH-1:0]    inst;
+logic [DATA_WIDTH-1:0]  inst_mem_to_proc;
+logic [DATA_WIDTH-1:0]  daddr;
+logic [DATA_WIDTH-1:0]  data_mem_to_proc_map;
+logic [DATA_WIDTH-1:0]  data_mem_to_proc_dmem;
+logic [DATA_WIDTH-1:0]  data_proc_to_mem;
 logic                   ldcr;
 
 logic we_map;
@@ -83,8 +83,8 @@ imem IMEM (
   // We truncate address here but this is OK. It will just fetch 0s (HALT) if out of range
   .addr_i   (iaddr[IMEM_DEPTH-1:0]),
   .daddr_i  (daddr[IMEM_DEPTH-1:0]),
-  .inst_o   (inst[IMEM_WIDTH-1:0]),
-  .data_o   (inst_mem_to_proc[IMEM_WIDTH-1:0])
+  .inst_o   (inst[PC_WIDTH-1:0]),
+  .data_o   (inst_mem_to_proc[DATA_WIDTH-1:0])
 );
 
 //////////////////

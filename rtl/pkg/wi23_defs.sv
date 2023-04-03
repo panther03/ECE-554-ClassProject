@@ -5,12 +5,18 @@ package wi23_defs;
     /////////////
 
     // IMEM = 32kB
-    localparam IMEM_DEPTH = 13;
-    localparam IMEM_WIDTH = 32;
+    localparam IMEM_DEPTH = 15;
+    localparam IMEM_WIDTH = 8;
+    
+    // PC
+    localparam PC_WIDTH = 32;
 
     // DMEM = 16kB
-    localparam DMEM_DEPTH = 12;
-    localparam DMEM_WIDTH = 32;
+    localparam DMEM_DEPTH = 14;
+    localparam DMEM_WIDTH = 8;
+
+    // DATA
+    localparam DATA_WIDTH = 32;
 
     // REGFILE - 32-bit Width, 32 Registers
     localparam REGFILE_DEPTH = 5;
