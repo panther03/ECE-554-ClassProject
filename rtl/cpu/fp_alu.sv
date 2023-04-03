@@ -67,7 +67,7 @@ import wi23_defs::*;
   
   assign lt = isNaN ? 1'b0 : 
 	            A_sign & ~B_sign  ? 1'b1 :
-							~A_sign & B_sign  ? 1'b0;
+							~A_sign & B_sign  ? 1'b0 :
 							~A_sign & ~B_sign ? exponent_lt | (exponent_eq & mantissa_lt) :
 							                    (~exponent_lt & ~exponent_eq) | (exponent_eq & (~mantissa_lt & ~mantissa_eq));
   

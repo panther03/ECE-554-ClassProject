@@ -15,7 +15,7 @@ import wi23_defs::*;
    reg [IMEM_WIDTH-1:0] data_r;
 
    initial begin
-      $readmemh("../../fw/32BDecodeTest.hex", mem_r);
+      $readmemh("../../fw/FPIssueTest.hex", mem_r);
    end
 
    // We read on negative edge becuase the 552 memory reads asyncronously

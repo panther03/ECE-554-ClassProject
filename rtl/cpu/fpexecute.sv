@@ -30,7 +30,7 @@ import wi23_defs::*;
 
     assign aluA = reg1;
     assign aluB = AluSrc ? imm : reg2;
-    //fp_alu iFPALU(.A(aluA),.B(aluB),.Op(AluOp),.Out(alu_out),.alu_err(alu_err));
+    fp_alu iFPALU(.A(aluA),.B(aluB),.Op(AluOp[3:0]),.Out(alu_out),.alu_err(alu_err));
 
     // Error handling
     assign ex_err = alu_err;

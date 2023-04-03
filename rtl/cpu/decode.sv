@@ -60,7 +60,7 @@ import wi23_defs::*;
     rf iRF (.clk(clk),.rst_n(rst_n),.write(RegWrite),.err(int_decode_err),
             .read1regsel(reg1sel),.read2regsel(reg2sel),.writeregsel(writesel),
             .read1data(reg1raw),.read2data(reg2raw),.writedata(write_in));
-    
+
     assign dec_reg1 = bypass_reg1 ? write_in : reg1raw;
     assign dec_reg2 = bypass_reg2 ? write_in : reg2raw;
     
