@@ -26,7 +26,7 @@ import wi23_defs::*;
 // memory signals //
 ///////////////////
 
-logic [PC_WIDTH-1:0]  iaddr;
+logic [PC_WIDTH-1:0]    iaddr;
 logic [PC_WIDTH-1:0]    inst;
 logic [DATA_WIDTH-1:0]  inst_mem_to_proc;
 logic [DATA_WIDTH-1:0]  daddr;
@@ -35,9 +35,9 @@ logic [DATA_WIDTH-1:0]  data_mem_to_proc_dmem;
 logic [DATA_WIDTH-1:0]  data_proc_to_mem;
 logic                   ldcr;
 
-logic we_map;
-logic re_map;
-logic we_dmem;
+logic [3:0] we_map;
+logic [3:0] re_map;
+logic [3:0] we_dmem;
 
 ///////////////////
 // LEDs signals //
@@ -90,6 +90,9 @@ imem IMEM (
 //////////////////
 // Data memory //
 //////////////// 
+
+logic [DMEM_DEPTH-1:0] daddr_a;
+assign daddr_a = daddr[DMEM_DEPTH-1:0] & 14'b11111111111100;  // Word Aligned Address
 
 dmem DMEM (
   .clk(clk),
@@ -164,7 +167,7 @@ always_comb begin
     casez (daddr)
       // LED
       16'hC000: begin 
-        if (we_map)
+        if (|we_map)
           LEDR_en = 1;
       end
       // Switches
@@ -173,22 +176,22 @@ always_comb begin
       end
       // SPART - TX/RX buffer
       16'hC004: begin
-        spart_iocs_n = ~re_map && ~we_map;
-        spart_iorw_n = ~we_map;
+        spart_iocs_n = ~|re_map && ~|we_map;
+        spart_iorw_n = ~|we_map;
         // databuf ioaddr is same as default
         data_mem_to_proc_map = {8'h0, spart_databus};
         spart_databus_in = data_proc_to_mem[7:0];
       end
       // SPART - Status register
       16'hC005: begin
-        spart_iocs_n = ~re_map;
+        spart_iocs_n = ~|re_map;
         spart_ioaddr = ADDR_SREG;
         data_mem_to_proc_map = {8'h0, spart_databus};
       end
       // SPART - DB register
       16'hC006, 16'hC007: begin
-        spart_iocs_n = ~re_map && ~we_map;
-        spart_iorw_n = ~we_map;
+        spart_iocs_n = ~|re_map && ~|we_map;
+        spart_iorw_n = ~|we_map;
         spart_ioaddr = daddr[0] ? ADDR_DBH : ADDR_DBL; 
         data_mem_to_proc_map = {8'h0, spart_databus};
         spart_databus_in = data_proc_to_mem[7:0];

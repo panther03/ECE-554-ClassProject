@@ -1,33 +1,32 @@
 module execute 
 import wi23_defs::*;
 (
-    reg1, reg2, imm, pc_inc, alu_out,
-    AluOp, JType, InstFmt, AluSrc,
-    ex_err
+    // Inputs
+    input logic [REGFILE_WIDTH-1:0] reg1, 
+    input logic [REGFILE_WIDTH-1:0] reg2, 
+    input logic [REGFILE_WIDTH-1:0] imm, 
+    input logic [REGFILE_WIDTH-1:0] pc_inc,
+    input logic [4:0]               AluOp,
+    input logic [1:0]               JType, 
+    input logic [1:0]               InstFmt,
+    input logic                     AluSrc,
+    input logic                     UnsignedOp,
+
+    // Outputs
+    output [REGFILE_WIDTH-1:0]      alu_out,
+    output logic                    ex_err
 ); 
 
-    input [REGFILE_WIDTH-1:0] reg1, reg2, imm, pc_inc;
-    output [REGFILE_WIDTH-1:0] alu_out;
-    output ex_err;
-
-    //////////////////////
-    // control signals //
-    ////////////////////
-
-    input [4:0] AluOp;
-    input [1:0] JType, InstFmt;
-    input AluSrc;
-
     ///////////////////////
-    // main ALU section //
-    /////////////////////
+    // Main ALU Section ///
+    ///////////////////////
 
     wire [REGFILE_WIDTH-1:0] aluA, aluB;
     wire alu_err;
 
     assign aluA = ^JType ? pc_inc : reg1;
     assign aluB = AluSrc ? imm : reg2;
-    alu iALU(.A(aluA),.B(aluB),.Op(AluOp),.Out(alu_out),.alu_err(alu_err));
+    alu iALU(.A(aluA),.B(aluB),.Op(AluOp),.UnsignedOp(UnsignedOp),.Out(alu_out),.alu_err(alu_err));
 
     // Error handling
     assign ex_err = alu_err;

@@ -36,6 +36,8 @@ typedef enum logic [6:0] {
     SEQ,
     SLT,
     SLE,
+    USLT,
+    USLE,
     BEQZ,
     BNEZ,
     BLTZ,
@@ -58,7 +60,14 @@ typedef enum logic [6:0] {
     IMOVF,
     FST,
     FLD,
-    FCLASS
+    FCLASS,
+    STB,
+    LDB,
+    STH,
+    LDH,
+    XORSI,
+    SRAI,
+    SRA
 } op_word_t;
 
 endpackage

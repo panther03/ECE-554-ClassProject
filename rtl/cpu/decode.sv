@@ -22,6 +22,7 @@ import wi23_defs::*;
     input logic [1:0]   FPIntCvtReg,
     input logic         MemRead,
     input logic         MemWrite,
+    input logic         UnsignedOp,
 
     // Outputs
     output logic [REGFILE_WIDTH-1:0] reg1,
