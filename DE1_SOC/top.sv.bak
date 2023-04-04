@@ -1,0 +1,103 @@
+/**
+Aidan McEllistrem
+3/21/2023
+
+Top-level synthesis for testing the VGA driver
+*/
+`default_nettype none
+module top (
+    input wire        REF_CLK,
+    input wire        RST_n,
+	 
+	 output wire [9:0] LEDR,
+    // VGA
+    output wire       VGA_BLANK_N,
+    output wire [7:0] VGA_B,
+    output wire [7:0] VGA_G,
+    output wire       VGA_HS,
+    output wire[7:0]  VGA_R,
+    output wire       VGA_SYNC_N,
+    output wire       VGA_VS
+  );
+	
+  wire VGA_CLK;
+  //////////////////////
+  // instantiate pll //
+  ////////////////////
+  wire pll_locked;
+  wire clk;
+  PLL iPLL(
+      .refclk(REF_CLK),
+      .rst(~RST_n),
+      .outclk_0(clk), // 50Mhz 
+      .outclk_1(VGA_CLK), // 25MHz
+      .locked(pll_locked)
+  );
+
+  /////////////////////////
+  // reset synchronizer //
+  ///////////////////////
+  // This is the synchronized reset we will feed to the rest of our FPGA
+  wire rst_n;
+  rst_synch RST (
+      .clk(clk),
+      .RST_n_i(RST_n),
+      .PLL_locked_i(pll_locked),
+      .rst_n_o(rst_n)
+  );
+
+  const var TEXT_MODE  = 1'b0;
+  const var GRAPH_MODE = 1'b1;
+  const var TEXT_BUF_SIZE = 2400;
+  const var GRAPH_BUF_SIZE = 76800;
+  
+  reg [15:0] vga_char_i;        // Character data to write into buffer in from MM'd value
+  reg [11:0] vga_char_addr_i;   // Address from MM to put char data in 
+                                  //(addr 0 = first col, first row, addr 80 = first col, second row, etc)
+  reg vga_char_we_i;            // MM'd write enable
+  
+  reg [3:0]  graph_px_i;        // Graph palette pixel data to write into buffer from MM'd value
+  reg [18:0] graph_addr_i;      // Address to put pixel data in  
+  reg graph_we_i;               // MM'd write enable
+  
+  reg draw_mode_sel_i;          // Chooses framebuffer output
+  wire idle;
+  
+  wire [1:0] Hstate;
+  wire [1:0] Vstate;
+  
+  wire [7:0] vga_r_comp;
+  wire [7:0] vga_g_comp;
+  wire [7:0] vga_b_comp;
+
+  VGA_display iVGA(
+    .clk(clk),
+    .rst_n(rst_n),
+    .vga_char_i(16'h0000), .vga_char_addr_i(12'h000), .vga_char_we_i(1'b0),
+    .graph_px_i(4'h0), .graph_addr_i(19'h00000), .graph_we_i(1'b0),
+    .draw_mode_sel_i(TEXT_MODE),
+    .VGA_CLK(VGA_CLK), 
+    
+    .VGA_BLANK_N(VGA_BLANK_N),
+    .VGA_HS(VGA_HS), .VGA_SYNC_N(VGA_SYNC_N), .VGA_VS(VGA_VS),
+    .VGA_R(vga_r_comp), .VGA_G(vga_g_comp), .VGA_B(vga_b_comp),
+    .idle(idle),
+	 .Hstate_o(Hstate), .Vstate_o(Vstate)
+  );
+  
+  //assign VGA_G = (Hstate == 2'b10) ? 8'hff : 8'h00;
+  assign VGA_R = 8'h00;
+  assign VGA_G = 8'hff;
+  assign VGA_B = 8'h00;
+  
+  reg [23:0] cnt;
+  always_ff @(posedge VGA_CLK, negedge RST_n) begin
+    if (!RST_n)
+		cnt <= 0;
+    else
+	   cnt <= cnt+1;
+  end
+  
+  assign LEDR = {VGA_R[7:5], VGA_G[7:5], VGA_B[7:5], rst_n};
+    
+endmodule
