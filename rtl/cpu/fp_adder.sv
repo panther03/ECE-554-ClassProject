@@ -24,16 +24,16 @@ module fp_adder(A, B, subtract, S);
   // types
   logic [2:0] A_type, B_type;
   assign A_type = ~|A_ex && ~|A_m ? 3'b000 :  // Zero
-				  ~|A_ex && |A_m  ? 3'b001 :  // Subnormal
-				  &A_ex && ~|A_m  ? 3'b010 :  // Infinity
-				  &A_ex && |A_m   ? 3'b011 :  // NaN
-				                    3'b100;   // Normal
+				          ~|A_ex && |A_m  ? 3'b001 :  // Subnormal
+				          &A_ex && ~|A_m  ? 3'b010 :  // Infinity
+				          &A_ex && |A_m   ? 3'b011 :  // NaN
+				                            3'b100;   // Normal
 				   
   assign B_type = ~|B_ex && ~|B_m ? 3'b000 :  // Zero
-	   		      ~|B_ex && |B_m  ? 3'b001 :  // Subnormal
-				  &B_ex && ~|B_m  ? 3'b010 :  // Infinity
-				  &B_ex && |B_m   ? 3'b011 :  // NaN
-				                    3'b100;   // Normal 	
+	   		          ~|B_ex && |B_m  ? 3'b001 :  // Subnormal
+				          &B_ex && ~|B_m  ? 3'b010 :  // Infinity
+				          &B_ex && |B_m   ? 3'b011 :  // NaN
+				                            3'b100;   // Normal 	
   
   /////////////////////////////////////////////////
   ///////////////   Special Cases    //////////////
@@ -50,10 +50,11 @@ module fp_adder(A, B, subtract, S);
   
   assign is_special = (~^A_type | ~^B_type) || A_type == 3'b010 || B_type == 3'b010 ? 1'b1 : 1'b0;
   assign S_special_sign = ~|A_type                                                   ? B_s :  // A is 0
-						  ~|B_type                                                   ? A_s :  // B is 0
-						  (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_s :  // A = norm or subnorm and B = inf
-						  (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_s :  // A = inf and B = norm or subnorm
-						                                                               1'b1;  // default to 1
+                          ~|B_type                                                   ? A_s :  // B is 0
+                          (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_s :  // A = norm or subnorm and B = inf
+                          (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_s :  // A = inf and B = norm or subnorm
+                          B_type == 3'b010 && A_type == 3'b010 && A_s ~^ B_s         ? A_s :
+						                                                                           1'b1;  // default to 1
 						  
   assign S_special_exponent = ~|A_type                                                   ? B_ex :  // A is 0
 						      ~|B_type                                                   ? A_ex :  // B is 0
@@ -76,8 +77,9 @@ module fp_adder(A, B, subtract, S);
   logic [27:0] A_mantissa_preadder, B_mantissa_preadder;
   logic [7:0] Exponent_preadder;
   logic comp;
+	logic swp;
 
-  fp_preadder iPREADDER(.A(A), .B(B), .A_type(A_type), .B_type(B_type), .A_out_sign(A_sign), .B_out_sign(B_sign), .Exponent_out(Exponent_preadder), .A_out_mantissa(A_mantissa_preadder), .B_out_mantissa(B_mantissa_preadder), .Comp_out(comp));
+  fp_preadder iPREADDER(.A(A), .B(B), .A_type(A_type), .B_type(B_type), .A_out_sign(A_sign), .B_out_sign(B_sign), .Exponent_out(Exponent_preadder), .A_out_mantissa(A_mantissa_preadder), .B_out_mantissa(B_mantissa_preadder), .Comp_out(comp), .swp(swp));
   
   
   /////////////////////////////////////////////////
@@ -95,12 +97,13 @@ module fp_adder(A, B, subtract, S);
   // logic
   assign B_sign_with_op = B_sign ^ subtract;
   
-  assign Sign_out = (A_sign & (B_sign_with_op | comp)) | (~A & B_sign_with_op & ~comp);
+  assign Sign_out = subtract ? (A_sign & (B_sign_with_op | (~B_sign_with_op & ~swp))) | (~A_sign & ~B_sign_with_op & swp):
+	                             (A_sign & (B_sign_with_op | comp)) | (~A_sign & B_sign_with_op & ~comp);
   
-  assign A_mantissa = A_sign & ~B_sign_with_op ? B_mantissa_preadder : 
+  assign A_mantissa = A_sign & ~B_sign_with_op ? B_mantissa_preadder :
                                                  A_mantissa_preadder;
 												 
-  assign B_mantissa = A_sign & ~B_sign_with_op ? A_mantissa_preadder : 
+  assign B_mantissa = A_sign & ~B_sign_with_op ? A_mantissa_preadder :
                                                  B_mantissa_preadder;
 												 
   assign subtract_mod = A_sign != B_sign_with_op;
@@ -111,12 +114,15 @@ module fp_adder(A, B, subtract, S);
   // signals
   logic C_in, C_out;
   logic [27:0] B_mantissa_adder;
-  logic [27:0] S_adder;
+  logic [27:0] S_adder_signed;
+	logic [27:0] S_adder;
   
   //logic
   assign C_in = subtract_mod ? 1'b1 : 1'b0;
   assign B_mantissa_adder = subtract_mod ? ~B_mantissa : B_mantissa;
-  assign {C_out, S_adder} = {1'b0, A_mantissa} + {1'b0, B_mantissa_adder} + C_in;
+  assign {xtr_bit, C_out, S_adder_signed} = {2'b0, A_mantissa} + {1'b0, subtract_mod, B_mantissa_adder} + C_in;
+	
+	assign S_adder = C_out & subtract_mod ? ~S_adder_signed + 1'b1 : S_adder_signed;
   
   /////////////////////////////////////////////////
   ///////////////    Normalize    /////////////////
@@ -131,30 +137,30 @@ module fp_adder(A, B, subtract, S);
                       ~|S_adder[27:2] ? 5'h1a :
                       ~|S_adder[27:3] ? 5'h19 :
                       ~|S_adder[27:4] ? 5'h18 :
-					  ~|S_adder[27:5] ? 5'h17 :
+                      ~|S_adder[27:5] ? 5'h17 :
                       ~|S_adder[27:6] ? 5'h16 :
-					  ~|S_adder[27:7] ? 5'h15 :
-					  ~|S_adder[27:8] ? 5'h14 :
-					  ~|S_adder[27:9] ? 5'h13 :
-					  ~|S_adder[27:10] ? 5'h12 :
-					  ~|S_adder[27:11] ? 5'h11 :
-					  ~|S_adder[27:12] ? 5'h10 :
-					  ~|S_adder[27:13] ? 5'h0f :
-					  ~|S_adder[27:14] ? 5'h0e :
-					  ~|S_adder[27:15] ? 5'h0d :
-					  ~|S_adder[27:16] ? 5'h0c :
-					  ~|S_adder[27:17] ? 5'h0b :
-					  ~|S_adder[27:18] ? 5'h0a :
-					  ~|S_adder[27:19] ? 5'h09 :
-					  ~|S_adder[27:20] ? 5'h08 :
-					  ~|S_adder[27:21] ? 5'h07 :
-					  ~|S_adder[27:22] ? 5'h06 :
-					  ~|S_adder[27:23] ? 5'h05 :
-					  ~|S_adder[27:24] ? 5'h04 :
-					  ~|S_adder[27:25] ? 5'h03 :
-					  ~|S_adder[27:26] ? 5'h02 :
-					  ~|S_adder[27] ? 5'h01 :
-					  5'h0;
+                      ~|S_adder[27:7] ? 5'h15 :
+                      ~|S_adder[27:8] ? 5'h14 :
+                      ~|S_adder[27:9] ? 5'h13 :
+                      ~|S_adder[27:10] ? 5'h12 :
+                      ~|S_adder[27:11] ? 5'h11 :
+                      ~|S_adder[27:12] ? 5'h10 :
+                      ~|S_adder[27:13] ? 5'h0f :
+                      ~|S_adder[27:14] ? 5'h0e :
+                      ~|S_adder[27:15] ? 5'h0d :
+                      ~|S_adder[27:16] ? 5'h0c :
+                      ~|S_adder[27:17] ? 5'h0b :
+                      ~|S_adder[27:18] ? 5'h0a :
+                      ~|S_adder[27:19] ? 5'h09 :
+                      ~|S_adder[27:20] ? 5'h08 :
+                      ~|S_adder[27:21] ? 5'h07 :
+                      ~|S_adder[27:22] ? 5'h06 :
+                      ~|S_adder[27:23] ? 5'h05 :
+                      ~|S_adder[27:24] ? 5'h04 :
+                      ~|S_adder[27:25] ? 5'h03 :
+                      ~|S_adder[27:26] ? 5'h02 :
+                      ~|S_adder[27] ? 5'h01 :
+                      5'h0;
   
   /////////////////
   //  Exponent  //
@@ -167,9 +173,13 @@ module fp_adder(A, B, subtract, S);
   assign shift = Exponent_preadder > zero_count ? zero_count :
                                                   Exponent_preadder[4:0];
   
-  assign Exponent = Exponent_preadder > zero_count ? Exponent_preadder - zero_count + C_out :
+	assign overflow = Exponent_preadder == 8'hfe && (C_out & ~subtract_mod);
+  assign Exponent = overflow                       ? 8'hff :
+	                  subtract_mod                   ? Exponent_preadder - zero_count :
+	                                                   Exponent_preadder + C_out;
+	                  /*Exponent_preadder > zero_count ? Exponent_preadder + C_out : // Exponent_preadder - zero_count + C_out 
                     Exponent_preadder < zero_count ? 8'h00 :
-                                                     8'h01;
+                                                     8'h01;*/
   
   //////////////
   //  Round  //
@@ -177,11 +187,16 @@ module fp_adder(A, B, subtract, S);
   logic [27:0] shifted_mantissa;
   logic [22:0] Mantissa_out;
   
-  assign shifted_mantissa = S_adder << shift;
+  assign shifted_mantissa = C_out & subtract_mod ? S_adder << (1'b1 + shift):
+	                          C_out                ? S_adder :
+	                                                 S_adder << shift;
   
   // in doc range is 26:4
-  assign Mantissa_out = shifted_mantissa[4:0] > 5'b01111 ? shifted_mantissa[27:5] + 1'b1 :
-                                                          shifted_mantissa[27:5];
+  assign Mantissa_out = overflow            ? 23'h0 :
+	                      shifted_mantissa[4] & C_out ? shifted_mantissa[27:5] + 1'b1 :
+                        C_out                       ? shifted_mantissa[27:5] :
+												shifted_mantissa[3]         ? shifted_mantissa[26:4] + 1'b1 :
+												                              shifted_mantissa[26:4];
 
   //////////////////
   //  Vecotrize  //
