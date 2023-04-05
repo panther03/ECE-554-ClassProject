@@ -120,6 +120,8 @@ import wi23_defs::*;
 	logic [31:0] fp_ff;
 	logic [31:0] intgr_ff;
 	logic [31:0] A_ff;
+	logic [3:0] Op_ff;
+	logic subtract_ff;
 	
 	always_ff @(posedge clk) begin
 		eq_ff <= eq;
@@ -128,16 +130,18 @@ import wi23_defs::*;
 		fp_ff <= fp;
 		intgr_ff <= intgr;
 		A_ff <= A;
+		Op_ff <= Op;
+		subtract_ff <= subtract;
 	end
 	
 	
-  assign Out = ~|Op | subtract ? S_adder :
-               Op == 4'b0010   ? S_multiplier :
-							 Op == 4'b1100   ? {31'h0, eq_ff} :
-							 Op == 4'b1110   ? {31'h0, le_ff} :
-							 Op == 4'b1101   ? {31'h0, lt_ff} :
-							 Op == 4'b0100   ? fp_ff :
-							 Op == 4'b0101   ? intgr_ff :
+  assign Out = ~|Op_ff | subtract_ff ? S_adder :
+               Op_ff == 4'b0010   ? S_multiplier :
+							 Op_ff == 4'b1100   ? {31'h0, eq_ff} :
+							 Op_ff == 4'b1110   ? {31'h0, le_ff} :
+							 Op_ff == 4'b1101   ? {31'h0, lt_ff} :
+							 Op_ff == 4'b0100   ? fp_ff :
+							 Op_ff == 4'b0101   ? intgr_ff :
 							                   A_ff;
 
 endmodule
