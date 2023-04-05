@@ -26,18 +26,19 @@ import wi23_defs::*;
 // memory signals //
 ///////////////////
 
-logic [IMEM_WIDTH-1:0]  iaddr;
-logic [IMEM_WIDTH-1:0]  inst;
-logic [IMEM_WIDTH-1:0]  inst_mem_to_proc;
-logic [DMEM_WIDTH-1:0]  daddr;
-logic [DMEM_WIDTH-1:0]  data_mem_to_proc_map;
-logic [DMEM_WIDTH-1:0]  data_mem_to_proc_dmem;
-logic [DMEM_WIDTH-1:0]  data_proc_to_mem;
+logic [PC_WIDTH-1:0]    iaddr;
+logic [PC_WIDTH-1:0]    inst;
+logic [DATA_WIDTH-1:0]  inst_mem_to_proc;
+logic [DATA_WIDTH-1:0]  daddr;
+logic [DATA_WIDTH-1:0]  data_mem_to_proc_map;
+logic [DATA_WIDTH-1:0]  data_mem_to_proc_dmem;
+logic [DATA_WIDTH-1:0]  data_proc_to_mem;
+logic [DATA_WIDTH-1:0]  data_proc_to_mem_be;
 logic                   ldcr;
 
-logic we_map;
-logic re_map;
-logic we_dmem;
+logic [3:0] we_map;
+logic [3:0] re_map;
+logic [3:0] we_dmem;
 
 ///////////////////
 // LEDs signals //
@@ -83,20 +84,23 @@ imem IMEM (
   // We truncate address here but this is OK. It will just fetch 0s (HALT) if out of range
   .addr_i   (iaddr[IMEM_DEPTH-1:0]),
   .daddr_i  (daddr[IMEM_DEPTH-1:0]),
-  .inst_o   (inst[IMEM_WIDTH-1:0]),
-  .data_o   (inst_mem_to_proc[IMEM_WIDTH-1:0])
+  .inst_o   (inst[PC_WIDTH-1:0]),
+  .data_o   (inst_mem_to_proc[DATA_WIDTH-1:0])
 );
 
 //////////////////
 // Data memory //
 //////////////// 
 
+// Big-Endian DMEM
+assign data_proc_to_mem_be = {data_proc_to_mem[DMEM_WIDTH-1:0], data_proc_to_mem[2*DMEM_WIDTH-1:DMEM_WIDTH], data_proc_to_mem[3*DMEM_WIDTH-1:2*DMEM_WIDTH], data_proc_to_mem[4*DMEM_WIDTH-1:3*DMEM_WIDTH]};
+
 dmem DMEM (
   .clk(clk),
   .we_i(we_dmem),
   // Also OK to truncate address, we have already checked that it's in range (otherwise we would not be enabled).
   .addr_i(daddr[DMEM_DEPTH-1:0]),
-  .wdata_i(data_proc_to_mem),
+  .wdata_i(data_proc_to_mem_be),
   .rdata_o(data_mem_to_proc_dmem)
 );
 
@@ -161,10 +165,10 @@ always_comb begin
     data_mem_to_proc_map = ldcr ? inst_mem_to_proc : data_mem_to_proc_dmem;
   end else begin
     // Otherwise we map to the remaining peripherals
-    casez (daddr)
+    casez (daddr[15:0])
       // LED
       16'hC000: begin 
-        if (we_map)
+        if (|we_map)
           LEDR_en = 1;
       end
       // Switches
@@ -173,26 +177,27 @@ always_comb begin
       end
       // SPART - TX/RX buffer
       16'hC004: begin
-        spart_iocs_n = ~re_map && ~we_map;
-        spart_iorw_n = ~we_map;
+        spart_iocs_n = ~|re_map && ~|we_map;
+        spart_iorw_n = ~|we_map;
         // databuf ioaddr is same as default
         data_mem_to_proc_map = {8'h0, spart_databus};
         spart_databus_in = data_proc_to_mem[7:0];
       end
       // SPART - Status register
       16'hC005: begin
-        spart_iocs_n = ~re_map;
+        spart_iocs_n = ~|re_map;
         spart_ioaddr = ADDR_SREG;
         data_mem_to_proc_map = {8'h0, spart_databus};
       end
       // SPART - DB register
       16'hC006, 16'hC007: begin
-        spart_iocs_n = ~re_map && ~we_map;
-        spart_iorw_n = ~we_map;
+        spart_iocs_n = ~|re_map && ~|we_map;
+        spart_iorw_n = ~|we_map;
         spart_ioaddr = daddr[0] ? ADDR_DBH : ADDR_DBL; 
         data_mem_to_proc_map = {8'h0, spart_databus};
         spart_databus_in = data_proc_to_mem[7:0];
       end
+		default : begin end
       // There is no default because all of our inputs
       // are defaulted. It would be the same thing.
     endcase
