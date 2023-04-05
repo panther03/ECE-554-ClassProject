@@ -223,7 +223,7 @@ import control_defs_pkg::*;
    logic frwrd_fp_WB_EX_opA, frwrd_fp_WB_EX_opB;
    logic frwrd_int_WB_EX_opA, frwrd_int_WB_EX_opB; 
    logic frwrd_MEM_FEX_opA, frwrd_MEM_FEX_opB;
-   logic frwrd_EX_ID_opA;
+   logic frwrd_EX_ID_opA, frwrd_FEX_ID_opA;
 
    ///////////////////
    /// Fetch Block ///
@@ -233,7 +233,7 @@ import control_defs_pkg::*;
    // we are only interested in the special EX->ID forward case,
    // and standard RF bypass case.
    logic [REGFILE_WIDTH-1:0] reg1_frwrd_fetch;
-   assign reg1_frwrd_fetch  = frwrd_EX_ID_opA ? EX_MEM_alu_out_out : reg1;
+   assign reg1_frwrd_fetch  = frwrd_EX_ID_opA ? EX_MEM_alu_out_out : frwrd_FEX_ID_opA ? FEX_WB_alu_out_out : reg1;
 
    // Halt from all integer stages is passed to stop PC increment,
    // but the testbench should only see Halt from MEM_WB.
@@ -731,7 +731,7 @@ import control_defs_pkg::*;
    // FP instruction to FEX a) FP Inst b) Non-LD/ST FP Inst
    assign IF_ID_is_fp_ex = IF_ID_ctrl_FpInst_ea & ~(IF_ID_ctrl_MemRead_ea | IF_ID_ctrl_MemWrite_ea);
 
-   hazard iHAZARD (.IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
+   hazard iHAZARD (.clk(clk),.IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
       .IF_ID_is_branch(JType[0]),.ID_EX_is_load(ID_EX_ctrl_MemRead_out), .ID_EX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),
       .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),.EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out), .ID_FEX_ctrl_regw(ID_FEX_ctrl_RegWrite_out),
       .ID_EX_regw(writesel),.ID_FEX_regw(fp_writesel),.EX_MEM_regw(EX_MEM_writesel_out), .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
@@ -754,14 +754,14 @@ import control_defs_pkg::*;
       .ID_FEX_reg1(ID_FEX_inst_out[25:21]),.ID_FEX_reg2(ID_FEX_inst_out[20:16]),
       .EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out),.MEM_WB_ctrl_regw(MEM_WB_ctrl_RegWrite_out), .FEX_WB_ctrl_regw(FEX_WB_ctrl_RegWrite_out),
       .ID_EX_ctrl_FpInst(ID_EX_ctrl_FpInst_out),.ID_FEX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),.EX_MEM_ctrl_FpInst(EX_MEM_ctrl_FpInst_out),.MEM_WB_ctrl_FpInst(MEM_WB_ctrl_FpInst_out),.FEX_WB_ctrl_FpInst(FEX_WB_ctrl_FpInst_out), 
-      .FEX_WB_ctrl_MemRead(FEX_WB_ctrl_MemRead_out), 
+      .FEX_WB_ctrl_MemRead(FEX_WB_ctrl_MemRead_out), .MEM_WB_ctrl_MemToReg(MEM_WB_ctrl_MemToReg_out),
       .FEX_WB_ctrl_FPIntCvtReg(FEX_WB_ctrl_FpIntCvtReg_out), .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
       .IF_ID_ctrl_FPIntCvtReg(IF_ID_ctrl_FPIntCvtReg_ea),
 
       // Outputs
       .frwrd_MEM_EX_opA(frwrd_MEM_EX_opA),.frwrd_MEM_EX_opB(frwrd_MEM_EX_opB),
       .frwrd_WB_EX_opA(frwrd_WB_EX_opA),.frwrd_WB_EX_opB(frwrd_WB_EX_opB),
-      .frwrd_EX_ID_opA(frwrd_EX_ID_opA),
+      .frwrd_EX_ID_opA(frwrd_EX_ID_opA),.frwrd_FEX_ID_opA(frwrd_FEX_ID_opA),
       .frwrd_WB_FEX_opA(frwrd_WB_FEX_opA),.frwrd_WB_FEX_opB(frwrd_WB_FEX_opB),
       .frwrd_fp_WB_EX_opA(frwrd_fp_WB_EX_opA),.frwrd_fp_WB_EX_opB(frwrd_fp_WB_EX_opB),
       .frwrd_int_WB_EX_opA(frwrd_int_WB_EX_opA),.frwrd_int_WB_EX_opB(frwrd_int_WB_EX_opB),

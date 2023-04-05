@@ -44,9 +44,13 @@ import wi23_defs::*;
     // Or if we're doing a jump (Like a branch that is always taken)
     assign flush = (CmpOut & (JType == 2'b11)) | (^JType) | Exc | Rtn;
 
+    // PC is word-aligned, Make it byte aligned to compute branch address calculations
+    //logic [PC_WIDTH-1:0] pc_inc_in_t;
+    //assign pc_inc_in_t = pc_inc_in << 2;
+
     ///////////////////////////////////////
-    // branch address calculation logic //
-    /////////////////////////////////////
+    // Branch Address Calculation Logic ///
+    ///////////////////////////////////////
 
     wire [PC_WIDTH-1:0] addr_base, addr_ofs, addr;
 
@@ -70,7 +74,7 @@ import wi23_defs::*;
     reg [PC_WIDTH-1:0] pc, epc;
 
     wire [PC_WIDTH-1:0] pc_exc;
-    assign pc_exc = Exc ? 16'h1 : (Rtn ? epc : (stall ? pc : pc_target));
+    assign pc_exc = Exc ? 16'h4 : (Rtn ? epc : (stall ? pc : pc_target));
 
     always @(posedge clk, negedge rst_n) begin
         if (!rst_n) begin
@@ -82,16 +86,16 @@ import wi23_defs::*;
         end
     end
 
-    assign iaddr = pc;
+    assign iaddr = pc >> 2;	// Make PC word-aligned
 
     ///////////////////////////
     // pc_inc (adder) logic //
     /////////////////////////
 
-	assign pc_inc_out = pc + (Halt ? 16'h0 : 16'h1);
+    assign pc_inc_out = pc + (Halt ? 16'h0 : 16'h4);
 
-	// we don't consider an error case for fetch,
-   	// so err is tied low.
-	assign fetch_err = 1'b0;
+    // we don't consider an error case for fetch,
+    // so err is tied low.
+    assign fetch_err = 1'b0;
 
 endmodule
