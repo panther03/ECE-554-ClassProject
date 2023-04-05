@@ -81,6 +81,7 @@ import control_defs_pkg::*;
    logic bypass_reg1, bypass_reg2;
    logic [REGFILE_WIDTH-1:0] fp_reg1, fp_reg2;
    logic fp_bypass_reg1, fp_bypass_reg2;
+   logic fp_int_bypass_reg1, fp_int_bypass_reg2;
    logic decode_err;
    
    //////////////////////////
@@ -317,6 +318,7 @@ import control_defs_pkg::*;
       .inst(IF_ID_inst_out), .writesel(MEM_WB_writesel_out), .fp_writesel(FEX_WB_writesel_out),
       .bypass_reg1(bypass_reg1), .bypass_reg2(bypass_reg2),
       .fp_bypass_reg1(fp_bypass_reg1), .fp_bypass_reg2(fp_bypass_reg2),
+      .fp_int_bypass_reg1(fp_int_bypass_reg1), .fp_int_bypass_reg2(fp_int_bypass_reg2),
       .write_in(write_in), .reg1(reg1), .reg2(reg2), .imm(imm), .ofs(ofs),
       .fp_write_in(fp_write_in), .fp_reg1(fp_reg1), .fp_reg2(fp_reg2),
       .InstFmt(InstFmt), .JType(JType), .XtendSel(XtendSel), 
@@ -585,8 +587,8 @@ import control_defs_pkg::*;
       we_o = 4'h0;
       casez (EX_MEM_ctrl_MemGran_out)
          2'b00 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & 4'hF; // Word Access
-         2'b01 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & 4'h1; // Byte Access
-         2'b10 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & 4'h3; // Half-Word Access
+         2'b10 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & 4'hC; // Half-Word Access
+         2'b01 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & 4'h8; // Byte Access
          default : begin end // Unsupported Access
       endcase
    end
@@ -765,7 +767,9 @@ import control_defs_pkg::*;
       .frwrd_int_WB_EX_opA(frwrd_int_WB_EX_opA),.frwrd_int_WB_EX_opB(frwrd_int_WB_EX_opB),
       .frwrd_MEM_FEX_opA(frwrd_MEM_FEX_opA),.frwrd_MEM_FEX_opB(frwrd_MEM_FEX_opB),
       .bypass_reg1(bypass_reg1),.bypass_reg2(bypass_reg2),
-      .fp_bypass_reg1(fp_bypass_reg1),.fp_bypass_reg2(fp_bypass_reg2));
+      .fp_bypass_reg1(fp_bypass_reg1),.fp_bypass_reg2(fp_bypass_reg2),
+      .fp_int_bypass_reg1(fp_int_bypass_reg1),.fp_int_bypass_reg2(fp_int_bypass_reg2)
+   );
 
    // error handling
    assign err_o = ex_err | ctrl_err | fetch_err | decode_err | mem_err;

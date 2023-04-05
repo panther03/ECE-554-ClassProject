@@ -95,7 +95,7 @@ module fp_adder(A, B, subtract, S);
   // logic
   assign B_sign_with_op = B_sign ^ subtract;
   
-  assign Sign_out = (A_sign & (B_sign_with_op | comp)) | (~A & B_sign_with_op & ~comp);
+  assign Sign_out = (A_sign & (B_sign_with_op | comp)) | (~A_sign & B_sign_with_op & ~comp);
   
   assign A_mantissa = A_sign & ~B_sign_with_op ? B_mantissa_preadder : 
                                                  A_mantissa_preadder;

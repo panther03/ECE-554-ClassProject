@@ -1,4 +1,4 @@
-module imem 
+module imem
 import wi23_defs::*;
 (
    input                   clk,
@@ -20,21 +20,15 @@ import wi23_defs::*;
 
    // We read on negative edge becuase the 552 memory reads asyncronously
    always @(negedge clk) begin
-      inst_r[IMEM_WIDTH-1:0]               <= mem_r[addr_i];
-      inst_r[2*IMEM_WIDTH-1:IMEM_WIDTH]    <= mem_r[addr_i + 1];
-      inst_r[3*IMEM_WIDTH-1:2*IMEM_WIDTH]  <= mem_r[addr_i + 2];
-      inst_r[4*IMEM_WIDTH-1:3*IMEM_WIDTH]  <= mem_r[addr_i + 3];
+      inst_r <= mem_r[addr_i];
    end
    
    always @(negedge clk) begin
-      data_r[IMEM_WIDTH-1:0]               <= mem_r[daddr_i];
-      data_r[2*IMEM_WIDTH-1:IMEM_WIDTH]    <= mem_r[daddr_i + 1];
-      data_r[3*IMEM_WIDTH-1:2*IMEM_WIDTH]  <= mem_r[daddr_i + 2];
-      data_r[4*IMEM_WIDTH-1:3*IMEM_WIDTH]  <= mem_r[daddr_i + 3];
+      data_r <= mem_r[daddr_i];
    end
 
-   // Big-Endian
-   assign inst_o = {inst_r[IMEM_WIDTH-1:0], inst_r[2*IMEM_WIDTH-1:IMEM_WIDTH], inst_r[3*IMEM_WIDTH-1:2*IMEM_WIDTH], inst_r[4*IMEM_WIDTH-1:3*IMEM_WIDTH]};
-   assign data_o = {data_r[IMEM_WIDTH-1:0], data_r[2*IMEM_WIDTH-1:IMEM_WIDTH], data_r[3*IMEM_WIDTH-1:2*IMEM_WIDTH], data_r[4*IMEM_WIDTH-1:3*IMEM_WIDTH]};
+   assign inst_o = inst_r;
+   assign data_o = data_r;
 
 endmodule
+

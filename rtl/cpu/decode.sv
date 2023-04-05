@@ -13,6 +13,8 @@ import wi23_defs::*;
     input logic         bypass_reg2,
     input logic         fp_bypass_reg1, 
     input logic         fp_bypass_reg2,
+    input logic         fp_int_bypass_reg1, 
+    input logic         fp_int_bypass_reg2,
     input logic [1:0]   InstFmt, 
     input logic [1:0]   JType,
     input logic         XtendSel, 
@@ -62,8 +64,8 @@ import wi23_defs::*;
             .read1regsel(reg1sel),.read2regsel(reg2sel),.writeregsel(writesel),
             .read1data(reg1raw),.read2data(reg2raw),.writedata(write_in));
 
-    assign dec_reg1 = bypass_reg1 ? write_in : reg1raw;
-    assign dec_reg2 = bypass_reg2 ? write_in : reg2raw;
+    assign dec_reg1 = bypass_reg1 ? write_in : fp_int_bypass_reg1 ? fp_write_in : reg1raw;
+    assign dec_reg2 = bypass_reg2 ? write_in : fp_int_bypass_reg2 ? fp_write_in : reg2raw;
     
     ////////////////////////
     /// FP Register file ///

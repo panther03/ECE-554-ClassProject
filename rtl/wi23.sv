@@ -33,6 +33,7 @@ logic [DATA_WIDTH-1:0]  daddr;
 logic [DATA_WIDTH-1:0]  data_mem_to_proc_map;
 logic [DATA_WIDTH-1:0]  data_mem_to_proc_dmem;
 logic [DATA_WIDTH-1:0]  data_proc_to_mem;
+logic [DATA_WIDTH-1:0]  data_proc_to_mem_be;
 logic                   ldcr;
 
 logic [3:0] we_map;
@@ -91,15 +92,15 @@ imem IMEM (
 // Data memory //
 //////////////// 
 
-logic [DMEM_DEPTH-1:0] daddr_a;
-assign daddr_a = daddr[DMEM_DEPTH-1:0] & 14'b11111111111100;  // Word Aligned Address
+// Big-Endian DMEM
+assign data_proc_to_mem_be = {data_proc_to_mem[DMEM_WIDTH-1:0], data_proc_to_mem[2*DMEM_WIDTH-1:DMEM_WIDTH], data_proc_to_mem[3*DMEM_WIDTH-1:2*DMEM_WIDTH], data_proc_to_mem[4*DMEM_WIDTH-1:3*DMEM_WIDTH]};
 
 dmem DMEM (
   .clk(clk),
   .we_i(we_dmem),
   // Also OK to truncate address, we have already checked that it's in range (otherwise we would not be enabled).
   .addr_i(daddr[DMEM_DEPTH-1:0]),
-  .wdata_i(data_proc_to_mem),
+  .wdata_i(data_proc_to_mem_be),
   .rdata_o(data_mem_to_proc_dmem)
 );
 
@@ -164,7 +165,7 @@ always_comb begin
     data_mem_to_proc_map = ldcr ? inst_mem_to_proc : data_mem_to_proc_dmem;
   end else begin
     // Otherwise we map to the remaining peripherals
-    casez (daddr)
+    casez (daddr[15:0])
       // LED
       16'hC000: begin 
         if (|we_map)
@@ -196,6 +197,7 @@ always_comb begin
         data_mem_to_proc_map = {8'h0, spart_databus};
         spart_databus_in = data_proc_to_mem[7:0];
       end
+		default : begin end
       // There is no default because all of our inputs
       // are defaulted. It would be the same thing.
     endcase

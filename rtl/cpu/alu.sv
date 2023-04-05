@@ -41,7 +41,7 @@ import wi23_defs::*;
 
    always_comb begin
       alu_err = 1'b0;
-      casex (Op)
+      casez (Op)
          5'b00000 : begin Out = S[REGFILE_WIDTH-1:0]; end   // ADD, ADDI, BEQZ, BNEZ, BLTZ, BGEZ, ST, LD, STU
          5'b00010 : begin Out = A ^ B; end   // XOR, XORI
          5'b00011 : begin Out = A & ~B; end  // ANDN, ANDNI

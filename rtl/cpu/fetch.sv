@@ -70,7 +70,7 @@ import wi23_defs::*;
     reg [PC_WIDTH-1:0] pc, epc;
 
     wire [PC_WIDTH-1:0] pc_exc;
-    assign pc_exc = Exc ? 16'h4 : (Rtn ? epc : (stall ? pc : pc_target));
+    assign pc_exc = Exc ? 16'h1 : (Rtn ? epc : (stall ? pc : pc_target));
 
     always @(posedge clk, negedge rst_n) begin
         if (!rst_n) begin
@@ -88,7 +88,7 @@ import wi23_defs::*;
     // pc_inc (adder) logic //
     /////////////////////////
 
-	assign pc_inc_out = pc + (Halt ? 16'h0 : 16'h4);
+	assign pc_inc_out = pc + (Halt ? 16'h0 : 16'h1);
 
 	// we don't consider an error case for fetch,
    	// so err is tied low.

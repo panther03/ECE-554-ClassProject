@@ -5,11 +5,11 @@ package wi23_defs;
     /////////////
 
     // IMEM = 32kB
-    localparam IMEM_DEPTH = 15;
-    localparam IMEM_WIDTH = 8;
+    localparam IMEM_DEPTH = 13;
+    localparam IMEM_WIDTH = 32;
     
     // PC
-    localparam PC_WIDTH = 32;
+    localparam PC_WIDTH = IMEM_WIDTH;
 
     // DMEM = 16kB
     localparam DMEM_DEPTH = 14;
