@@ -1,6 +1,6 @@
 module fp_preadder
 //import wi23_defs::*;
-(A, B, A_type, B_type, A_out_sign, B_out_sign, Exponent_out, A_out_mantissa, B_out_mantissa, Comp_out, swp);
+(A, B, A_type, B_type, A_out_sign, B_out_sign, Exponent_out, A_out_mantissa, B_out_mantissa, is_subnormal, Comp_out, swp);
   input [31:0] A;
   input [31:0] B;
   input [2:0] A_type;
@@ -10,6 +10,7 @@ module fp_preadder
   output [7:0] Exponent_out;
   output [27:0] A_out_mantissa;
   output [27:0] B_out_mantissa;
+	output is_subnormal;
   output Comp_out;
 	output swp;
 
@@ -54,7 +55,7 @@ module fp_preadder
   logic [27:0] A_sub_mantissa, B_sub_mantissa;
   logic [7:0] S_sub_exponent;
   
-  logic is_subnormal, comp_mantissa;
+  logic comp_mantissa;
   
   assign is_subnormal = A_type == 3'b001 && B_type == 3'b001;
   assign comp_mantissa = A_mantissa >= B_mantissa;
@@ -197,8 +198,9 @@ module fp_preadder
   assign A_out_mantissa = is_subnormal ? A_sub_mantissa :
 					                     A_normal_out_mantissa;
   
-  assign B_out_sign = is_subnormal ? A_sub_sign :
-					                 A_normal_sign;
+  assign B_out_sign = is_subnormal ? B_sub_sign :
+	                    is_mixed     ? B_mixed[36] :
+					                           B_normal_out_sign;
 									 
   assign B_out_mantissa = is_subnormal ? B_sub_mantissa :
 	                        is_mixed     ? B_mixed[27:0] :
@@ -212,5 +214,7 @@ module fp_preadder
 	                                 1'b1;
 	/*                  is_mixed     ? 1'b1 :
                                    comp_normal;*/
-	assign swp = ~comp_normal;
+	assign swp = is_subnormal ? ~comp_mantissa :
+	             is_mixed     ? ~|A_exponent :
+							                ~comp_normal;
 endmodule

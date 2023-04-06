@@ -51,14 +51,14 @@ import wi23_defs::*;
 	assign A_adder = subtract ? B : A;
 	assign B_adder = subtract ? A : B;
 	
-  fp_adder iADDER(.A(A_adder), .B(B_adder), .subtract(subtract), .S(S_adder));
+  fp_adder iADDER(.clk(clk), .A(A_adder), .B(B_adder), .subtract_unflopped(subtract), .S(S_adder));
   
 	///////////////////
   //  Mulitplier  //
 	/////////////////
-  logic [31:0] S_multiplier;
+  logic [31:0] Product;
   
-  fp_multiplier iMULT(.A(A), .B(B), .P(S_multiplier));
+  fp_multiplier iMULT(.A(A), .B(B), .P(Product));
   
 	//////////////////////
 	//  Convert to FP  //
@@ -117,28 +117,32 @@ import wi23_defs::*;
 	logic eq_ff;
 	logic le_ff;
 	logic lt_ff;
+	logic [31:0] Product_ff;
 	logic [31:0] fp_ff;
 	logic [31:0] intgr_ff;
 	logic [31:0] A_ff;
+	logic [3:0] Op_ff;
 	
 	always_ff @(posedge clk) begin
 		eq_ff <= eq;
 		le_ff <= lt | eq;
 		lt_ff <= lt;
+		Product_ff <= Product;
 		fp_ff <= fp;
 		intgr_ff <= intgr;
 		A_ff <= A;
+		Op_ff <= Op;
 	end
 	
 	
-  assign Out = ~|Op | subtract ? S_adder :
-               Op == 4'b0010   ? S_multiplier :
-							 Op == 4'b1100   ? {31'h0, eq_ff} :
-							 Op == 4'b1110   ? {31'h0, le_ff} :
-							 Op == 4'b1101   ? {31'h0, lt_ff} :
-							 Op == 4'b0100   ? fp_ff :
-							 Op == 4'b0101   ? intgr_ff :
-							                   A_ff;
+  assign Out = ~|Op_ff | &Op_ff ? S_adder :
+               Op_ff == 4'b0010 ? Product_ff :
+							 Op_ff == 4'b1100 ? {31'h0, eq_ff} :
+							 Op_ff == 4'b1110 ? {31'h0, le_ff} :
+							 Op_ff == 4'b1101 ? {31'h0, lt_ff} :
+							 Op_ff == 4'b0100 ? fp_ff :
+							 Op_ff == 4'b0101 ? intgr_ff :
+							                    A_ff;
 
 endmodule
    

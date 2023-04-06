@@ -1,7 +1,8 @@
-module fp_adder(A, B, subtract, S);
+module fp_adder(clk, A, B, subtract_unflopped, S);
+  input clk;
   input [31:0] A;
   input [31:0] B;
-  input subtract;
+  input subtract_unflopped;
   output [31:0] S;
 
   /////////////////////////
@@ -73,14 +74,37 @@ module fp_adder(A, B, subtract, S);
   /////////////////////////////////////////////////
   ///////////////    PRE-ADDER    /////////////////
   /////////////////////////////////////////////////
-  logic A_sign, B_sign;
+  logic A_sign_unflopped, B_sign_unflopped;
+  logic [27:0] A_mantissa_preadder_unflopped, B_mantissa_preadder_unflopped;
+  logic [7:0] Exponent_preadder_unflopped;
+  logic comp_unflopped;
+	logic swp_unflopped;
+	logic is_subnormal_unflopped;
+
+  fp_preadder iPREADDER(.A(A), .B(B), .A_type(A_type), .B_type(B_type), .A_out_sign(A_sign_unflopped), .B_out_sign(B_sign_unflopped), .Exponent_out(Exponent_preadder_unflopped), .A_out_mantissa(A_mantissa_preadder_unflopped), .B_out_mantissa(B_mantissa_preadder_unflopped), .is_subnormal(is_subnormal_unflopped), .Comp_out(comp_unflopped), .swp(swp_unflopped));
+  
+	/////////////
+	//  Flop  //
+	///////////
+	logic A_sign, B_sign;
   logic [27:0] A_mantissa_preadder, B_mantissa_preadder;
   logic [7:0] Exponent_preadder;
   logic comp;
 	logic swp;
-
-  fp_preadder iPREADDER(.A(A), .B(B), .A_type(A_type), .B_type(B_type), .A_out_sign(A_sign), .B_out_sign(B_sign), .Exponent_out(Exponent_preadder), .A_out_mantissa(A_mantissa_preadder), .B_out_mantissa(B_mantissa_preadder), .Comp_out(comp), .swp(swp));
-  
+	logic is_subnormal;
+	logic subtract;
+	
+	always_ff @(posedge clk) begin
+		A_sign <= A_sign_unflopped;
+		B_sign <= B_sign_unflopped;
+		A_mantissa_preadder <= A_mantissa_preadder_unflopped;
+		B_mantissa_preadder <= B_mantissa_preadder_unflopped;
+		Exponent_preadder <= Exponent_preadder_unflopped;
+		comp <= comp_unflopped;
+		swp <= swp_unflopped;
+		is_subnormal <= is_subnormal_unflopped;
+		subtract <= subtract_unflopped;
+	end
   
   /////////////////////////////////////////////////
   ///////////////      ADDER      /////////////////
@@ -97,13 +121,13 @@ module fp_adder(A, B, subtract, S);
   // logic
   assign B_sign_with_op = B_sign ^ subtract;
   
-  assign Sign_out = subtract ? (A_sign & (B_sign_with_op | (~B_sign_with_op & ~swp))) | (~A_sign & ~B_sign_with_op & swp):
+  assign Sign_out = subtract ? (A_sign & (~swp)) | (~A_sign & swp):
 	                             (A_sign & (B_sign_with_op | comp)) | (~A_sign & B_sign_with_op & ~comp);
   
-  assign A_mantissa = A_sign & ~B_sign_with_op ? B_mantissa_preadder :
+  assign A_mantissa = /*A_sign & ~B_sign_with_op ? B_mantissa_preadder :*/
                                                  A_mantissa_preadder;
 												 
-  assign B_mantissa = A_sign & ~B_sign_with_op ? A_mantissa_preadder :
+  assign B_mantissa = /*A_sign & ~B_sign_with_op ? A_mantissa_preadder :*/
                                                  B_mantissa_preadder;
 												 
   assign subtract_mod = A_sign != B_sign_with_op;
@@ -168,31 +192,29 @@ module fp_adder(A, B, subtract, S);
   // signals
   logic [4:0] shift;
   logic [7:0] Exponent;
+	logic [27:0] shifted_mantissa;
+  logic [22:0] Mantissa_out;
   
   // logic
   assign shift = Exponent_preadder > zero_count ? zero_count :
                                                   Exponent_preadder[4:0];
   
 	assign overflow = Exponent_preadder == 8'hfe && (C_out & ~subtract_mod);
-  assign Exponent = overflow                       ? 8'hff :
-	                  subtract_mod                   ? Exponent_preadder - zero_count :
-	                                                   Exponent_preadder + C_out;
-	                  /*Exponent_preadder > zero_count ? Exponent_preadder + C_out : // Exponent_preadder - zero_count + C_out 
-                    Exponent_preadder < zero_count ? 8'h00 :
-                                                     8'h01;*/
+  assign Exponent = overflow                            ? 8'hff :
+	                  is_subnormal & shifted_mantissa[27] ? 8'h01 :
+										is_subnormal | (~|S_adder & ~C_out) ? 8'h00 : 
+										subtract_mod                        ? Exponent_preadder - zero_count :
+	                                                        Exponent_preadder + C_out;
   
   //////////////
   //  Round  //
   ////////////
-  logic [27:0] shifted_mantissa;
-  logic [22:0] Mantissa_out;
-  
   assign shifted_mantissa = C_out & subtract_mod ? S_adder << (1'b1 + shift):
 	                          C_out                ? S_adder :
 	                                                 S_adder << shift;
   
   // in doc range is 26:4
-  assign Mantissa_out = overflow            ? 23'h0 :
+  assign Mantissa_out = overflow                    ? 23'h0 :
 	                      shifted_mantissa[4] & C_out ? shifted_mantissa[27:5] + 1'b1 :
                         C_out                       ? shifted_mantissa[27:5] :
 												shifted_mantissa[3]         ? shifted_mantissa[26:4] + 1'b1 :

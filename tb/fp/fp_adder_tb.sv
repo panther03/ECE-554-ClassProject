@@ -4,7 +4,7 @@ module fp_adder_tb();
 	logic subtract;
 	logic clk;
 	
-	fp_adder iADDER(.A(A), .B(B), .subtract(subtract), .S(S));
+	fp_adder iADDER(.clk(clk), .A(A), .B(B), .subtract_unflopped(subtract), .S(S));
 	
 	initial begin
 		clk = 0;
@@ -53,6 +53,18 @@ module fp_adder_tb();
 		
 		testA_B(clk, A, B, subtract, S, 32'hFF76FF8A, 32'h7E7BB9AC, 1'b1, 32'hFF800000); // 22. -3.2831692E38 - 8.3650073E37 = -Inf
 		
+		testA_B(clk, A, B, subtract, S, 32'h8036FF8F, 32'h017FB9AC, 1'b1, 32'h818D9CBA); // 23. -5.050794E-39 - 4.6969316E-38 = -5.202011E-38
+		
+		testA_B(clk, A, B, subtract, S, 32'h0036FF8F, 32'h807FB9AC, 1'b1, 32'h00B6B93B); // 24. 5.050794E-39 - -1.1729715E-38 = 1.6780508E-38
+		
+		testA_B(clk, A, B, subtract, S, 32'h0036FF8F, 32'h007FB9AC, 1'b1, 32'h8048BA1D); // 25. 5.050794E-39 - 1.1729715E-38 = -6.67892E-39
+		
+		testA_B(clk, A, B, subtract, S, 32'h40600000, 32'h40e00000, 1'b0, 32'h41280000); // 26. 3.5 + 7 = 10.5
+		
+		testA_B(clk, A, B, subtract, S, 32'h40600000, 32'h40e00000, 1'b1, 32'hc0600000); // 27. 3.5 - 7 = -3.5
+		
+		testA_B(clk, A, B, subtract, S, 32'h40600000, 32'h40600000, 1'b1, 32'h00000000); // 28. 3.5 - 3.5 = 0
+		
 		$stop();
 	end
 
@@ -62,16 +74,17 @@ module fp_adder_tb();
 	integer count = 0;
 	task automatic testA_B(ref clk, ref [31:0] A, ref [31:0] B, ref subtract, ref [31:0] S, input [31:0] A_in, input [31:0] B_in, input sub_in, input [31:0] S_expected);
 		begin
+			@(posedge clk);
 			A = A_in;
 			B = B_in;
 			subtract = sub_in;
 			count++;
 		
-			@(posedge clk);
+			repeat (2) @(posedge clk);
 			if (S != S_expected)
 				$display("test %d: expected %h, but got %h", count, S_expected, S);
 		
-			repeat (4) @(posedge clk);
+			repeat (3) @(posedge clk);
 		end
 	endtask
 endmodule
