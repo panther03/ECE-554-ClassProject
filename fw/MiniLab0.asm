@@ -1,61 +1,60 @@
-// Load Address of LED into R0
-lbi R0, 0xC0
-slbi R0, 0x00
+// load address of led into r0
+lbi r0, 0xc000
 
-// Check with all the switches off
-LD R1, R0, 0x1
-BNEZ R1, .FAIL
-
-
-// Wait for switch 1
-NOP
-NOP
-.CHECK1:
-NOP
-LD R1, R0, 0x1
-SUBI R1, R1, 0x0001
-BNEZ R1, .FAIL
-
-// Wait for switch 2
-NOP
-NOP
-.CHECK2:
-NOP
-LD R1, R0, 0x1
-SUBI R1, R1, 0x0002
-BNEZ R1, .FAIL
+// check with all the switches off
+ld r1, r0, 0x1
+bnez r1, .fail
 
 
-// Wait for switch 3
-NOP
-NOP
-.CHECK3:
-NOP
-LD R1, R0, 0x1
-SUBI R1, R1, 0x0003
-BNEZ R1, .FAIL
+// wait for switch 1
+nop
+nop
+.check1:
+nop
+ld r1, r0, 0x1
+subi r1, r1, 0x0001
+bnez r1, .fail
+
+// wait for switch 2
+nop
+nop
+.check2:
+nop
+ld r1, r0, 0x1
+subi r1, r1, 0x0002
+bnez r1, .fail
 
 
-// Turn on LED 0 and wait for tb to check
-LBI R1, 0x0001
-ST R1, R0, 0x0
-NOP
-NOP
-NOP
-.CHECK4:
-NOP
+// wait for switch 3
+nop
+nop
+.check3:
+nop
+ld r1, r0, 0x1
+subi r1, r1, 0x0003
+bnez r1, .fail
 
-// Turn on LED 2 and wait for tb to check
-LBI R1, 0x0002
-ST R1, R0, 0x0
-NOP
-NOP
-NOP
-.CHECK5:
-NOP
 
-HALT
+// turn on led 0 and wait for tb to check
+lbi r1, 0x0001
+st r1, r0, 0x0
+nop
+nop
+nop
+.check4:
+nop
 
-.FAIL:
-J .FAIL
+// turn on led 2 and wait for tb to check
+lbi r1, 0x0002
+st r1, r0, 0x0
+nop
+nop
+nop
+.check5:
+nop
+
+halt
+
+.fail:
+j .fail
 

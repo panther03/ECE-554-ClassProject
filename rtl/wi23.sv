@@ -79,11 +79,15 @@ proc PROC (
 // Instruction memory //
 ///////////////////////
 
+// IMEM is 32-bit wide. Align to word size,
+logic [IMEM_DEPTH-1:0] daddr_im;
+assign daddr_im = daddr[IMEM_DEPTH-1:0] >> 2;
+
 imem IMEM (
   .clk(clk),
   // We truncate address here but this is OK. It will just fetch 0s (HALT) if out of range
   .addr_i   (iaddr[IMEM_DEPTH-1:0]),
-  .daddr_i  (daddr[IMEM_DEPTH-1:0]),
+  .daddr_i  (daddr_im[IMEM_DEPTH-1:0]),
   .inst_o   (inst[PC_WIDTH-1:0]),
   .data_o   (inst_mem_to_proc[DATA_WIDTH-1:0])
 );
@@ -93,6 +97,10 @@ imem IMEM (
 //////////////// 
 
 // Big-Endian DMEM
+logic [DATA_WIDTH-1:0] aligned_data_proc_to_mem;
+logic [4:0] shft_amt;
+assign shft_amt = {daddr[1:0], 3'b0};
+assign aligned_data_proc_to_mem = data_proc_to_mem << shft_amt;
 assign data_proc_to_mem_be = {data_proc_to_mem[DMEM_WIDTH-1:0], data_proc_to_mem[2*DMEM_WIDTH-1:DMEM_WIDTH], data_proc_to_mem[3*DMEM_WIDTH-1:2*DMEM_WIDTH], data_proc_to_mem[4*DMEM_WIDTH-1:3*DMEM_WIDTH]};
 
 dmem DMEM (
@@ -156,7 +164,7 @@ always_comb begin
   spart_databus_in = 8'h0;
 
   // Data back to processor.
-  data_mem_to_proc_map = 8'h0;
+  data_mem_to_proc_map = 32'h0;
 
   // Handle physical memory range primarily
   // Checks that none of the bits are set.
@@ -173,28 +181,28 @@ always_comb begin
       end
       // Switches
       16'hC001: begin
-        data_mem_to_proc_map = {6'h00 , SW};
+        data_mem_to_proc_map = {22'h00 , SW};
       end
       // SPART - TX/RX buffer
       16'hC004: begin
         spart_iocs_n = ~|re_map && ~|we_map;
         spart_iorw_n = ~|we_map;
         // databuf ioaddr is same as default
-        data_mem_to_proc_map = {8'h0, spart_databus};
+        data_mem_to_proc_map = {24'h0, spart_databus};
         spart_databus_in = data_proc_to_mem[7:0];
       end
       // SPART - Status register
       16'hC005: begin
         spart_iocs_n = ~|re_map;
         spart_ioaddr = ADDR_SREG;
-        data_mem_to_proc_map = {8'h0, spart_databus};
+        data_mem_to_proc_map = {24'h0, spart_databus};
       end
       // SPART - DB register
       16'hC006, 16'hC007: begin
         spart_iocs_n = ~|re_map && ~|we_map;
         spart_iorw_n = ~|we_map;
         spart_ioaddr = daddr[0] ? ADDR_DBH : ADDR_DBL; 
-        data_mem_to_proc_map = {8'h0, spart_databus};
+        data_mem_to_proc_map = {24'h0, spart_databus};
         spart_databus_in = data_proc_to_mem[7:0];
       end
 		default : begin end

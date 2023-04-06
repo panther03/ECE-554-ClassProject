@@ -11,7 +11,7 @@ import wi23_defs::*;
    logic [DMEM_DEPTH-1:2] block_addr;
    assign block_addr = {2'b0, addr_i[DMEM_DEPTH-1:2]}; // Address aligned to word
   
-   logic [DATA_WIDTH-1:0] rdata_r;
+   logic [DATA_WIDTH-1:0] rdata_r, rdata_rt;
 
    // Block Ram 0 - 1B x 4K = 4kB
    // Address [00]
@@ -53,6 +53,10 @@ import wi23_defs::*;
       .rdata_o(rdata_r[4*DMEM_WIDTH-1:3*DMEM_WIDTH])
    );
 
-   assign rdata_o = {rdata_r[DMEM_WIDTH-1:0], rdata_r[2*DMEM_WIDTH-1:DMEM_WIDTH], rdata_r[3*DMEM_WIDTH-1:2*DMEM_WIDTH], rdata_r[4*DMEM_WIDTH-1:3*DMEM_WIDTH]};
-
+   assign rdata_rt = {rdata_r[DMEM_WIDTH-1:0], rdata_r[2*DMEM_WIDTH-1:DMEM_WIDTH], rdata_r[3*DMEM_WIDTH-1:2*DMEM_WIDTH], rdata_r[4*DMEM_WIDTH-1:3*DMEM_WIDTH]};
+   
+   logic [4:0] shft;
+   assign shft = {addr_i[1:0], 3'b0};
+   assign rdata_o = rdata_rt >> shft;
+ 
 endmodule

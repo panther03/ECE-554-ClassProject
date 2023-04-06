@@ -592,7 +592,15 @@ import control_defs_pkg::*;
          default : begin end // Unsupported Access
       endcase
    end
-   assign re_o = {4{EX_MEM_ctrl_MemRead_out}};
+   always_comb begin
+      re_o = 4'h0;
+      casez (EX_MEM_ctrl_MemGran_out)
+         2'b00 : re_o = {4{EX_MEM_ctrl_MemRead_out}} & 4'hF; // Word Access
+         2'b10 : re_o = {4{EX_MEM_ctrl_MemRead_out}} & 4'hC; // Half-Word Access
+         2'b01 : re_o = {4{EX_MEM_ctrl_MemRead_out}} & 4'h8; // Byte Access
+         default : begin end // Unsupported Access
+      endcase
+   end
    assign ldcr_o = EX_MEM_ctrl_InstMemRead_out;
    assign mem_err = &EX_MEM_ctrl_MemGran_out; // Unsupported Access 
 

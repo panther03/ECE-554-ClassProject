@@ -29,7 +29,7 @@ logic IF_MEM_hazard;
 assign IF_MEM_hazard = EX_MEM_ctrl_regw & ((IF_ID_reg1 == EX_MEM_regw)
                                       | (IF_ID_reg2 == EX_MEM_regw));
 logic ID_FEX_hazard;
-assign ID_FEX_hazard = ID_FEX_ctrl_regw & ((IF_ID_reg1 == ID_FEX_regw)
+assign ID_FEX_hazard = ID_FEX_ctrl_regw & ID_EX_ctrl_FpInst & ((IF_ID_reg1 == ID_FEX_regw)
                                     | (IF_ID_reg2 == ID_FEX_regw));
 logic IF_FEX_hazard;
 assign IF_FEX_hazard = (ID_EX_ctrl_regw | ID_EX_ctrl_FpInst) & ((IF_ID_reg1 == ID_EX_regw)

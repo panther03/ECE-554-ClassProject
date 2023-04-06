@@ -5,6 +5,7 @@ add wave -noupdate /wi23_tb/WI23/PROC/rst_n
 add wave -noupdate -divider IF
 add wave -noupdate /wi23_tb/WI23/PROC/inst_i
 add wave -noupdate /wi23_tb/WI23/PROC/IF_ID_inst_in
+add wave -noupdate /wi23_tb/WI23/PROC/iFETCH/pc
 add wave -noupdate -divider ID
 add wave -noupdate /wi23_tb/WI23/PROC/iDECODE/inst
 add wave -noupdate /wi23_tb/WI23/PROC/iCONTROL/Op
@@ -21,9 +22,11 @@ add wave -noupdate /wi23_tb/WI23/PROC/ID_EX_ctrl_Op_out
 add wave -noupdate /wi23_tb/WI23/PROC/iEXECUTE/AluOp
 add wave -noupdate /wi23_tb/WI23/PROC/iEXECUTE/reg1
 add wave -noupdate /wi23_tb/WI23/PROC/iEXECUTE/reg2
+add wave -noupdate /wi23_tb/WI23/PROC/iEXECUTE/imm
 add wave -noupdate /wi23_tb/WI23/PROC/iEXECUTE/alu_out
 add wave -noupdate -divider FEX
 add wave -noupdate /wi23_tb/WI23/PROC/ID_FEX_ctrl_Op_out
+add wave -noupdate /wi23_tb/WI23/PROC/iFPEXECUTE/AluOp
 add wave -noupdate /wi23_tb/WI23/PROC/iFPEXECUTE/reg1
 add wave -noupdate /wi23_tb/WI23/PROC/iFPEXECUTE/reg2
 add wave -noupdate /wi23_tb/WI23/PROC/iFPEXECUTE/imm
@@ -62,7 +65,7 @@ add wave -noupdate /wi23_tb/WI23/PROC/iFORWARD/bypass_reg2
 add wave -noupdate /wi23_tb/WI23/PROC/iFORWARD/fp_bypass_reg1
 add wave -noupdate /wi23_tb/WI23/PROC/iFORWARD/fp_bypass_reg2
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {11200 ps} 0}
+WaveRestoreCursors {{Cursor 1} {25500 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 219
 configure wave -valuecolwidth 100
@@ -78,4 +81,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ps} {53600 ps}
+WaveRestoreZoom {0 ps} {91400 ps}
