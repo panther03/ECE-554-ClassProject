@@ -79,15 +79,11 @@ proc PROC (
 // Instruction memory //
 ///////////////////////
 
-// IMEM is 32-bit wide. Align to word size,
-logic [IMEM_DEPTH-1:0] daddr_im;
-assign daddr_im = daddr[IMEM_DEPTH-1:0] >> 2;
-
 imem IMEM (
   .clk(clk),
   // We truncate address here but this is OK. It will just fetch 0s (HALT) if out of range
   .addr_i   (iaddr[IMEM_DEPTH-1:0]),
-  .daddr_i  (daddr_im[IMEM_DEPTH-1:0]),
+  .daddr_i  (daddr[IMEM_DEPTH-1:0]),
   .inst_o   (inst[PC_WIDTH-1:0]),
   .data_o   (inst_mem_to_proc[DATA_WIDTH-1:0])
 );
@@ -101,7 +97,7 @@ logic [DATA_WIDTH-1:0] aligned_data_proc_to_mem;
 logic [4:0] shft_amt;
 assign shft_amt = {daddr[1:0], 3'b0};
 assign aligned_data_proc_to_mem = data_proc_to_mem << shft_amt;
-assign data_proc_to_mem_be = {data_proc_to_mem[DMEM_WIDTH-1:0], data_proc_to_mem[2*DMEM_WIDTH-1:DMEM_WIDTH], data_proc_to_mem[3*DMEM_WIDTH-1:2*DMEM_WIDTH], data_proc_to_mem[4*DMEM_WIDTH-1:3*DMEM_WIDTH]};
+assign data_proc_to_mem_be = {aligned_data_proc_to_mem[DMEM_WIDTH-1:0], aligned_data_proc_to_mem[2*DMEM_WIDTH-1:DMEM_WIDTH], aligned_data_proc_to_mem[3*DMEM_WIDTH-1:2*DMEM_WIDTH], aligned_data_proc_to_mem[4*DMEM_WIDTH-1:3*DMEM_WIDTH]};
 
 dmem DMEM (
   .clk(clk),

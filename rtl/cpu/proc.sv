@@ -587,17 +587,26 @@ import control_defs_pkg::*;
       we_o = 4'h0;
       casez (EX_MEM_ctrl_MemGran_out)
          2'b00 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & 4'hF; // Word Access
-         2'b10 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & 4'hC; // Half-Word Access
-         2'b01 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & 4'h8; // Byte Access
+         // Big-endian write to half-word and byte granularity
+         // E.g. STH @ 0 - Write Addr [3:2]
+         //      STH @ 2 - Write Addr [1:0]
+         //      STB @ 0 - Write Addr [3]
+         //      STB @ 3 - Write Addr [0] 
+         2'b10 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & (4'hC >> daddr_o[1:0]); // Half-Word Access
+         2'b01 : we_o = {4{EX_MEM_ctrl_MemWrite_out}} & (4'h8 >> daddr_o[1:0]); // Byte Access
          default : begin end // Unsupported Access
       endcase
    end
    always_comb begin
       re_o = 4'h0;
       casez (EX_MEM_ctrl_MemGran_out)
+         // E.g. LDH @ 0 - Write Addr [3:2]
+         //      LDH @ 2 - Write Addr [1:0]
+         //      LDB @ 0 - Write Addr [3]
+         //      LDB @ 3 - Write Addr [0] 
          2'b00 : re_o = {4{EX_MEM_ctrl_MemRead_out}} & 4'hF; // Word Access
-         2'b10 : re_o = {4{EX_MEM_ctrl_MemRead_out}} & 4'hC; // Half-Word Access
-         2'b01 : re_o = {4{EX_MEM_ctrl_MemRead_out}} & 4'h8; // Byte Access
+         2'b10 : re_o = {4{EX_MEM_ctrl_MemRead_out}} & (4'hC >> daddr_o[1:0]); // Half-Word Access
+         2'b01 : re_o = {4{EX_MEM_ctrl_MemRead_out}} & (4'h8 >> daddr_o[1:0]); // Byte Access
          default : begin end // Unsupported Access
       endcase
    end
