@@ -128,10 +128,37 @@ spart SPART (
     .RX(RX)                    // UART RX line
 );
 
+
+///////////////////////////////////////
+// Instantiate VGA Timing Generator //
+/////////////////////////////////////
+wire [9:0] xpix;					// current X coordinate of VGA
+wire [8:0] ypix;					// current Y coordinate of VGA
+VGA_timing iVGATM(.clk25MHz(VGA_CLK), .rst_n(rst_n), .VGA_BLANK_N(VGA_BLANK_N),
+                  .VGA_HS(VGA_HS),.VGA_SYNC_N(VGA_SYNC_N), .VGA_VS(VGA_VS), 
+        .xpix(xpix), .ypix(ypix));
+        
 //////////////////////
-// Instantiate BMP //
+// Instantiate VGA //
 ////////////////////
-// Leaving the BMP code in the repo for reference, but we are not going to use it.
+
+  wire [15:0] daddr_vga_raw = (daddr[15:0] - 16'hE000);
+  wire [11:0] daddr_vga_ofs = daddr_vga_raw[11:2];
+  // This is a hacky way of checking for an address in the VGA framebuffer range
+  // Technically the range is 0xE000 - 0xF2C0 but this will trigger until 0xFFFF (and also for whatever the upper 16 bits are)
+  wire vga_we = &daddr[15:13] & |we_map;
+
+
+  VGA_display iVGA(
+    .clk(clk),
+    .rst_n(rst_n),
+	 .xloc(xpix), .yloc(ypix),
+    .vga_char_i(data_proc_to_mem[15:0]), .vga_char_addr_i(daddr_vga_ofs), .vga_char_we_i(vga_we),
+    .graph_px_i(4'h0), .graph_addr_i(19'h00000), .graph_we_i(1'b0),
+    .draw_mode_sel_i(1'b0),
+    .VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B)
+  );
+  
 
 /////////////////////////
 // LED register logic //
@@ -162,9 +189,10 @@ always_comb begin
   spart_iocs_n = 1'b1;
   spart_iorw_n = 1'b1;
   spart_databus_in = 8'h0;
-
   // Data back to processor.
   data_mem_to_proc_map = 32'h0;
+
+
 
   // Handle physical memory range primarily
   // Checks that none of the bits are set.
