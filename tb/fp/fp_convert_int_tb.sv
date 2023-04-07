@@ -22,7 +22,7 @@ module fp_convert_int_tb();
 		
 		testA(clk, A, intgr, 32'ha00ff1f4, 32'h00000000);
 		
-		testA(clk, A, intgr, 32'h40d80000, 32'h00000007); // 6.75 -> 7
+		testA(clk, A, intgr, 32'h40d80000, 32'h00000006); // 6.75 -> 6
 		
 		testA(clk, A, intgr, 32'h4f000001, 32'h7fffffff); // max overflow
 		

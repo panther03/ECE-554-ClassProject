@@ -21,12 +21,11 @@ module fp_convert_int(A, intgr);
   //  Mantissa  //
   ///////////////
   logic [55:0] mantissa_shifter;
-  logic [32:0] round_int;
+  logic [31:0] round_int;
   
   assign mantissa_shifter = {32'h0, A_mantissa} << exponent_unbiased;
   
-  assign round_int = mantissa_shifter[23] ? {1'b0, mantissa_shifter[55:24]} + 1'b1 :
-                                            {1'b0, mantissa_shifter[55:24]};
+  assign round_int = mantissa_shifter[55:24];
   
   
   ///////////////
@@ -36,7 +35,7 @@ module fp_convert_int(A, intgr);
   logic [31:0] positive_intgr;
   logic overflow;
   
-  assign overflow = |round_int[32:31] | (exponent_unbiased > 8'h1f);
+  assign overflow = (exponent_unbiased > 8'h1f);
   assign negative_intgr = overflow ? 32'h80000000 : 
                                      ~round_int[31:0] + 1'b1;
                                      
