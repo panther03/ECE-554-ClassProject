@@ -11,7 +11,7 @@
         - If operator, the value should store one of the following ascii values: '+', '-', '*', '/', '(', ')'
     
 */
-typedef struct token{
+typedef struct Token{
     int isOperator;
     int value;
 } Token;
@@ -20,6 +20,10 @@ typedef struct token{
 void parse_equation(char * userInput, Token * output);
 void to_reverse_polish_notation(Token * input, Token * output);
 void text_to_array_of_tokens(char * userInput, Token * output);
+
+
+#include "queue.c"
+
 
 #endif /* PARSER_H */
 

@@ -1,4 +1,5 @@
 #include "parser.h"
+#include <stdlib.h> // Used only for debugging. Not actually supported on the board
 int main(int argc, char *argv[]){
 
 
