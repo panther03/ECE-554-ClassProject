@@ -31,13 +31,17 @@ import wi23_defs::*;
 
    logic SEQ, SLE, SLT;
    logic USLE, USLT;
-   logic Ofl;
+   logic Ofl, EqU_n;
 
    assign Ofl = (S[REGFILE_WIDTH-1] & ~A_inv[REGFILE_WIDTH-1] & ~B[REGFILE_WIDTH-1]) | (~S[REGFILE_WIDTH-1] & A_inv[REGFILE_WIDTH-1] & B[REGFILE_WIDTH-1]);
 
    assign SEQ = ~|S;
    assign SLE = (~S[REGFILE_WIDTH-1] ^ Ofl);
    assign SLT = SLE & ~SEQ; 
+
+   assign EqU_n = A ^ B;
+   assign USLT = A < B;
+   assign USLE = USLT | ~|EqU_n;
 
    always_comb begin
       alu_err = 1'b0;
@@ -50,8 +54,8 @@ import wi23_defs::*;
          5'b01010 : begin Out = B; end       // LBI
          5'b01011 : begin Out = (A << 16) | B; end // SLBI
          5'b01100 : begin Out = {31'h0, SEQ}; end  // SEQ
-         5'b01101 : begin Out = ~UnsignedOp ? {31'h0, SLT} : {31'h0, SLT}; end   // SLT, USLT
-         5'b01110 : begin Out = ~UnsignedOp ? {31'h0, SLE} : {31'h0, SLE}; end   // SLE, USLE
+         5'b01101 : begin Out = ~UnsignedOp ? {31'h0, SLT} : {31'h0, USLT}; end   // SLT, USLT
+         5'b01110 : begin Out = ~UnsignedOp ? {31'h0, SLE} : {31'h0, USLE}; end   // SLE, USLE
          5'b01111 : begin Out = S[REGFILE_WIDTH-1:0]; end   // SUB, SUBI
          5'b10011 : begin Out = A & B; end   // AND, ANDI
          5'b10010 : begin Out = A | B; end   // OR, ORI

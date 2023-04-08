@@ -40,7 +40,7 @@ initial begin
     rst_n = 1'b0;
     repeat (2) @ (negedge clk);
     rst_n = 1'b1;
-    repeat (80) @ (negedge clk);
+    repeat (400) @ (negedge clk);
     //check_dec_inst(clk, WI23.inst, rf_tb, fp_rf_tb); 
     //$display("\nYahoo!!! All Tests Passed\n");
     $finish();
