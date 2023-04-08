@@ -1,6 +1,6 @@
 FPGA_DEV ?= "de1_soc"
-TB ?= "" # no default
-FW_UNIT_TEST ?= "" # no default
+TB ?=  # no default
+UNIT ?=  # no default
 
 # trying to save you from silly capitalization mistakes
 ifneq ($(tb),)
@@ -19,7 +19,7 @@ $(OUT_DIR):
 	@mkdir -p $(OUT_DIR)
 
 fw: $(OUT_DIR)
-ifeq ($(FW_UNIT_TEST),)
+ifeq ($(UNIT),)
 	@make -C $(FW_DIR)
 else
 	@make -C $(FW_DIR) unit
