@@ -15,7 +15,7 @@ import wi23_defs::*;
    reg [DATA_WIDTH-1:0] data_r;
 
    initial begin
-      $readmemh("../../fw/frontend.hex", mem_r);
+      $readmemh("../../out/fw.hex", mem_r);
    end
 
    // We read on negative edge becuase the 552 memory reads asyncronously

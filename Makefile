@@ -1,6 +1,6 @@
-ASM_PROG ?= "HelloWorld.asm"
 FPGA_DEV ?= "de1_soc"
 TB ?= "" # no default
+FW_UNIT_TEST ?= "" # no default
 
 # trying to save you from silly capitalization mistakes
 ifneq ($(tb),)
@@ -19,8 +19,13 @@ $(OUT_DIR):
 	@mkdir -p $(OUT_DIR)
 
 fw: $(OUT_DIR)
-	@python3 $(SW_DIR)/assemble.py $(FW_DIR)/$(ASM_PROG) -o $(OUT_DIR)/out.hex
+ifeq ($(FW_UNIT_TEST),)
+	@make -C $(FW_DIR)
+else
+	@make -C $(FW_DIR) unit
+endif
 
+#@python3 $(SW_DIR)/assemble.py $(FW_DIR)/$(ASM_PROG) -o $(OUT_DIR)/out.hex
 fpga_fw: $(OUT_DIR) fw
 	@make -C $(FPGA_DIR)/$(FPGA_DEV) update_mem
 

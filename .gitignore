@@ -14,6 +14,8 @@ tb/*/*
 !tb/*/*.sv
 !tb/*/wave.do
 
+fw/**/*.hex
+
 transcript
 
 __pycache__/
