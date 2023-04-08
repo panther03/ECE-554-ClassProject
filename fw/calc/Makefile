@@ -9,7 +9,7 @@ OBJDIR  = obj
 BINDIR  = bin
 
 SOURCES = $(wildcard ./*.c)
-OBJECTS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SOURCES))
+OBJECTS = $(patsubst ./%.c,$(OBJDIR)/%.o,$(SOURCES))
 TARGET  = $(BINDIR)/calc.elf
 
 OUT_DIR = ../../out/
