@@ -25,7 +25,9 @@ else
 	@make -C $(FW_DIR) unit
 endif
 
-#@python3 $(SW_DIR)/assemble.py $(FW_DIR)/$(ASM_PROG) -o $(OUT_DIR)/out.hex
+fpga_mif: $(OUT_DIR)
+	@make -C $(FPGA_DIR)/$(FPGA_DEV) replace_mif
+ 
 fpga_fw: $(OUT_DIR) fw
 	@make -C $(FPGA_DIR)/$(FPGA_DEV) update_mem
 

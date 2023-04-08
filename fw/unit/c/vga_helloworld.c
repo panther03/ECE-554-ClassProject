@@ -14,7 +14,7 @@ void vga_print_plain(int x, int y, const char* msg_data) {
   int* buff_addr = VGA_TEXT_BUFFER + (y << 4) + (y << 6) + x;
   int i = 0;
   // assume string is NULL-terminated
-  while (*(msg_data + i) < 0x40) {
+  while (*(msg_data + i) != 0) {
     // set text data
     // upper byte = 0x20 => green background, black text
     *(buff_addr + i) = *(msg_data + i) | (0x2000);
