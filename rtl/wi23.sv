@@ -76,14 +76,18 @@ proc PROC (
 );
 
 /////////////////////////
-// Instruction memory //
-///////////////////////
+// Instruction memory ///
+/////////////////////////
+
+// Word-aligned IMEM. Make daddr word-aligned.
+logic [IMEM_DEPTH-1:0] daddr_im;
+assign daddr_im = daddr >> 2;
 
 imem IMEM (
   .clk(clk),
   // We truncate address here but this is OK. It will just fetch 0s (HALT) if out of range
   .addr_i   (iaddr[IMEM_DEPTH-1:0]),
-  .daddr_i  (daddr[IMEM_DEPTH-1:0]),
+  .daddr_i  (daddr_im[IMEM_DEPTH-1:0]),
   .inst_o   (inst[PC_WIDTH-1:0]),
   .data_o   (inst_mem_to_proc[DATA_WIDTH-1:0])
 );
