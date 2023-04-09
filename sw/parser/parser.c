@@ -25,15 +25,52 @@ void parse_equation(char * userInput, Queue * output){
 // Input array is the user input parsed into an array of tokens
 // Output array is array of tokens in reverse polish notation
 void to_reverse_polish_notation(Queue * input, Queue * output){
-    
+
+    // Define operatorStack
+    Stack operatorStack;
+    structureStack_Stack(&operatorStack);
+
+
+    // while there are tokens to be read:
     while(!isEmpty_Queue(input)){
+        //read a token
         Token nextToken = dequeue_Queue(input);
-
+        //if the token is:
+        // - a number:
         if(!nextToken.isOperator){
-            enqueue_Queue(output, nextToken);
-        }else {
-
+            // put it into the output queue
         }
+        // an operator o1:
+        else if(1) {
+            // while ( there is an operator o2 at the top of the operator stack which is not a left parenthesis, and (o2 has greater precedence than o1 or (o1 and o2 have the same precedence and o1 is left-associative))):
+            while (1) {
+                // pop o2 from the operator stack into the output queue
+            }
+            // push o1 onto the operator stack
+        }
+        // - a left parenthesis (i.e. "("):
+         else if (1) {
+            //  push it onto the operator stack
+         }
+        // - a right parenthesis (i.e. ")"):
+        else if (1) {
+            // while the operator at the top of the operator stack is not a left parenthesis:
+            while (1) {
+                /* If the stack runs out without finding a left parenthesis, then there are mismatched parentheses. */
+                // pop the operator from the operator stack into the output queue
+            }
+            // pop the left parenthesis from the operator stack and discard it
+            //  if there is a function token at the top of the operator stack, then:
+            if (1){
+                // pop the function from the operator stack into the output queue
+            }
+        }
+    }
+    /* After the while loop, pop the remaining items from the operator stack into the output queue. */
+    // while there are tokens on the operator stack:
+    while(1) {
+        /* If the operator token on the top of the stack is a parenthesis, then there are mismatched parentheses. */
+        // pop the operator from the operator stack onto the output queue
     }
 
 }
