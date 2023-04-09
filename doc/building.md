@@ -39,6 +39,12 @@ Some scripts have been setup to enable quick(er) iteration of firmware when test
 
 1. Run `make fpga_mif` in the terminal.
 2. Click the "Update Memory Initialization Files" button in Quartus:
+
 ![Update Memory Initialization Files](img/update_mif.png)
+
 3. Wait for the job to finish, then rerun specifically the Assembler task (don't start the whole thing over!):
+
 ![Rerun assembler](img/rerun_assembler.png)
+
+4. Reprogram your FPGA.
+5. Profit.
