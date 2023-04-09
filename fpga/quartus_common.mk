@@ -2,7 +2,7 @@ all: prog
 	@cp output_files/$(REVISION).sof ../../out/out.sof
 
 DB_IMEM_MIF = $(wildcard ./db/*imem*.mif)
-SRC_MEM_MIF = ../../out.mif
+SRC_MEM_MIF = ../../out/out.mif
 
 .PHONY: $(DB_IMEM_MIF) $(SRC_MEM_MIF)
 
