@@ -8,8 +8,6 @@ module VGA_timing(clk25MHz, rst_n, VGA_BLANK_N, VGA_HS, VGA_SYNC_N, VGA_VS, xpix
   output [9:0] xpix;				// x pixel location
   output reg [8:0] ypix;			// y pixel location
   
-  output reg [18:0] addr_lead;
-  
   typedef enum reg[1:0] {H_SYNCH,H_BP,H_LINE,H_FP} Hstate_t;
   output Hstate_t Hstate;
   Hstate_t nxt_Hstate;

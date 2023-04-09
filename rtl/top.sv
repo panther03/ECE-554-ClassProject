@@ -70,7 +70,7 @@ wi23 iWI23
   .VGA_HS(VGA_HS),
   .VGA_R(VGA_R),
   .VGA_SYNC_N(VGA_SYNC_N),
-  .VGA_V(VGA_V)
+  .VGA_VS(VGA_VS)
 );
 
 endmodule

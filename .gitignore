@@ -1,4 +1,4 @@
-out/
+out/*
 
 fpga/*/*
 !fpga/*/Makefile
@@ -14,4 +14,11 @@ tb/*/*
 !tb/*/*.sv
 !tb/*/wave.do
 
+fw/**/*.hex
+fw/**/*.o
+fw/**/*.elf
+
 transcript
+
+__pycache__/
+*.py[cod]

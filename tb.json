@@ -11,5 +11,13 @@
             "generic_tasks",
             "spart_tb_tasks"
         ]
+    },
+    "wi23": {
+        "top": "wi23_tb",
+        "fw": "BasicTest.asm",
+        "tb_pkgs": [
+            "generic_tasks",
+            "decode_tasks_pkg"
+        ]
     }
 }
