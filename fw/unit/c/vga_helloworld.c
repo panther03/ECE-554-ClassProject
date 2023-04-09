@@ -20,7 +20,7 @@ void vga_print_plain(int x, int y, const char* msg_data) {
     // upper byte = 0x20 => green background, black text
     *(buff_addr + i) = *(msg_data + i) | c;
     i += 1;
-	c += 0x1000;
+	c += 0x2000;
   }
 }
 
