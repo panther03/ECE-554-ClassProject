@@ -1,25 +1,20 @@
-#include "parser.h"
 
-#define MAX_SIZE 20
+#include "queue.h"
 
-typedef struct Queue {
-    Token data[MAX_SIZE];
-    int head;
-    int tail;
-    int size;
-} Queue;
 
-void structureQueue(Queue * queue) {
+
+void structureQueue_Queue(Queue * queue) {
     queue->head = -1;
+    queue->tail = -1;
     queue->size = 0;
 }
 
-int isEmpty(Queue * queue){
+int isEmpty_Queue(Queue * queue){
     return (queue->size == 0);
 }
 
-void enqueue(Queue * queue, Token value){
-    if(isEmpty(queue)) {
+void enqueue_Queue(Queue * queue, Token value){
+    if(isEmpty_Queue(queue)) {
         queue->head = 0;
         queue->tail = 0;
     } else {
@@ -30,7 +25,7 @@ void enqueue(Queue * queue, Token value){
     queue->size += 1;
 }
 
-Token dequeue(Queue * queue) {
+Token dequeue_Queue(Queue * queue) {
     Token value = queue->data[queue->head];
 
     if(queue->size = 1){
@@ -46,6 +41,6 @@ Token dequeue(Queue * queue) {
 }
 
 
-Token peek(Queue * queue) {
+Token peek_Queue(Queue * queue) {
     return queue->data[queue->head];
 }
