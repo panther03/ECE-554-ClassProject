@@ -13,6 +13,7 @@
 typedef struct Token{
     int isOperator;
     int value;
+    int precedence;
 } Token;
 
 
