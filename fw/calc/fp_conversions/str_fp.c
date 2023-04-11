@@ -118,7 +118,7 @@ float str_to_fp(char* str, int* err) {
     if (sign < 0) {
         str++;
     }
-    for (i = 0; i <= length + 1 && *(str + i) != '\0'; i++) {
+    for (i = 0; i <= length + 1 && !check_end(*(str + i)); i++) {
         curr = *(str + i);
 
         if (curr == '.') {
