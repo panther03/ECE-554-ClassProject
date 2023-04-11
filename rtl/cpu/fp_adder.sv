@@ -40,16 +40,16 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
   ///////////////   Special Cases    //////////////
   /////////////////////////////////////////////////
   // Special case signals
-  logic [31:0] S_special;
+  logic [31:0] S_special_unflopped;
   logic S_special_sign;
   logic [7:0] S_special_exponent;
   logic [22:0] S_special_mantissa;
   
-  logic is_special;
+  logic is_special_unflopped;
   
-  assign S_special = {S_special_sign, S_special_exponent, S_special_mantissa};
+  assign S_special_unflopped = {S_special_sign, S_special_exponent, S_special_mantissa};
   
-  assign is_special = (~^A_type | ~^B_type) || A_type == 3'b010 || B_type == 3'b010 ? 1'b1 : 1'b0;
+  assign is_special_unflopped = (~^A_type | ~^B_type) || A_type == 3'b010 || B_type == 3'b010 ? 1'b1 : 1'b0;
   assign S_special_sign = ~|A_type                                                   ? B_s :  // A is 0
                           ~|B_type                                                   ? A_s :  // B is 0
                           (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_s :  // A = norm or subnorm and B = inf
@@ -93,6 +93,8 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
   logic swp;
   logic is_subnormal;
   logic subtract;
+  logic is_special;
+  logic S_special;
   
   always_ff @(posedge clk) begin
     A_sign <= A_sign_unflopped;
@@ -104,6 +106,8 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
     swp <= swp_unflopped;
     is_subnormal <= is_subnormal_unflopped;
     subtract <= subtract_unflopped;
+    is_special <= is_special_unflopped;
+    S_special <= S_special_unflopped;
   end
   
   /////////////////////////////////////////////////

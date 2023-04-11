@@ -167,12 +167,14 @@ import control_defs_pkg::*;
    logic EX_MEM_ctrl_FpInst_in, EX_MEM_ctrl_FpInst_out;
    logic [1:0] EX_MEM_ctrl_FPIntCvtReg_in, EX_MEM_ctrl_FPIntCvtReg_out;
    logic [1:0] EX_MEM_ctrl_MemGran_in, EX_MEM_ctrl_MemGran_out;
+   logic [PC_WIDTH-1:0] EX_MEM_pc_inc_in, EX_MEM_pc_inc_out;
 
    logic EX_MEM_ctrl_Halt_in, EX_MEM_ctrl_Halt_out;
 
    logic [REGFILE_WIDTH-1:0] EX_MEM_alu_out_in,  EX_MEM_alu_out_out;
    logic [REGFILE_WIDTH-1:0] EX_MEM_reg2_in, EX_MEM_reg2_out;
    logic [REGFILE_DEPTH-1:0] EX_MEM_writesel_in, EX_MEM_writesel_out;
+   logic [PC_WIDTH-1:0] EX_MEM_inst_in, EX_MEM_inst_out;
 
    ///////////////////////////////
    /// MEM_WB Transition wires ///
@@ -184,12 +186,15 @@ import control_defs_pkg::*;
    logic MEM_WB_ctrl_FpInst_in, MEM_WB_ctrl_FpInst_out;
    logic [1:0] MEM_WB_ctrl_FPIntCvtReg_in, MEM_WB_ctrl_FPIntCvtReg_out;
    logic [1:0] MEM_WB_ctrl_MemGran_in, MEM_WB_ctrl_MemGran_out;
+   logic MEM_WB_ctrl_MemWrite_in, MEM_WB_ctrl_MemWrite_out;
+   logic [PC_WIDTH-1:0] MEM_WB_pc_inc_in, MEM_WB_pc_inc_out;
 
    logic MEM_WB_ctrl_Halt_in, MEM_WB_ctrl_Halt_out;
 
    logic [REGFILE_DEPTH-1:0] MEM_WB_writesel_in, MEM_WB_writesel_out;
    logic [REGFILE_WIDTH-1:0] MEM_WB_alu_out_in, MEM_WB_alu_out_out;
    logic [REGFILE_WIDTH-1:0] MEM_WB_mem_out_in, MEM_WB_mem_out_out;
+   logic [PC_WIDTH-1:0] MEM_WB_inst_in, MEM_WB_inst_out;
 
    ///////////////////////////////
    /// FEX_WB Transition wires ///
@@ -537,6 +542,7 @@ import control_defs_pkg::*;
 	assign EX_MEM_ctrl_FpInst_in = ID_EX_ctrl_FpInst_out;
 	assign EX_MEM_ctrl_FPIntCvtReg_in = ID_EX_ctrl_FPIntCvtReg_out;
    assign EX_MEM_ctrl_MemGran_in = ID_EX_ctrl_MemGran_out;
+   assign EX_MEM_pc_inc_in = ID_EX_pc_inc_out;
 
    assign EX_MEM_ctrl_Halt_in = ID_EX_ctrl_Halt_out;
   
@@ -545,6 +551,7 @@ import control_defs_pkg::*;
    assign EX_MEM_writesel_in = writesel;
 
    assign EX_MEM_ctrl_Op_in = ID_EX_ctrl_Op_out;
+   assign EX_MEM_inst_in = ID_EX_inst_out;
 
    always @(posedge clk, negedge rst_n)
       if (!rst_n) begin
@@ -561,6 +568,8 @@ import control_defs_pkg::*;
 			EX_MEM_ctrl_FpInst_out <= 0;
 			EX_MEM_ctrl_FPIntCvtReg_out <= 0;
          EX_MEM_ctrl_MemGran_out <= 0;
+         EX_MEM_inst_out <= 0;
+         EX_MEM_pc_inc_out <= 0;
       end else begin
          EX_MEM_ctrl_Op_out <= EX_MEM_ctrl_Op_in;
          EX_MEM_ctrl_RegWrite_out <= EX_MEM_ctrl_RegWrite_in;
@@ -575,6 +584,8 @@ import control_defs_pkg::*;
 			EX_MEM_ctrl_FpInst_out <= EX_MEM_ctrl_FpInst_in;
 			EX_MEM_ctrl_FPIntCvtReg_out <= EX_MEM_ctrl_FPIntCvtReg_in;
          EX_MEM_ctrl_MemGran_out <= EX_MEM_ctrl_MemGran_in;
+         EX_MEM_inst_out <= EX_MEM_inst_in;
+         EX_MEM_pc_inc_out <= EX_MEM_pc_inc_in;
       end
 
    ////////////////////
@@ -621,6 +632,9 @@ import control_defs_pkg::*;
    assign MEM_WB_ctrl_MemToReg_in = EX_MEM_ctrl_MemToReg_out;
    assign MEM_WB_ctrl_Halt_in = EX_MEM_ctrl_Halt_out;
    assign MEM_WB_ctrl_MemGran_in = EX_MEM_ctrl_MemGran_out;
+   assign MEM_WB_inst_in = EX_MEM_inst_out;
+   assign MEM_WB_ctrl_MemWrite_in = EX_MEM_ctrl_MemWrite_out;
+   assign MEM_WB_pc_inc_in = EX_MEM_pc_inc_out;
 
    assign MEM_WB_alu_out_in = EX_MEM_alu_out_out;
    always_comb begin
@@ -651,6 +665,9 @@ import control_defs_pkg::*;
 			MEM_WB_ctrl_FpInst_out <= 0;
 			MEM_WB_ctrl_FPIntCvtReg_out <= 0;
          MEM_WB_ctrl_MemGran_out <= 0;
+         MEM_WB_inst_out <= 0;
+         MEM_WB_ctrl_MemWrite_out <= 0;
+         MEM_WB_pc_inc_out <= 0;
       end else begin
          MEM_WB_ctrl_Op_out <= MEM_WB_ctrl_Op_in;
          MEM_WB_ctrl_RegWrite_out <= MEM_WB_ctrl_RegWrite_in;
@@ -662,6 +679,9 @@ import control_defs_pkg::*;
 			MEM_WB_ctrl_FpInst_out <= MEM_WB_ctrl_FpInst_in;
 			MEM_WB_ctrl_FPIntCvtReg_out <= MEM_WB_ctrl_FpInst_out;
          MEM_WB_ctrl_MemGran_out <= MEM_WB_ctrl_MemGran_in;
+         MEM_WB_inst_out <= MEM_WB_inst_in;
+         MEM_WB_ctrl_MemWrite_out <= MEM_WB_ctrl_MemWrite_in;
+         MEM_WB_pc_inc_out <= MEM_WB_pc_inc_in;
       end
    
    /////////////////////////

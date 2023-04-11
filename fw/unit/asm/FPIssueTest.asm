@@ -10,18 +10,18 @@ slbi r10,0x0000
 fmovi f10,r10
 flt f6,f1,f10
 imovf r6,f6
-// beqz r6,.FAIL 
+beqz r6,.fail 
 fst f1,r0,4
 st r8,r0,0
 fadd f23,f1,f10
 fadd f24,f1,f10
 fsub f25,f23,f24
 imovf r25,f25
-bnez r25,.FAIL
+bnez r25,.fail
 fld f1,r0,0
 imovf r1,f1
 sub r1,r1,r8
-bnez r1,.FAIL
+bnez r1,.fail
 fadd f20,f1,f10
 nop
 fadd f23,f1,f10
@@ -42,8 +42,10 @@ fst f23, r0, 0
 nop 
 nop 
 
-.FAIL:
-lbi r16,1
-
-.PASS:
+.pass:
 lbi r17,1
+j .pass
+
+.fail:
+lbi r16,1
+j .fail
