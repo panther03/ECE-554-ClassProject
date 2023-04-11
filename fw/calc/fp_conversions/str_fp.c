@@ -64,7 +64,7 @@ void decode_str(char* str, int* length, int* decimalIndx, int* sign, int* expone
 
 	    exp = str;
 
-            while (*str != '\0') {
+            while (!check_end(*str)) {
                 expLength++;
 		str++;
             }
