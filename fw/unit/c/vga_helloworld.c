@@ -4,9 +4,6 @@ Aidan McEllistrem & Julien de Castelnau
 3/30/23
 */
 
-// Using wide chars for the time being..
-#define char int
-
 // In-hardware MM addresses
 const int *VGA_TEXT_BUFFER = 0xFFFFE000;
 
@@ -26,7 +23,7 @@ void vga_print_plain(int x, int y, const char* msg_data) {
 
 __attribute__((section(".text")))
 int main() {
-  vga_print_plain(0,0,L"Hello World!");
+  vga_print_plain(0,0,"Hello World!");
   while(1) {
     continue;
   }

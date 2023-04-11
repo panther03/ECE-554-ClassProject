@@ -99,16 +99,20 @@ imem IMEM (
 // Big-Endian DMEM
 logic [DATA_WIDTH-1:0] aligned_data_proc_to_mem;
 logic [4:0] shft_amt;
+// Align the data whichs needs to be stored.
+// High Byte  - Stored in [11]
+// Mid Byte   - Stored in [10]
+// Mid Byte   - Stored in [01]
+// Low Byte   - Stored in [00]
 assign shft_amt = {daddr[1:0], 3'b0};
-assign aligned_data_proc_to_mem = data_proc_to_mem << shft_amt;
-assign data_proc_to_mem_be = {aligned_data_proc_to_mem[DMEM_WIDTH-1:0], aligned_data_proc_to_mem[2*DMEM_WIDTH-1:DMEM_WIDTH], aligned_data_proc_to_mem[3*DMEM_WIDTH-1:2*DMEM_WIDTH], aligned_data_proc_to_mem[4*DMEM_WIDTH-1:3*DMEM_WIDTH]};
+assign aligned_data_proc_to_mem = data_proc_to_mem >> shft_amt;
 
 dmem DMEM (
   .clk(clk),
   .we_i(we_dmem),
   // Also OK to truncate address, we have already checked that it's in range (otherwise we would not be enabled).
   .addr_i(daddr[DMEM_DEPTH-1:0]),
-  .wdata_i(data_proc_to_mem_be),
+  .wdata_i(aligned_data_proc_to_mem),
   .rdata_o(data_mem_to_proc_dmem)
 );
 
