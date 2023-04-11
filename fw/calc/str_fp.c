@@ -122,7 +122,6 @@ int main() {
 
     char *fp = "-2.4534e-12";
     x = str_to_fp(fp, &err);
-    
 
     fp = "2.4534e12";
     x = str_to_fp(fp, &err);
