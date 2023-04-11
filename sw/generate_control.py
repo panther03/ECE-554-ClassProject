@@ -7,22 +7,22 @@ def generate_module(row, names, control_file):
     # Find Signal Width and print the output interface signals
     for i in range(len(row)-3):
         signal_name = names[i+3]
-        if (signal_name == "InstFmt" or signal_name == "CondOp" or signal_name == "JType" or signal_name == "FPIntCvtReg") :
+        if (signal_name in ["InstFmt","CondOp","JType","FPIntCvtReg","MemGran"]) :
             signal_width = 2
         elif (signal_name == "AluOp") :
-            signal_width = 4
+            signal_width = 5
         else :
             signal_width = 1
         module_interface += "    output logic [" + str(signal_width-1) +":0]  "+signal_name+",\n" 
     module_interface += "    output logic [0:0]  ctrl_err,\n    output op_word_t Op\n);\n\n" 
     control_file.write(module_interface)
     case_start = "/*\n    7 bit opcode word comprised of the 5-bit opcode,\n    and the 2 LSBs of the instruction to indicate ALU\n    operation in the R-type case (in that order.)\n*/\n"
-    case_start +="always_comb begin\n    case (op_word) inside\n"
+    case_start +="always_comb begin\n    casez (op_word) \n"
     control_file.write(case_start)
 
 def end_module(control_file):
     ## Default Case Statement
-    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 4'b0000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; ctrl_err = 1; Op = NOP; end // error case (default)\n")
+    control_file.write("        default: begin RegWrite = 0; MemWrite = 0; MemRead = 0; InstFmt = 2'b00; MemToReg = 0; AluSrc = 0; AluOp = 5'b00000; CondOp = 2'b00; JType = 2'b00; XtendSel = 0; Exc = 1; Rtn = 0; Halt = 0; FPInst = 0; FPIntCvtReg = 2'b00; InstMemRead = 0; UnsignedOp = 0; MemGran = 2'b0; ctrl_err = 1; Op = NOP; end // error case (default)\n")
     control_file.write("    endcase\nend")
     control_file.write("\n\nendmodule")
 

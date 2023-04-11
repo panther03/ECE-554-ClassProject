@@ -1,4 +1,4 @@
-module VGA_timing(clk25MHz, rst_n, VGA_BLANK_N, VGA_HS, VGA_SYNC_N, VGA_VS, xpix, ypix, addr_lead);
+module VGA_timing(clk25MHz, rst_n, VGA_BLANK_N, VGA_HS, VGA_SYNC_N, VGA_VS, xpix, ypix, addr_lead, Hstate, Vstate);
 				
   input clk25MHz,rst_n;				// 25MHz clk, and asynch active low reset
   output logic VGA_BLANK_N;			// assert (low) during non-active pixels
@@ -7,7 +7,16 @@ module VGA_timing(clk25MHz, rst_n, VGA_BLANK_N, VGA_HS, VGA_SYNC_N, VGA_VS, xpix
   output logic VGA_VS;				// active low vertical synch
   output [9:0] xpix;				// x pixel location
   output reg [8:0] ypix;			// y pixel location
-  output reg [18:0] addr_lead;		// address for videoRam.  Leads by 1.
+  
+  output reg [18:0] addr_lead;
+  
+  typedef enum reg[1:0] {H_SYNCH,H_BP,H_LINE,H_FP} Hstate_t;
+  output Hstate_t Hstate;
+  Hstate_t nxt_Hstate;
+  
+  typedef enum reg[1:0] {V_SYNCH,V_BP,V_FRAME,V_FP} Vstate_t;
+  output Vstate_t Vstate; 
+  Vstate_t nxt_Vstate;
   
   ///////////////////////
   // Needed Registers //
@@ -101,13 +110,6 @@ module VGA_timing(clk25MHz, rst_n, VGA_BLANK_N, VGA_HS, VGA_SYNC_N, VGA_VS, xpix
 	  addr_lead <= addr_lead + 1;
   		
   assign end_of_frame = ((ypix==Rows) && (end_of_line)) ? 1'b1 : 1'b0;
-  
-	  
-  typedef enum reg[1:0] {H_SYNCH,H_BP,H_LINE,H_FP} Hstate_t;
-  Hstate_t Hstate, nxt_Hstate;
-  
-  typedef enum reg[1:0] {V_SYNCH,V_BP,V_FRAME,V_FP} Vstate_t;
-  Vstate_t Vstate, nxt_Vstate;
 
   ///////////////////////////////////////////////
   // Infer state flops for Horizontal machine //
@@ -210,4 +212,3 @@ module VGA_timing(clk25MHz, rst_n, VGA_BLANK_N, VGA_HS, VGA_SYNC_N, VGA_VS, xpix
   assign VGA_SYNC_N = 1'b0;
   
 endmodule
-

@@ -1,21 +1,21 @@
-module imem 
+module imem
 import wi23_defs::*;
 (
    input                   clk,
    input  [IMEM_DEPTH-1:0] addr_i,
    input  [IMEM_DEPTH-1:0] daddr_i,
-   output [IMEM_WIDTH-1:0] inst_o,
-   output [IMEM_WIDTH-1:0] data_o
+   output [PC_WIDTH-1:0] inst_o,
+   output [DATA_WIDTH-1:0] data_o
 );
 
    localparam IMEM_ENTRIES = 1 << IMEM_DEPTH;
    
    reg [IMEM_WIDTH-1:0] mem_r [IMEM_ENTRIES-1:0];
-   reg [IMEM_WIDTH-1:0] inst_r;
-   reg [IMEM_WIDTH-1:0] data_r;
+   reg [PC_WIDTH-1:0] inst_r;
+   reg [DATA_WIDTH-1:0] data_r;
 
    initial begin
-      $readmemh("../../out/32bdecode_temp.hex", mem_r);
+      $readmemh("../../out/out.hex", mem_r);
    end
 
    // We read on negative edge becuase the 552 memory reads asyncronously
@@ -31,3 +31,4 @@ import wi23_defs::*;
    assign data_o = data_r;
 
 endmodule
+

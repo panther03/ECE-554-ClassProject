@@ -65,10 +65,10 @@ def clean(tb_dir, tb_name):
     control_pkg_file = "control_defs_pkg.sv"
     rtl_cpu_dir = "rtl/cpu"
     rtl_pkg_dir = "rtl/pkg"
-    dec_tasks_file = "decode_tasks_pkg.sv"
-    tb_pkg_dir = "tb/pkg"
-    if os.path.exists(os.path.join(tb_pkg_dir, dec_tasks_file)):
-        os.remove(os.path.join(tb_pkg_dir, dec_tasks_file))
+    #dec_tasks_file = "decode_tasks_pkg.sv"
+    #tb_pkg_dir = "tb/pkg"
+    #if os.path.exists(os.path.join(tb_pkg_dir, dec_tasks_file)):
+    #    os.remove(os.path.join(tb_pkg_dir, dec_tasks_file))
     if os.path.exists(os.path.join(rtl_cpu_dir, control_file)):
         os.remove(os.path.join(rtl_cpu_dir, control_file))
     if os.path.exists(os.path.join(rtl_pkg_dir, control_pkg_file)):
@@ -130,15 +130,15 @@ def run_flow(flow, tb, tb_cfg):
     control_pkg_file = "control_defs_pkg.sv"
     rtl_cpu_dir = "rtl/cpu"
     rtl_pkg_dir = "rtl/pkg"
-    dec_tasks_file = "decode_tasks_pkg.sv"
-    tb_pkg_dir = "tb/pkg"
+    #dec_tasks_file = "decode_tasks_pkg.sv"
+    #tb_pkg_dir = "tb/pkg"
 
     if not os.path.exists(tb_dir):
         raise RuntimeError(f"tb directory {tb_dir} doesn't exist. Quitting.")
 
     fw_file = tb_cfg.get("fw")
-    if fw_file:
-        subprocess.run(f"python3 sw/assemble.py fw/{fw_file} -o out/out.hex", shell=True, check=True, capture_output=True)
+    #if fw_file:
+    #    subprocess.run(f"python3 sw/assemble.py fw/{fw_file} -o out/out.hex", shell=True, check=True, capture_output=True)
 
     top = tb_cfg["top"]
     fileset = tb_cfg.get("files")
@@ -159,10 +159,10 @@ def run_flow(flow, tb, tb_cfg):
     shutil.move(control_file,os.path.join(rtl_cpu_dir, control_file))
 
     # Generate the decode_tasks.pkg
-    gen_dec_tasks(orders)
-    if os.path.exists(os.path.join(tb_pkg_dir, dec_tasks_file)):
-        os.remove(os.path.join(tb_pkg_dir, dec_tasks_file))
-    shutil.move(dec_tasks_file,os.path.join(tb_pkg_dir, dec_tasks_file))
+    #gen_dec_tasks(orders)
+    #if os.path.exists(os.path.join(tb_pkg_dir, dec_tasks_file)):
+    #    os.remove(os.path.join(tb_pkg_dir, dec_tasks_file))
+    #shutil.move(dec_tasks_file,os.path.join(tb_pkg_dir, dec_tasks_file))
     
     instr_file.close()
 

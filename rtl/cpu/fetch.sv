@@ -8,10 +8,10 @@ import wi23_defs::*;
     //////////////////////
     // control signals //
     ////////////////////
-    input logic [DMEM_WIDTH-1:0]  reg1, 
-    input logic [DMEM_WIDTH-1:0]  imm, 
-    input logic [DMEM_WIDTH-1:0]  ofs,
-    input logic [IMEM_WIDTH-1:0]  pc_inc_in,
+    input logic [REGFILE_WIDTH-1:0]  reg1, 
+    input logic [REGFILE_WIDTH-1:0]  imm, 
+    input logic [REGFILE_WIDTH-1:0]  ofs,
+    input logic [PC_WIDTH-1:0]    pc_inc_in,
     input logic         stall,
     
     /////////////////////////
@@ -24,8 +24,8 @@ import wi23_defs::*;
     input logic [1:0]   CondOp,
 
     // Outputs
-    output logic [IMEM_WIDTH-1:0] iaddr,
-    output logic [IMEM_WIDTH-1:0] pc_inc_out,
+    output logic [PC_WIDTH-1:0] iaddr,  // Output full 32-bit address
+    output logic [PC_WIDTH-1:0] pc_inc_out,
     output logic        flush,
     output logic        fetch_err
 );
@@ -35,8 +35,8 @@ import wi23_defs::*;
     always @* case (CondOp)
         2'b00 : CmpOut = ~|reg1;
         2'b01 : CmpOut = |reg1;
-        2'b10 : CmpOut = reg1[DMEM_WIDTH];
-        default : CmpOut = ~reg1[DMEM_WIDTH]; // 2'b11
+        2'b10 : CmpOut = reg1[REGFILE_WIDTH-1];
+        default : CmpOut = ~reg1[REGFILE_WIDTH-1]; // 2'b11
     endcase
 
     // Only flush if we are doing a branch and it's taken
@@ -44,17 +44,21 @@ import wi23_defs::*;
     // Or if we're doing a jump (Like a branch that is always taken)
     assign flush = (CmpOut & (JType == 2'b11)) | (^JType) | Exc | Rtn;
 
-    ///////////////////////////////////////
-    // branch address calculation logic //
-    /////////////////////////////////////
+    // PC is word-aligned, Make it byte aligned to compute branch address calculations
+    //logic [PC_WIDTH-1:0] pc_inc_in_t;
+    //assign pc_inc_in_t = pc_inc_in << 2;
 
-    wire [IMEM_WIDTH-1:0] addr_base, addr_ofs, addr;
+    ///////////////////////////////////////
+    // Branch Address Calculation Logic ///
+    ///////////////////////////////////////
+
+    wire [PC_WIDTH-1:0] addr_base, addr_ofs, addr;
 
     assign addr_base = JType[1] ? pc_inc_in : reg1;
     assign addr_ofs = JType[0] ? imm : ofs;
     assign addr = addr_base + addr_ofs;
 
-    reg [IMEM_WIDTH-1:0] pc_target;
+    reg [PC_WIDTH-1:0] pc_target;
 
     always @* case (JType)
         2'b00 : pc_target = pc_inc_out;
@@ -67,10 +71,10 @@ import wi23_defs::*;
     // PC & EPC register //
     //////////////////////
 
-    reg [IMEM_WIDTH-1:0] pc, epc;
+    reg [PC_WIDTH-1:0] pc, epc;
 
-    wire [IMEM_WIDTH-1:0] pc_exc = Exc ? 16'h4 : (Rtn ? epc : (stall ? pc : pc_target));
-
+    wire [PC_WIDTH-1:0] pc_exc;
+    assign pc_exc = Exc ? 16'h4 : (Rtn ? epc : (stall ? pc : pc_target));
 
     always @(posedge clk, negedge rst_n) begin
         if (!rst_n) begin
@@ -82,16 +86,16 @@ import wi23_defs::*;
         end
     end
 
-    assign iaddr = pc;
+    assign iaddr = pc >> 2;	// Make PC word-aligned
 
     ///////////////////////////
     // pc_inc (adder) logic //
     /////////////////////////
 
-	assign pc_inc_out = pc + (Halt ? 16'h0 : 16'h4);
+    assign pc_inc_out = pc + (Halt ? 16'h0 : 16'h4);
 
-	// we don't consider an error case for fetch,
-   	// so err is tied low.
-	assign fetch_err = 1'b0;
+    // we don't consider an error case for fetch,
+    // so err is tied low.
+    assign fetch_err = 1'b0;
 
 endmodule

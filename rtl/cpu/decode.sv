@@ -4,7 +4,7 @@ import wi23_defs::*;
     // Inputs
     input logic         clk, 
     input logic         rst_n,
-    input logic [IMEM_WIDTH-1:0]  inst,
+    input logic [PC_WIDTH-1:0]  inst,
     input logic [REGFILE_WIDTH-1:0]  write_in,
     input logic [REGFILE_DEPTH-1:0]  writesel,
     input logic [REGFILE_WIDTH-1:0]  fp_write_in,
@@ -13,6 +13,8 @@ import wi23_defs::*;
     input logic         bypass_reg2,
     input logic         fp_bypass_reg1, 
     input logic         fp_bypass_reg2,
+    input logic         fp_int_bypass_reg1, 
+    input logic         fp_int_bypass_reg2,
     input logic [1:0]   InstFmt, 
     input logic [1:0]   JType,
     input logic         XtendSel, 
@@ -22,6 +24,7 @@ import wi23_defs::*;
     input logic [1:0]   FPIntCvtReg,
     input logic         MemRead,
     input logic         MemWrite,
+    input logic         UnsignedOp,
 
     // Outputs
     output logic [REGFILE_WIDTH-1:0] reg1,
@@ -47,6 +50,8 @@ import wi23_defs::*;
     logic [REGFILE_WIDTH-1:0] dec_reg2;
     logic [REGFILE_WIDTH-1:0] dec_fp_reg1;
     logic [REGFILE_WIDTH-1:0] dec_fp_reg2;
+	 
+	logic  int_decode_err, fp_decode_err;
     
     /////////////////////////
     /// Int Register file ///
@@ -58,9 +63,9 @@ import wi23_defs::*;
     rf iRF (.clk(clk),.rst_n(rst_n),.write(RegWrite),.err(int_decode_err),
             .read1regsel(reg1sel),.read2regsel(reg2sel),.writeregsel(writesel),
             .read1data(reg1raw),.read2data(reg2raw),.writedata(write_in));
-    
-    assign dec_reg1 = bypass_reg1 ? write_in : reg1raw;
-    assign dec_reg2 = bypass_reg2 ? write_in : reg2raw;
+
+    assign dec_reg1 = bypass_reg1 ? write_in : fp_int_bypass_reg1 ? fp_write_in : reg1raw;
+    assign dec_reg2 = bypass_reg2 ? write_in : fp_int_bypass_reg2 ? fp_write_in : reg2raw;
     
     ////////////////////////
     /// FP Register file ///

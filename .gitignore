@@ -1,5 +1,4 @@
 out/*
-!out/32bdecode_temp.hex
 
 fpga/*/*
 !fpga/*/Makefile
@@ -14,6 +13,10 @@ tb/*/*
 !tb/*/*.v
 !tb/*/*.sv
 !tb/*/wave.do
+
+fw/**/*.hex
+fw/**/*.o
+fw/**/*.elf
 
 transcript
 
