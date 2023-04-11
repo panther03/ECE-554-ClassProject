@@ -6,7 +6,7 @@ int main(int argc, char *argv[]){
     Queue equation;
     structureQueue_Queue(&equation);
 
-    parse_equation("12 + 2 + 31-1", &equation);
+    parse_equation("5 - 2 * 8", &equation);
 
     while(!isEmpty_Queue(&equation)){
         if(peek_Queue(&equation).isOperator){
@@ -191,52 +191,13 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
         userInput++;
     }
 
-    // Token token;
-    // token.isOperator = 1;
-    // token.value = '(';
-    // token.precedence = 1;
-    // enqueue_Queue(output, token);
-
-    // token.isOperator = 0;
-    // token.precedence = 1;
-    // token.value = 1;
-    // enqueue_Queue(output, token);
-
-
-    // token.isOperator = 1;
-    // token.precedence = 1;
-    // token.value = '+';
-    // enqueue_Queue(output, token);
-
-
-    // token.isOperator = 0;
-    // token.precedence = 1;
-    // token.value = 2;
-    // enqueue_Queue(output, token);
-
-    // token.isOperator = 1;
-    // token.precedence = 2;
-    // token.value = '/';
-    // enqueue_Queue(output, token);
-
-
-    // token.isOperator = 0;
-    // token.precedence = 1;
-    // token.value = 3;
-    // enqueue_Queue(output, token);
-
-    // token.isOperator = 1;
-    // token.precedence = 1;
-    // token.value = ')';
-    // enqueue_Queue(output, token);
-
-    while(!isEmpty_Queue(output)){
-        if(peek_Queue(output).isOperator){
-            printf("%c: ", dequeue_Queue(output).value);
-        }else {
-            printf("%d: ", dequeue_Queue(output).value);
-        }
-    }
+    // while(!isEmpty_Queue(output)){
+    //     if(peek_Queue(output).isOperator){
+    //         printf("%c: ", dequeue_Queue(output).value);
+    //     }else {
+    //         printf("%d: ", dequeue_Queue(output).value);
+    //     }
+    // }
 
     printf("\n");
 }
