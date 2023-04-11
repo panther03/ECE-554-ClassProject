@@ -1,3 +1,25 @@
+#include "str_fp.h"
+
+int check_end(char c) {
+    if (c == '\0')
+        return 1;
+    if (c == ' ')
+        return 1; 
+    if (c == '+')
+        return 1;
+    if (c == '-')
+        return 1;
+    if (c == '*')
+        return 1;
+    if (c == '/')
+        return 1;
+    if (c == '(')
+        return 1;
+    if (c == ')')
+        return 1;
+    return 0;
+}
+
 float pow_10(int pow) {
     float mult = 1.0f;
 
@@ -24,7 +46,7 @@ void decode_str(char* str, int* length, int* decimalIndx, int* sign, int* expone
 	str++;
     }
     
-    while (*str != '\0') {
+    while (!check_end(*str)) {
         if (*str == '.') {
             *decimalIndx = *length;
         }
@@ -42,13 +64,13 @@ void decode_str(char* str, int* length, int* decimalIndx, int* sign, int* expone
 
 	    exp = str;
 
-            while (*str != '\0') {
+            while (!check_end(*str)) {
                 expLength++;
 		str++;
             }
 	    *exponentLength = expLength;
 
-            while (*exp != '\0') {
+            while (!check_end(*exp)) {
                 if (*exp < '0' || *exp > '9') {
                     *err = 1;
                 }
@@ -96,7 +118,7 @@ float str_to_fp(char* str, int* err) {
     if (sign < 0) {
         str++;
     }
-    for (i = 0; i <= length + 1 && *(str + i) != '\0'; i++) {
+    for (i = 0; i <= length + 1 && !check_end(*(str + i)); i++) {
         curr = *(str + i);
 
         if (curr == '.') {
@@ -114,38 +136,4 @@ float str_to_fp(char* str, int* err) {
     }
 
     return fp * sign;
-}
-
-int main() {
-    float x;
-    int err;
-
-    char *fp = "-2.4534e-12";
-    x = str_to_fp(fp, &err);
-    
-
-    fp = "2.4534e12";
-    x = str_to_fp(fp, &err);
-       
-    fp = "7463.82201";
-    x = str_to_fp(fp, &err);
-    
-    fp = ".004534794";
-    x = str_to_fp(fp, &err);
-    
-    fp = ".004c34794";
-    x = str_to_fp(fp, &err);
-        
-    fp = "-x.0034794";
-    x = str_to_fp(fp, &err);
-        
-    fp = "05794e";
-    x = str_to_fp(fp, &err);
-    
-    fp = "4.794e-7c8";
-    x = str_to_fp(fp, &err);
-    
-    fp = "453-4794";
-    x = str_to_fp(fp, &err);
-    return 0;
 }
