@@ -127,7 +127,7 @@ assign write_in = regwrite ? (int_regwrite ? int_write_in : fp_write_in) : 32'hX
 assign writesel = regwrite ? (int_regwrite ? int_writesel : fp_writesel) : 5'hX;
 
 // MEM is always 1 pipeline stage (and 1 cycle) before WB
-always_ff @ (negedge clk) begin
+always_ff @ (posedge clk) begin
     mem_write_data <= WI23.data_proc_to_mem;
     mem_read_data <= WI23.data_mem_to_proc_map;
     mem_data_addr <= WI23.daddr;
@@ -135,11 +135,11 @@ end
     
 // Store Instruction Address and Data
 assign write_addr = WI23.PROC.MEM_WB_ctrl_MemWrite_out ? mem_data_addr : 32'hX;
-assign write_data = WI23.PROC.MEM_WB_ctrl_MemWrite_out ? WI23.data_proc_to_mem : 32'hX;
+assign write_data = WI23.PROC.MEM_WB_ctrl_MemWrite_out ? mem_write_data : 32'hX;
 
 // Load Instruction Address and Data
 assign read_addr = WI23.PROC.MEM_WB_ctrl_MemToReg_out ? mem_data_addr : 32'hX;
-assign read_data = WI23.PROC.MEM_WB_ctrl_MemToReg_out ? WI23.data_mem_to_proc_map : 32'hX;
+assign read_data = WI23.PROC.MEM_WB_ctrl_MemToReg_out ? mem_write_data : 32'hX;
 
 // String for Register File and Index
 assign write_reg = regwrite ? (int_regwrite ? int_reg : fp_reg) : "x";
