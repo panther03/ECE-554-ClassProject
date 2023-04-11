@@ -1,5 +1,25 @@
 #include "str_fp.h"
 
+int check_end(char c) {
+    if (c == '\0')
+        return 1;
+    if (c == ' ')
+        return 1; 
+    if (c == '+')
+        return 1;
+    if (c == '-')
+        return 1;
+    if (c == '*')
+        return 1;
+    if (c == '/')
+        return 1;
+    if (c == '(')
+        return 1;
+    if (c == ')')
+        return 1;
+    return 0;
+}
+
 float pow_10(int pow) {
     float mult = 1.0f;
 
@@ -26,7 +46,7 @@ void decode_str(char* str, int* length, int* decimalIndx, int* sign, int* expone
 	str++;
     }
     
-    while (*str != '\0') {
+    while (!check_end(*str)) {
         if (*str == '.') {
             *decimalIndx = *length;
         }
@@ -50,7 +70,7 @@ void decode_str(char* str, int* length, int* decimalIndx, int* sign, int* expone
             }
 	    *exponentLength = expLength;
 
-            while (*exp != '\0') {
+            while (!check_end(*exp)) {
                 if (*exp < '0' || *exp > '9') {
                     *err = 1;
                 }
