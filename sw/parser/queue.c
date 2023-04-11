@@ -28,7 +28,7 @@ void enqueue_Queue(Queue * queue, Token value){
 Token dequeue_Queue(Queue * queue) {
     Token value = queue->data[queue->head];
 
-    if(queue->size = 1){
+    if(queue->size == 1){
         queue->head = -1;
         queue->tail = 0;
     } else {

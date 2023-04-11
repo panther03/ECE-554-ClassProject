@@ -21,4 +21,5 @@ Token pop_Stack(Stack * stack) {
 
 Token peek_Stack(Stack * stack){
     Token value = stack->data[stack->top];
+    return value;
 }
