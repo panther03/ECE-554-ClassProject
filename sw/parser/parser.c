@@ -6,7 +6,7 @@ int main(int argc, char *argv[]){
     Queue equation;
     structureQueue_Queue(&equation);
 
-    parse_equation("", &equation);
+    parse_equation("12 + 2 + 31-1", &equation);
 
     while(!isEmpty_Queue(&equation)){
         if(peek_Queue(&equation).isOperator){
@@ -98,32 +98,145 @@ void to_reverse_polish_notation(Queue * input, Queue * output){
 
 
 void text_to_array_of_tokens(char * userInput, Queue * output){
-    Token token;
-    token.isOperator = 0;
-    token.precedence = 1;
-    token.value = 1;
-    enqueue_Queue(output, token);
+
+    while (*userInput) {
+
+        switch (*userInput){
+            case ' ':{
+                break;
+            }
+            case '+':{
+                Token token;
+                token.value = '+';
+                token.isOperator = 1;
+                token.precedence = 1;
+                enqueue_Queue(output, token);
+                break;
+            }
+            case '-':{
+                Token token;
+                token.value = '-';
+                token.precedence = 1;
+                token.isOperator = 1;
+                enqueue_Queue(output, token);
+                break;
+            }
+            case '*':{
+                Token token;
+                token.value = '*';
+                token.precedence = 2;
+                token.isOperator = 1;
+                enqueue_Queue(output, token);
+                break;
+            }
+            case '/':{
+                Token token;
+                token.value = '/';
+                token.precedence = 2;
+                token.isOperator = 1;
+                enqueue_Queue(output, token);
+                break;
+            }
+            case '(':{
+                Token token;
+                token.value = '(';
+                token.isOperator = 1;
+                enqueue_Queue(output, token);
+                break;
+            }
+            case ')':{
+                Token token;
+                token.value = ')';
+                token.isOperator = 1;
+                enqueue_Queue(output, token);
+                break;
+            }
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9': {
+                int value = 0;
+                while(*userInput >= '0' && *userInput <= '9'){
+                    value = (*userInput - '0') + value * 10;
+
+                    userInput++;
+                }
+
+                Token token;
+                token.value = value;
+                token.isOperator = 0;
+                enqueue_Queue(output, token);
+
+                userInput--;
+
+                break;
+
+            }
+            default:
+            {
+                // Clear queue and return
+                while(!isEmpty_Queue(output)){
+                    dequeue_Queue(output);
+                }
+                return;
+            }
+        }
+
+        userInput++;
+    }
+
+    // Token token;
+    // token.isOperator = 1;
+    // token.value = '(';
+    // token.precedence = 1;
+    // enqueue_Queue(output, token);
+
+    // token.isOperator = 0;
+    // token.precedence = 1;
+    // token.value = 1;
+    // enqueue_Queue(output, token);
 
 
-    token.isOperator = 1;
-    token.precedence = 1;
-    token.value = '+';
-    enqueue_Queue(output, token);
+    // token.isOperator = 1;
+    // token.precedence = 1;
+    // token.value = '+';
+    // enqueue_Queue(output, token);
 
 
-    token.isOperator = 0;
-    token.precedence = 1;
-    token.value = 12;
-    enqueue_Queue(output, token);
+    // token.isOperator = 0;
+    // token.precedence = 1;
+    // token.value = 2;
+    // enqueue_Queue(output, token);
+
+    // token.isOperator = 1;
+    // token.precedence = 2;
+    // token.value = '/';
+    // enqueue_Queue(output, token);
 
 
-    // while(!isEmpty_Queue(output)){
-    //     if(peek_Queue(output).isOperator){
-    //         printf("%c: ", dequeue_Queue(output).value);
-    //     }else {
-    //         printf("%d: ", dequeue_Queue(output).value);
-    //     }
-    // }
+    // token.isOperator = 0;
+    // token.precedence = 1;
+    // token.value = 3;
+    // enqueue_Queue(output, token);
+
+    // token.isOperator = 1;
+    // token.precedence = 1;
+    // token.value = ')';
+    // enqueue_Queue(output, token);
+
+    while(!isEmpty_Queue(output)){
+        if(peek_Queue(output).isOperator){
+            printf("%c: ", dequeue_Queue(output).value);
+        }else {
+            printf("%d: ", dequeue_Queue(output).value);
+        }
+    }
 
     printf("\n");
 }
