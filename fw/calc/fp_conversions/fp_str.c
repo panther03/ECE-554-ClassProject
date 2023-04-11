@@ -1,3 +1,5 @@
+#include "str_fp.h"
+
 int write_integer(unsigned int integer, char *buff) {
     char intBuff[16];
     char *indx = intBuff + 15;
@@ -188,12 +190,4 @@ void fp_to_str(float fp, char *buff) {
 
     *buff = '\0';
     return;
-}
-
-int main() {
-    float x = -30.29026e-5f;
-    char buff[20];
-
-    fp_to_str(x, buff);
-    return 0;
 }

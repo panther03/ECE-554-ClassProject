@@ -1,3 +1,5 @@
+#include "str_fp.h"
+
 float pow_10(int pow) {
     float mult = 1.0f;
 
@@ -114,37 +116,4 @@ float str_to_fp(char* str, int* err) {
     }
 
     return fp * sign;
-}
-
-int main() {
-    float x;
-    int err;
-
-    char *fp = "-2.4534e-12";
-    x = str_to_fp(fp, &err);
-
-    fp = "2.4534e12";
-    x = str_to_fp(fp, &err);
-       
-    fp = "7463.82201";
-    x = str_to_fp(fp, &err);
-    
-    fp = ".004534794";
-    x = str_to_fp(fp, &err);
-    
-    fp = ".004c34794";
-    x = str_to_fp(fp, &err);
-        
-    fp = "-x.0034794";
-    x = str_to_fp(fp, &err);
-        
-    fp = "05794e";
-    x = str_to_fp(fp, &err);
-    
-    fp = "4.794e-7c8";
-    x = str_to_fp(fp, &err);
-    
-    fp = "453-4794";
-    x = str_to_fp(fp, &err);
-    return 0;
 }
