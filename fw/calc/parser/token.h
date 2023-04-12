@@ -12,7 +12,7 @@
 */
 typedef struct Token{
     int isOperator;
-    int value;
+    float value;
     int precedence;
 } Token;
 
