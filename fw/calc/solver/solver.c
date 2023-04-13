@@ -8,10 +8,10 @@ int main(int argc, char *argv[]){
     Queue equation;
     structureQueue_Queue(&equation);
 
-    parse_equation("3*(6-2)*5/10", &equation);
+    parse_equation("11", &equation);
 
     int err;
-    float output = solveEquation(&equation, 0, &err);
+    float output = solveEquation(&equation, 4.9, &err);
 
     printf("%f\n", output);
 

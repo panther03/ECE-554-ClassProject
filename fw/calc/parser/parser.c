@@ -1,26 +1,4 @@
 #include "parser.h"
-// #include <stdlib.h> // Used only for debugging. Not actually supported on the board
-// #include <stdio.h> // Used only for debugging. Not actually supported on the board
-// int main(int argc, char *argv[]){
-
-    
-//     Queue equation;
-//     structureQueue_Queue(&equation);
-
-//     parse_equation("-5 -x * 8", &equation);
-
-//     while(!isEmpty_Queue(&equation)){
-//         if(peek_Queue(&equation).isOperator){
-//             printf("%c ", (char)(dequeue_Queue(&equation).value));
-//         }else {
-//             printf("%f ", dequeue_Queue(&equation).value);
-//         }
-//     }
-
-//     printf("\n");
-
-//     return 0;
-// }
 
 // Input: User input string
 // Output: Array of Tokens in reverse polish notation
@@ -210,13 +188,5 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
 
         userInput++;
     }
-
-    // while(!isEmpty_Queue(output)){
-    //     if(peek_Queue(output).isOperator){
-    //         printf("%c: ", (char)dequeue_Queue(output).value);
-    //     }else {
-    //         printf("%f: ", dequeue_Queue(output).value);
-    //     }
-    // }
 
 }
