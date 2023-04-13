@@ -221,5 +221,4 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
     //     }
     // }
 
-    printf("\n");
 }
