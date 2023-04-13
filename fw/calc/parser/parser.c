@@ -3,8 +3,6 @@
 // #include <stdio.h> // Used only for debugging. Not actually supported on the board
 // int main(int argc, char *argv[]){
 
-//     int err;
-//     printf("%f\n", str_to_fp("10 ", &err));
     
 //     Queue equation;
 //     structureQueue_Queue(&equation);
