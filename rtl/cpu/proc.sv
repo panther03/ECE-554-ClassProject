@@ -19,6 +19,7 @@ import wi23_defs::*;
    output logic [3:0]            we_o,
    output logic [3:0]            re_o,
    output logic [DATA_WIDTH-1:0] data_proc_to_mem_o,
+   output logic [1:0]            data_proc_to_mem_gram_o,
    // Error and Halt status
    output logic                  err_o,
    output logic                  halt_o
@@ -594,6 +595,7 @@ import control_defs_pkg::*;
 
    assign daddr_o = EX_MEM_alu_out_out;
    assign data_proc_to_mem_o = EX_MEM_reg2_out;
+   assign data_proc_to_mem_gram_o = EX_MEM_ctrl_MemGran_out;
    always_comb begin
       we_o = 4'h0;
       casez (EX_MEM_ctrl_MemGran_out)

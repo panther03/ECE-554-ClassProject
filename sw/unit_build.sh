@@ -25,5 +25,5 @@ else
     exit 1
 fi
 
-$OBJDUMP -dr -S $OUT_DIR/out.elf > $OUT_DIR/exec-out.log
+$OBJDUMP -dr -s -S $OUT_DIR/out.elf > $OUT_DIR/exec-out.log
 $OBJCOPY --verilog-data-width 4 $OUT_DIR/out.elf  -O verilog $OUT_DIR/out.hex

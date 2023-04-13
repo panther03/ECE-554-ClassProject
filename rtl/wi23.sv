@@ -34,6 +34,7 @@ logic [DATA_WIDTH-1:0]  data_mem_to_proc_map;
 logic [DATA_WIDTH-1:0]  data_mem_to_proc_dmem;
 logic [DATA_WIDTH-1:0]  data_proc_to_mem;
 logic [DATA_WIDTH-1:0]  data_proc_to_mem_be;
+logic [1:0]             data_proc_to_mem_gran;
 logic                   ldcr;
 
 logic [3:0] we_map;
@@ -72,7 +73,8 @@ proc PROC (
    // Data memory signals
    .daddr_o(daddr), .we_o(we_map), .re_o(re_map),
    .data_proc_to_mem_o(data_proc_to_mem), 
-   .data_mem_to_proc_i(data_mem_to_proc_map)
+   .data_mem_to_proc_i(data_mem_to_proc_map),
+   .data_proc_to_mem_gram_o(data_proc_to_mem_gran)
 );
 
 /////////////////////////
@@ -96,23 +98,31 @@ imem IMEM (
 // Data memory //
 //////////////// 
 
-// Big-Endian DMEM
-logic [DATA_WIDTH-1:0] aligned_data_proc_to_mem;
-logic [4:0] shft_amt;
-// Align the data whichs needs to be stored.
-// High Byte  - Stored in [11]
-// Mid Byte   - Stored in [10]
-// Mid Byte   - Stored in [01]
-// Low Byte   - Stored in [00]
-assign shft_amt = {daddr[1:0], 3'b0};
-assign aligned_data_proc_to_mem = data_proc_to_mem >> shft_amt;
+// Shift data read from DMEM for sub-word accesses.
+// ----  Address --->
+// High Byte | Byte | Byte | Low Byte
+logic [4:0] shift_ldb;
+logic [REGFILE_WIDTH-1:0] data_proc_to_mem_ldb;
+assign shift_ldb = {~daddr[1:0], 3'b000}; // 00 - 24, 01 - 16, 10 - 8, 11 - 0
+assign data_proc_to_mem_ldb = data_proc_to_mem << shift_ldb;
+
+logic [4:0] shift_ldh;
+logic [REGFILE_WIDTH-1:0] data_proc_to_mem_ldh;
+assign shift_ldh = daddr[1:0] == 2'b00 ? 'd16 :
+                   daddr[1:0] == 2'b01 ? 'd08 : 'd00 ; // We don't support [1:0] == 2'b11 case
+assign data_proc_to_mem_ldh = data_proc_to_mem << shift_ldh;
+
+logic [DATA_WIDTH-1:0] data_proc_to_mem_muxed; 
+assign data_proc_to_mem_muxed = data_proc_to_mem_gran == 2'b01 ? data_proc_to_mem_ldb : // Byte Access  
+                                data_proc_to_mem_gran == 2'b10 ? data_proc_to_mem_ldh : // Byte Access  
+                                                                 data_proc_to_mem     ; // Word Access 
 
 dmem DMEM (
   .clk(clk),
   .we_i(we_dmem),
   // Also OK to truncate address, we have already checked that it's in range (otherwise we would not be enabled).
   .addr_i(daddr[DMEM_DEPTH-1:0]),
-  .wdata_i(aligned_data_proc_to_mem),
+  .wdata_i(data_proc_to_mem_muxed),
   .rdata_o(data_mem_to_proc_dmem)
 );
 

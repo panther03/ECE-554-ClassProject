@@ -29,20 +29,20 @@ andn r7, r6, r11
 bnez r7, .fail
 stb r1, r0, 0
 ldb r5, r0, 0
-subi r6, r5, 0x00ff
+subi r6, r5, 0x00cd
 bnez r6, .fail
 sth r1, r0, 0
 ldh r5, r0, 0
-xori r6, r5, 0xffff 
+xori r6, r5, 0xabcd
 andn r7, r6, r11
 bnez r7, .fail
 stb r1, r0, 3
 ldb r5, r0, 3
-subi r6, r5, 0x00ff
+subi r6, r5, 0x00cd
 bnez r6, .fail
 sth r1, r0, 2
 ldh r5, r0, 2
-xori r6, r5, 0xffff 
+xori r6, r5, 0xabcd
 andn r7, r6, r11
 bnez r7, .fail
 
