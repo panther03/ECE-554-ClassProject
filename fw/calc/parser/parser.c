@@ -1,28 +1,28 @@
 #include "parser.h"
-#include <stdlib.h> // Used only for debugging. Not actually supported on the board
-#include <stdio.h> // Used only for debugging. Not actually supported on the board
-int main(int argc, char *argv[]){
+// #include <stdlib.h> // Used only for debugging. Not actually supported on the board
+// #include <stdio.h> // Used only for debugging. Not actually supported on the board
+// int main(int argc, char *argv[]){
 
-    int err;
-    printf("%f\n", str_to_fp("10 ", &err));
+//     int err;
+//     printf("%f\n", str_to_fp("10 ", &err));
     
-    Queue equation;
-    structureQueue_Queue(&equation);
+//     Queue equation;
+//     structureQueue_Queue(&equation);
 
-    parse_equation("-5 -x * 8", &equation);
+//     parse_equation("-5 -x * 8", &equation);
 
-    while(!isEmpty_Queue(&equation)){
-        if(peek_Queue(&equation).isOperator){
-            printf("%c ", (char)(dequeue_Queue(&equation).value));
-        }else {
-            printf("%f ", dequeue_Queue(&equation).value);
-        }
-    }
+//     while(!isEmpty_Queue(&equation)){
+//         if(peek_Queue(&equation).isOperator){
+//             printf("%c ", (char)(dequeue_Queue(&equation).value));
+//         }else {
+//             printf("%f ", dequeue_Queue(&equation).value);
+//         }
+//     }
 
-    printf("\n");
+//     printf("\n");
 
-    return 0;
-}
+//     return 0;
+// }
 
 // Input: User input string
 // Output: Array of Tokens in reverse polish notation
