@@ -5,6 +5,7 @@
 CC="wi23-elf-gcc"
 AS="wi23-elf-as"
 LD="wi23-elf-ld"
+RUN="wi23-elf-run"
 OBJDUMP="wi23-elf-objdump"
 OBJCOPY="wi23-elf-objcopy"
 
@@ -26,4 +27,5 @@ else
 fi
 
 $OBJDUMP -dr -s -S $OUT_DIR/out.elf > $OUT_DIR/exec-out.log
-$OBJCOPY --verilog-data-width 4 $OUT_DIR/out.elf  -O verilog $OUT_DIR/out.hex
+$OBJCOPY --verilog-data-width 4 $OUT_DIR/out.elf -O verilog $OUT_DIR/out.hex
+#$RUN -t $OUT_DIR/out.elf > $OUT_DIR/wi23_sim_trace.log

@@ -37,7 +37,7 @@ initial begin
     repeat (2) @ (negedge clk);
     // Out of reset
     rst_n = 1'b1;
-    repeat (400) @ (negedge clk);
+    repeat (800) @ (negedge clk);
     $display("\nYahoo!!! All Tests Passed\n");
     $finish();
 end
@@ -55,7 +55,7 @@ int sim_log_file;
 
 // Initialize simulation trace
 initial begin
-      sim_log_file = $fopen("wi23_sim_trace.log");
+    sim_log_file = $fopen("wi23_tb_trace.log");
 end
 
 string write_reg, int_reg, fp_reg;
