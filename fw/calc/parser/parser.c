@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
     Queue equation;
     structureQueue_Queue(&equation);
 
-    parse_equation("-5 --2 * 8", &equation);
+    parse_equation("-5 -x * 8", &equation);
 
     while(!isEmpty_Queue(&equation)){
         if(peek_Queue(&equation).isOperator){
@@ -54,7 +54,7 @@ void to_reverse_polish_notation(Queue * input, Queue * output){
         Token nextToken = dequeue_Queue(input);
         //if the token is:
         // - a number:
-        if(!nextToken.isOperator){
+        if(!nextToken.isOperator || (char)nextToken.value == 'x'){
             // put it into the output queue
             enqueue_Queue(output, nextToken);
         }
@@ -151,6 +151,15 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 enqueue_Queue(output, token);
                 break;
             }
+            case 'x':
+            case 'X': {
+                Token token;
+                token.value = 'x';
+                token.isOperator = 1;
+                lastTokenWasOperator = 0;
+                enqueue_Queue(output, token);
+                break;
+            }
             case '-':
             case '0':
             case '1':
@@ -204,13 +213,13 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
         userInput++;
     }
 
-    while(!isEmpty_Queue(output)){
-        if(peek_Queue(output).isOperator){
-            printf("%c: ", (char)dequeue_Queue(output).value);
-        }else {
-            printf("%f: ", dequeue_Queue(output).value);
-        }
-    }
+    // while(!isEmpty_Queue(output)){
+    //     if(peek_Queue(output).isOperator){
+    //         printf("%c: ", (char)dequeue_Queue(output).value);
+    //     }else {
+    //         printf("%f: ", dequeue_Queue(output).value);
+    //     }
+    // }
 
     printf("\n");
 }
