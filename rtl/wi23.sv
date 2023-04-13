@@ -7,6 +7,9 @@ import wi23_defs::*;
   // Switches and LEDs
   input  [9:0] SW,
   output [9:0] LEDR,
+  // PS2
+  input        PS2_CLK,
+  input        PS2_DAT,
   // UART
   input        RX,
   output       TX,
@@ -148,7 +151,6 @@ VGA_timing iVGATM(.clk25MHz(VGA_CLK), .rst_n(rst_n), .VGA_BLANK_N(VGA_BLANK_N),
   // Technically the range is 0xE000 - 0xF2C0 but this will trigger until 0xFFFF (and also for whatever the upper 16 bits are)
   wire vga_we = &daddr[15:13] & |we_map;
 
-
   VGA_display iVGA(
     .clk(clk),
     .rst_n(rst_n),
@@ -158,11 +160,28 @@ VGA_timing iVGATM(.clk25MHz(VGA_CLK), .rst_n(rst_n), .VGA_BLANK_N(VGA_BLANK_N),
     .draw_mode_sel_i(1'b0),
     .VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B)
   );
+
+////////////////////////
+// Instantiate PS2 KB //
+////////////////////////
+  reg [9:0] debug_PS2_ledr;
+  reg [7:0] PS2_key;
+  reg PS2_rdy, PS2_kb_enter;
+  
+  PS2_kb iPS2_KB(
+    .clk(clk),                   
+    .rst_n(rst_n),
+    .PS2_CLK_i(PS2_CLK),             // The PS/2 KB has a clock of its own
+    .PS2_DAT_i(PS2_DAT),             // Serial line in from the KB
+    .PS2_CHAR_o(PS2_key),            // Last key pressed
+    .PS2_rdy_o(PS2_rdy),             // signal that a key code is available 
+	 .PS2_kb_enter_o(PS2_kb_enter)
+  );
   
 
 /////////////////////////
-// LED register logic //
-///////////////////////
+// LED register logic  //
+/////////////////////////
 // Hold LED state until the programmer writes to address again
 always_ff @(posedge clk, negedge rst_n)
   if (!rst_n)
@@ -231,6 +250,15 @@ always_comb begin
         data_mem_to_proc_map = {24'h0, spart_databus};
         spart_databus_in = data_proc_to_mem[7:0];
       end
+		16'hc008: begin
+			data_mem_to_proc_map = {24'h0, PS2_key};
+		end
+		16'hc009: begin
+			data_mem_to_proc_map = {31'h0, PS2_rdy};
+		end
+		16'hc00A: begin
+			data_mem_to_proc_map = {31'h0, PS2_kb_enter};
+		end
 		default : begin end
       // There is no default because all of our inputs
       // are defaulted. It would be the same thing.
@@ -242,5 +270,7 @@ end
 // Output signals //
 ///////////////////
 assign LEDR = LEDR_r;
+//assign LEDR = {PS2_rdy, PS2_kb_enter, LEDR_r};
+
 
 endmodule
