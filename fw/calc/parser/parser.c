@@ -3,16 +3,19 @@
 #include <stdio.h> // Used only for debugging. Not actually supported on the board
 int main(int argc, char *argv[]){
 
+    int err;
+    printf("%f\n", str_to_fp("10 ", &err));
+    
     Queue equation;
     structureQueue_Queue(&equation);
 
-    parse_equation("5 - 2 * 8", &equation);
+    parse_equation("-5 -x * 8", &equation);
 
     while(!isEmpty_Queue(&equation)){
         if(peek_Queue(&equation).isOperator){
-            printf("%c ", dequeue_Queue(&equation).value);
+            printf("%c ", (char)(dequeue_Queue(&equation).value));
         }else {
-            printf("%d ", dequeue_Queue(&equation).value);
+            printf("%f ", dequeue_Queue(&equation).value);
         }
     }
 
@@ -51,7 +54,7 @@ void to_reverse_polish_notation(Queue * input, Queue * output){
         Token nextToken = dequeue_Queue(input);
         //if the token is:
         // - a number:
-        if(!nextToken.isOperator){
+        if(!nextToken.isOperator || (char)nextToken.value == 'x'){
             // put it into the output queue
             enqueue_Queue(output, nextToken);
         }
@@ -98,9 +101,9 @@ void to_reverse_polish_notation(Queue * input, Queue * output){
 
 
 void text_to_array_of_tokens(char * userInput, Queue * output){
+    int lastTokenWasOperator = 0;
 
     while (*userInput) {
-
         switch (*userInput){
             case ' ':{
                 break;
@@ -110,14 +113,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 token.value = '+';
                 token.isOperator = 1;
                 token.precedence = 1;
-                enqueue_Queue(output, token);
-                break;
-            }
-            case '-':{
-                Token token;
-                token.value = '-';
-                token.precedence = 1;
-                token.isOperator = 1;
+                lastTokenWasOperator = 1;
                 enqueue_Queue(output, token);
                 break;
             }
@@ -126,6 +122,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 token.value = '*';
                 token.precedence = 2;
                 token.isOperator = 1;
+                lastTokenWasOperator = 1;
                 enqueue_Queue(output, token);
                 break;
             }
@@ -134,6 +131,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 token.value = '/';
                 token.precedence = 2;
                 token.isOperator = 1;
+                lastTokenWasOperator = 1;
                 enqueue_Queue(output, token);
                 break;
             }
@@ -141,6 +139,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 Token token;
                 token.value = '(';
                 token.isOperator = 1;
+                lastTokenWasOperator = 1;
                 enqueue_Queue(output, token);
                 break;
             }
@@ -148,9 +147,20 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 Token token;
                 token.value = ')';
                 token.isOperator = 1;
+                lastTokenWasOperator = 1;
                 enqueue_Queue(output, token);
                 break;
             }
+            case 'x':
+            case 'X': {
+                Token token;
+                token.value = 'x';
+                token.isOperator = 1;
+                lastTokenWasOperator = 0;
+                enqueue_Queue(output, token);
+                break;
+            }
+            case '-':
             case '0':
             case '1':
             case '2':
@@ -161,19 +171,31 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
             case '7':
             case '8':
             case '9': {
-                int value = 0;
-                while(*userInput >= '0' && *userInput <= '9'){
-                    value = (*userInput - '0') + value * 10;
+
+                if(isEmpty_Queue(output) || lastTokenWasOperator || *userInput != '-'){
+                    int err;
+                    Token token;
+                    token.value = str_to_fp(userInput, &err);
+                    token.isOperator = 0;
+                    lastTokenWasOperator = 0;
+                    enqueue_Queue(output, token);
 
                     userInput++;
+
+                    while ((*userInput >= '0' && *userInput <= '9') || *userInput == '.'){
+                        userInput++;
+                    }
+
+                    userInput--;
+                }else {
+                    Token token;
+                    token.value = '-';
+                    token.precedence = 1;
+                    token.isOperator = 1;
+                    lastTokenWasOperator = 1;
+                    enqueue_Queue(output, token);
                 }
-
-                Token token;
-                token.value = value;
-                token.isOperator = 0;
-                enqueue_Queue(output, token);
-
-                userInput--;
+                
 
                 break;
 
@@ -193,9 +215,9 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
 
     // while(!isEmpty_Queue(output)){
     //     if(peek_Queue(output).isOperator){
-    //         printf("%c: ", dequeue_Queue(output).value);
+    //         printf("%c: ", (char)dequeue_Queue(output).value);
     //     }else {
-    //         printf("%d: ", dequeue_Queue(output).value);
+    //         printf("%f: ", dequeue_Queue(output).value);
     //     }
     // }
 

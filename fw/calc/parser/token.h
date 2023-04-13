@@ -7,12 +7,12 @@
     - isOperator: 1 for operator, 0 for numerical value
     - value: The value of this token
         - If not an operator, value stores numerical value
-        - If operator, the value should store one of the following ascii values: '+', '-', '*', '/', '(', ')'
+        - If operator, the value should store one of the following ascii values: '+', '-', '*', '/', '(', ')', 'x'
     
 */
 typedef struct Token{
     int isOperator;
-    int value;
+    float value;
     int precedence;
 } Token;
 
