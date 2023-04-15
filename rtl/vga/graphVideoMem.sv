@@ -11,7 +11,7 @@ This implements Mode 1.
 module graphVideoMem(
     input wire clk,
     input wire we,
-    input wire [18:0] waddr_i,
+    input wire [16:0] waddr_i,
     input wire [3:0] pal_i,        // Color data in
     input wire [9:0] xloc_i,
     input wire [8:0] yloc_i,
@@ -27,7 +27,7 @@ module graphVideoMem(
   // 1 0100 0000 = 320 in binary
   // we can write addr = yloc[8:1] * 320 + xloc_i
   wire [16:0] framebuffer_addr_sel;
-  assign framebuffer_addr_sel = (yloc_i[8:1] * 320) + xloc_i[9:1];
+  assign framebuffer_addr_sel = waddr_i; //(yloc_i[8:1] * 320) + xloc_i[9:1];
   
   always @(posedge clk) begin
     if (we)
