@@ -27,11 +27,11 @@ module graphVideoMem(
   // 1 0100 0000 = 320 in binary
   // we can write addr = yloc[8:1] * 320 + xloc_i
   wire [16:0] framebuffer_addr_sel;
-  assign framebuffer_addr_sel = waddr_i; //(yloc_i[8:1] * 320) + xloc_i[9:1];
+  assign framebuffer_addr_sel = (yloc_i[8:1] * 320) + xloc_i[9:1];
   
   always @(posedge clk) begin
     if (we)
-      framebuffer[framebuffer_addr_sel] <= pal_i;
+      framebuffer[waddr_i] <= pal_i;
     pal_o <= framebuffer[framebuffer_addr_sel];
   end
 
