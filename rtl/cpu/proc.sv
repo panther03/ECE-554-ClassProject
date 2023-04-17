@@ -319,6 +319,11 @@ import control_defs_pkg::*;
    ////////////////////
    /// Decode Block ///
    ////////////////////
+
+   logic WB_IntRegWrite;
+   logic WB_FPRegWrite;
+   assign WB_IntRegWrite = MEM_WB_ctrl_RegWrite_out | FEX_WB_ctrl_FpIntCvtReg_out[1];
+   assign WB_FPRegWrite = FEX_WB_ctrl_RegWrite_out & ~FEX_WB_ctrl_FpIntCvtReg_out[1]; 
    
    decode iDECODE(.clk(clk), .rst_n(rst_n), .decode_err(decode_err),
       .inst(IF_ID_inst_out), .writesel(MEM_WB_writesel_out), .fp_writesel(FEX_WB_writesel_out),
@@ -328,7 +333,7 @@ import control_defs_pkg::*;
       .write_in(write_in), .reg1(reg1), .reg2(reg2), .imm(imm), .ofs(ofs),
       .fp_write_in(fp_write_in), .fp_reg1(fp_reg1), .fp_reg2(fp_reg2),
       .InstFmt(InstFmt), .JType(JType), .XtendSel(XtendSel), 
-      .RegWrite(MEM_WB_ctrl_RegWrite_out), .FPRegWrite(FEX_WB_ctrl_RegWrite_out),
+      .RegWrite(WB_IntRegWrite), .FPRegWrite(WB_FPRegWrite),
       .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg), .MemRead(MemRead), .MemWrite(MemWrite), .UnsignedOp(UnsignedOp));
 
    ////////////////////////

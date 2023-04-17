@@ -97,10 +97,10 @@ assign int_writesel = WI23.PROC.MEM_WB_writesel_out;
 assign fp_writesel = WI23.PROC.FEX_WB_writesel_out;
 
 // Integer Instruction Write Valid
-assign int_regwrite = WI23.PROC.MEM_WB_ctrl_RegWrite_out | WI23.PROC.FEX_WB_ctrl_FpIntCvtReg_out[1];
+assign int_regwrite = WI23.PROC.WB_IntRegWrite;
 
 // FP Instruction Write Valid
-assign fp_regwrite = WI23.PROC.FEX_WB_ctrl_RegWrite_out & ~WI23.PROC.FEX_WB_ctrl_FpIntCvtReg_out[1];
+assign fp_regwrite = WI23.PROC.WB_FPRegWrite;
 
 // Integer Instruction Write Data
 assign int_write_in = WI23.PROC.write_in;
@@ -148,7 +148,7 @@ assign write_reg = regwrite ? (int_regwrite ? int_reg : fp_reg) : "x";
 always_ff @(negedge clk) begin
     if (rst_n) begin
         if (Op != NOP) begin
-            $fdisplay(sim_log_file, "instruction: %8x", inst);
+            //$fdisplay(sim_log_file, "instruction: %8x", inst);
             $fdisplay(sim_log_file, "insn:    PC: @0x%4x Inst: %s RegWrite: %s%0d RegValue: 0x%8x LoadAddr: 0x%8x LoadValue: 0x%8x StoreAddr: 0x%8x StoreValue: 0x%8x", pc, Op, write_reg, writesel, write_in, read_addr, read_data, write_addr, write_data);
         end
     end
