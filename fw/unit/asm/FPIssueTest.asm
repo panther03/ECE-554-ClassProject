@@ -44,8 +44,11 @@ nop
 
 .pass:
 lbi r17,1
-j .pass
+j .halt
 
 .fail:
 lbi r16,1
-j .fail
+j .halt
+
+.halt:
+halt

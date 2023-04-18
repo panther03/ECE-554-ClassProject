@@ -34,8 +34,11 @@ bnez r19, .fail
 
 .pass:
 lbi r11, 1
-j .pass
+j .halt
 
 .fail:
 lbi r10, 1
-j .fail
+j .halt
+
+.halt:
+halt

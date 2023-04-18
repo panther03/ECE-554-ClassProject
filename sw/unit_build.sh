@@ -29,4 +29,4 @@ fi
 
 $OBJDUMP -dr -s -S $OUT_DIR/out.elf > $OUT_DIR/exec-out.log
 $OBJCOPY --verilog-data-width 4 $OUT_DIR/out.elf -O verilog $OUT_DIR/out.hex
-#$RUN -t $OUT_DIR/out.elf > $OUT_DIR/wi23_sim_trace.log
+#$RUN -t $OUT_DIR/out.elf 2>$OUT_DIR/wi23_sim_trace.log

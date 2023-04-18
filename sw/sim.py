@@ -164,6 +164,7 @@ def run_flow(flow, tb, tb_cfg):
         return
     # otherwise assume proj by default
     proj(tb_dir, tb, fileset, tb_pkgs)
+    flow_res = 0
     if flow == "gui":
         gui(tb_dir, tb)
     elif flow == "test":
