@@ -115,7 +115,7 @@ int normalize_float(float *fp) {
     return exponent;
 }
 
-void split_float(float *fp, int *integer, int *decimal, int *exponent) {
+void split_float(float *fp, unsigned int *integer, unsigned int *decimal, int *exponent) {
     *exponent = normalize_float(fp);
 
     *integer = (unsigned int)*fp;
