@@ -1,6 +1,6 @@
-#include "../solver/solver.h"
+// #include "../solver/solver.h"
 
-#include <stdio.h>
+//#include <stdio.h>
 
 volatile int VGA_GR_BUFF = 0xfffeD400;
 

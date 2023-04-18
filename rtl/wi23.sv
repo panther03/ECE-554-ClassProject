@@ -162,14 +162,19 @@ VGA_timing iVGATM(.clk25MHz(VGA_CLK), .rst_n(rst_n), .VGA_BLANK_N(VGA_BLANK_N),
   // Technically the range is 0xE000 - 0xF2C0 but this will trigger until 0xFFFF (and also for whatever the upper 16 bits are)
   wire vga_we = &daddr[15:13] & |we_map;
 
+  logic vga_graph_we;
+  logic [16:0] daddr_vidmem;
+
+  assign vga_graph_we = daddr >= 32'hfffed400 & |we_map;
+  assign daddr_vidmem = daddr - 32'hfffed400;
 
   VGA_display iVGA(
     .clk(clk),
     .rst_n(rst_n),
 	 .xloc(xpix), .yloc(ypix),
     .vga_char_i(data_proc_to_mem[15:0]), .vga_char_addr_i(daddr_vga_ofs), .vga_char_we_i(vga_we),
-    .graph_px_i(4'h0), .graph_addr_i(19'h00000), .graph_we_i(1'b0),
-    .draw_mode_sel_i(1'b0),
+    .graph_px_i(data_proc_to_mem[3:0]), .graph_addr_i(daddr_vidmem), .graph_we_i(vga_graph_we),
+    .draw_mode_sel_i(1'b1),
     .VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B)
   );
   
