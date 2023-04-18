@@ -31,6 +31,16 @@ srai r18, r17, 14
 sra r18, r18, r2
 xorsi r19, r18, 0x0000
 bnez r19, .fail
+// SRL, SRLI test
+lbi r16, 0xFFFF
+srli r17, r16, 16
+xori r17, r17, 0xFFFF
+bnez r17, .fail
+lbi r16, 0xFFFF
+lbi r18, 16
+srl r17, r16, r18
+xori r17, r17, 0xFFFF
+bnez r17, .fail
 
 .pass:
 lbi r11, 1

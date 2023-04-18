@@ -149,7 +149,7 @@ always_ff @(negedge clk) begin
     if (rst_n) begin
         if (Op != NOP) begin
             //$fdisplay(sim_log_file, "instruction: %8x", inst);
-            $fdisplay(sim_log_file, "insn:    PC: @0x%4x Inst: %s RegWrite: %s%0d RegValue: 0x%8x LoadAddr: 0x%8x LoadValue: 0x%8x StoreAddr: 0x%8x StoreValue: 0x%8x", pc, Op, write_reg, writesel, write_in, read_addr, read_data, write_addr, write_data);
+            $fdisplay(sim_log_file, "insn:     PC: @0x%4x Inst: %s RegWrite: %s%0d RegValue: 0x%8x LoadAddr: 0x%8x LoadValue: 0x%8x StoreAddr: 0x%8x StoreValue: 0x%8x", pc, Op, write_reg, writesel, write_in, read_addr, read_data, write_addr, write_data);
         end
     end
 end
