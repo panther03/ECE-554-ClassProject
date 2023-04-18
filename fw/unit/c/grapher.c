@@ -31,7 +31,7 @@ void plot_y_axis(float lower, float upper) {
 }
 
 void plot_xy(int x, int y) {
-    int *writeAddr = VGA_GR_BUFF + x + (320 * y);
+    int *writeAddr = VGA_GR_BUFF + x + (int)(320.0f * (float)y);
     *writeAddr = 0x2;
 }
 
@@ -48,7 +48,7 @@ int main() {
     float x = x_lower;
     float y;
 
-    float span = y_upper - y_lower;
+    float span_inv = 1 / (y_upper - y_lower);
 
     // parse eqs;
     /*
@@ -82,7 +82,7 @@ int main() {
         y = -x; //solveEquation(&eqPolishNot, x, &err);
 
 	if (err != 0 && y >= y_lower && y <= y_upper) {
-            y_coord = 239 - (int)(((y - y_lower) / span) * 239.0f);
+            y_coord = 239 - (int)(((y - y_lower) * span_inv) * 239.0f);
             plot_xy(x_coord, y_coord);
         }
 
