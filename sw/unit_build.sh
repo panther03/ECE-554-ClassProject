@@ -8,6 +8,7 @@ LD="wi23-elf-ld"
 RUN="wi23-elf-run"
 OBJDUMP="wi23-elf-objdump"
 OBJCOPY="wi23-elf-objcopy"
+CFLAFS="-fsingle-precision-constant -fno-builtin -fno-inline"
 
 FW_UNIT_TEST=$1
 OUT_DIR=$2
@@ -20,7 +21,7 @@ elif [[ "$FW_UNIT_TEST" == *.asm ]]; then
     $LD -o $OUT_DIR/out.elf $OUT_DIR/out.o
     rm $OUT_DIR/out.o
 elif [[ "$FW_UNIT_TEST" == *.c ]]; then
-    $CC -O2 -g unit/c/"$FW_UNIT_TEST" -o $OUT_DIR/out.elf
+    $CC $CFLAGS -O2 -g unit/c/"$FW_UNIT_TEST" -o $OUT_DIR/out.elf
 else
     echo "Error: Invalid file extension for FW_UNIT_TEST: $FW_UNIT_TEST"
     exit 1

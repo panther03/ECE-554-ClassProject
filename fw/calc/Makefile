@@ -2,7 +2,7 @@ CC      = wi23-elf-gcc
 LD      = wi23-elf-ld
 OBJCOPY = wi23-elf-objcopy
 OBJDUMP = wi23-elf-objdump
-CFLAGS  = -c -O2 -Wall
+CFLAGS  = -c -O2 -Wall -fsingle-precision-constant -fno-builtin -fno-inline
 #LDFLAGS = -T linker_script.ld
 
 OBJDIR  = obj
