@@ -17,7 +17,7 @@ def sim_compare (f1, f2):
         result_file.write(line)
         diff = True
 
-    result_file.write("---------- Simulation trace ended ----------")
+    result_file.write("\n---------- Simulation trace ended ----------\n")
     if (diff) :
         result_file.write("FAILED! Simulation trace difference detected!")
     else :

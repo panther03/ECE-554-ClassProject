@@ -8,7 +8,7 @@ int main(int argc, char *argv[]){
     Queue equation;
     structureQueue_Queue(&equation);
 
-    parse_equation("11", &equation);
+    parse_equation("1 + 1.2 * 2", &equation);
 
     int err;
     float output = solveEquation(&equation, 4.9, &err);
