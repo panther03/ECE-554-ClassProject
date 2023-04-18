@@ -125,6 +125,8 @@ def run_flow(flow, tb, tb_cfg):
 
     control_file = "control.sv"
     control_pkg_file = "control_defs_pkg.sv"
+    sim_trace_file = "sim_trace_compare.log"
+
     rtl_cpu_dir = "rtl/cpu"
     rtl_pkg_dir = "rtl/pkg"
 
@@ -171,6 +173,9 @@ def run_flow(flow, tb, tb_cfg):
     tb_trace = open(f'tb/{tb}/wi23_tb_trace.log', 'r')
     sim_trace = open('out/wi23_sim_trace.log', 'r')
     sim_compare(tb_trace, sim_trace)
+    if os.path.exists(os.path.join(tb_dir, sim_trace_file)):
+        os.remove(os.path.join(tb_dir, sim_trace_file))
+    shutil.move(sim_trace_file,os.path.join(tb_dir, sim_trace_file))
     tb_trace.close()
     sim_trace.close()
 
