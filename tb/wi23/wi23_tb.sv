@@ -37,7 +37,7 @@ initial begin
     repeat (2) @ (negedge clk);
     // Out of reset
     rst_n = 1'b1;
-    repeat (800) @ (negedge clk);
+    repeat (20000) @ (negedge clk);
     $display("\nYahoo!!! All Tests Passed\n");
     $finish();
 end

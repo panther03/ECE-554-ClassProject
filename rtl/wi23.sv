@@ -213,7 +213,7 @@ always_comb begin
 
   // Handle physical memory range primarily
   // Checks that none of the bits are set.
-  if (~|daddr[15:14] | (~daddr[15] & ldcr)) begin
+  if (~|daddr[31:14] | (~|daddr[31:15] & ldcr)) begin
     we_dmem = we_map;
     data_mem_to_proc_map = ldcr ? inst_mem_to_proc : data_mem_to_proc_dmem;
   end else begin
