@@ -127,7 +127,7 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
   assign B_sign_with_op = B_sign ^ subtract;
 	assign eq = A_mantissa_preadder == B_mantissa_preadder;
   
-  assign Sign_out = subtract ? (A_sign & (~swp) /*& (~eq)*/) | (~A_sign & swp) :
+  assign Sign_out = subtract ? (A_sign & (~swp) & (~eq | (eq & B_sign_with_op))) | (~A_sign & swp) :
                                (A_sign & (B_sign_with_op | comp)) | (~A_sign & B_sign_with_op & ~comp);
   
   assign A_mantissa = A_mantissa_preadder;

@@ -10,7 +10,13 @@ module fp_alu_tb();
   initial begin
     clk = 0;
     
-    testA_B(clk, A, B, subtract, S, 32'h41200000, 32'hc1200000, 1'b0, 32'h41a00000); // 1. 10 - -10 = 20
+    testA_B(clk, A, B, subtract, S, 32'hc1200000, 32'h41200000, 1'b0, 32'h41a00000); // 1. 10 - -10 = 20
+		
+		testA_B(clk, A, B, subtract, S, 32'hc1200000, 32'hc1200000, 1'b0, 32'h00000000); // 2. -10 - -10 = 0
+		
+		testA_B(clk, A, B, subtract, S, 32'h41200000, 32'h41200000, 1'b0, 32'h00000000); // 3. 10 - 10 = 0
+		
+		testA_B(clk, A, B, subtract, S, 32'h41200000, 32'hc1200000, 1'b0, 32'hc1a00000); // 4. -10 - 10 = -20
     
     $stop();
   end
