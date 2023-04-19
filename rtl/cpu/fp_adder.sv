@@ -94,7 +94,7 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
   logic is_subnormal;
   logic subtract;
   logic is_special;
-  logic S_special;
+  logic [31:0] S_special;
   
   always_ff @(posedge clk) begin
     A_sign <= A_sign_unflopped;
@@ -121,11 +121,13 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
   logic Sign_out;
   logic subtract_mod;
   logic [27:0] A_mantissa, B_mantissa;
+	logic eq;
   
   // logic
   assign B_sign_with_op = B_sign ^ subtract;
+	assign eq = A_mantissa_preadder == B_mantissa_preadder;
   
-  assign Sign_out = subtract ? (A_sign & (~swp)) | (~A_sign & swp) :
+  assign Sign_out = subtract ? (A_sign & (~swp) /*& (~eq)*/) | (~A_sign & swp) :
                                (A_sign & (B_sign_with_op | comp)) | (~A_sign & B_sign_with_op & ~comp);
   
   assign A_mantissa = A_mantissa_preadder;
