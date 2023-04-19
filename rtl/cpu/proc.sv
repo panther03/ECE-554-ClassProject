@@ -781,13 +781,15 @@ import control_defs_pkg::*;
    /// Hazard Detection Unit ///
    /////////////////////////////
 
-   logic IF_ID_is_fp_ex;
+   logic IF_ID_is_fp_ex, IF_ID_is_fp_store;
 	
-   // FP instruction to FEX a) FP Inst b) Non-LD/ST FP Inst
+   // FP FEX instruction decoded (non LD/ST)
    assign IF_ID_is_fp_ex = IF_ID_ctrl_FpInst_ea & ~(IF_ID_ctrl_MemRead_ea | IF_ID_ctrl_MemWrite_ea);
+   // FP LD/ST instruction decoded
+   assign IF_ID_is_fp_store = IF_ID_ctrl_FpInst_ea & IF_ID_ctrl_MemWrite_ea;
 
    hazard iHAZARD (.clk(clk),.IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
-      .IF_ID_is_branch(JType[0]),.ID_EX_is_load(ID_EX_ctrl_MemRead_out), .ID_EX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),
+      .IF_ID_is_branch(JType[0]),.ID_EX_is_load(ID_EX_ctrl_MemRead_out), .IF_ID_is_fp_store(IF_ID_is_fp_store), .ID_EX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),
       .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),.EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out), .ID_FEX_ctrl_regw(ID_FEX_ctrl_RegWrite_out),
       .ID_EX_regw(writesel),.ID_FEX_regw(fp_writesel),.EX_MEM_regw(EX_MEM_writesel_out), .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
       .FEX_busy(FEX_busy), .IF_ID_is_fp_ex(IF_ID_is_fp_ex), .FEX_busy_er(FEX_busy_er),
@@ -808,6 +810,7 @@ import control_defs_pkg::*;
       .ID_EX_reg1(ID_EX_inst_out[25:21]),.ID_EX_reg2(ID_EX_inst_out[20:16]),
       .ID_FEX_reg1(ID_FEX_inst_out[25:21]),.ID_FEX_reg2(ID_FEX_inst_out[20:16]),
       .EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out),.MEM_WB_ctrl_regw(MEM_WB_ctrl_RegWrite_out), .FEX_WB_ctrl_regw(FEX_WB_ctrl_RegWrite_out),
+      .ID_EX_ctrl_MemWrite(ID_EX_ctrl_MemWrite_out),
       .ID_EX_ctrl_FpInst(ID_EX_ctrl_FpInst_out),.ID_FEX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),.EX_MEM_ctrl_FpInst(EX_MEM_ctrl_FpInst_out),.MEM_WB_ctrl_FpInst(MEM_WB_ctrl_FpInst_out),.FEX_WB_ctrl_FpInst(FEX_WB_ctrl_FpInst_out), 
       .FEX_WB_ctrl_MemRead(FEX_WB_ctrl_MemRead_out), .MEM_WB_ctrl_MemToReg(MEM_WB_ctrl_MemToReg_out),
       .FEX_WB_ctrl_FPIntCvtReg(FEX_WB_ctrl_FpIntCvtReg_out), .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),

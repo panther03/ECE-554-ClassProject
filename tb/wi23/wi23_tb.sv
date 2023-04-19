@@ -139,7 +139,7 @@ assign write_data = WI23.PROC.MEM_WB_ctrl_MemWrite_out ? mem_write_data : 32'hX;
 
 // Load Instruction Address and Data
 assign read_addr = WI23.PROC.MEM_WB_ctrl_MemToReg_out ? mem_data_addr : 32'hX;
-assign read_data = WI23.PROC.MEM_WB_ctrl_MemToReg_out ? mem_write_data : 32'hX;
+assign read_data = WI23.PROC.MEM_WB_ctrl_MemToReg_out ? mem_read_data : 32'hX;
 
 // String for Register File and Index
 assign write_reg = regwrite ? (int_regwrite ? int_reg : fp_reg) : "x";
