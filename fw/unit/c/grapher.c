@@ -2,13 +2,13 @@
 
 //#include <stdio.h>
 
-volatile int VGA_GR_BUFF = 0xfffeD400;
+volatile unsigned char* VGA_GR_BUFF = 0xfffeD400;
 
 void plot_x_axis(float lower, float upper) {
     float span = upper - lower;
     int y_offset = (int)((upper / span) * 239.0f);
     
-    int* writeAddr = VGA_GR_BUFF + (int)(y_offset * 320.0f);
+    volatile char* writeAddr = VGA_GR_BUFF + (y_offset * 320);
 
     int i;
     for (i = 0; i < 320; i++) {
@@ -20,7 +20,7 @@ void plot_y_axis(float lower, float upper) {
     float span = upper - lower;
     int x_offset = (int)((-lower / span) * 319.0f);
     
-    int* writeAddr = VGA_GR_BUFF + (int)(x_offset);
+    volatile char* writeAddr = VGA_GR_BUFF + (int)(x_offset);
 
     int i;
     int y_offset = 0;
@@ -31,7 +31,7 @@ void plot_y_axis(float lower, float upper) {
 }
 
 void plot_xy(int x, int y) {
-    int *writeAddr = VGA_GR_BUFF + x + (int)(320.0f * (float)y);
+    volatile char *writeAddr = VGA_GR_BUFF + x + (y << 6) + (y << 8);
     *writeAddr = 0x2;
 }
 
@@ -49,6 +49,7 @@ int main() {
     float y;
 
     float span_inv = 1 / (y_upper - y_lower);
+    float y_multiplier = span_inv * 239.0f;
 
     // parse eqs;
     /*
@@ -75,14 +76,14 @@ int main() {
     }
 
     // graph lines
-    int err;
+    int err = 0;
     int x_coord = 0;
     int y_coord = 0; 
-    while (x < x_upper) {
+    while (x_coord < 320) {
         y = -x; //solveEquation(&eqPolishNot, x, &err);
 
-	if (err != 0 && y >= y_lower && y <= y_upper) {
-            y_coord = 239 - (int)(((y - y_lower) * span_inv) * 239.0f);
+	if (err == 0 && y >= y_lower && y <= y_upper) {
+            y_coord = 239 - (int)((y - y_lower) * y_multiplier);
             plot_xy(x_coord, y_coord);
         }
 
