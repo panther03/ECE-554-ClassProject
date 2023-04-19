@@ -3,7 +3,7 @@ import wi23_defs::*;
 (
   clk, IF_ID_reg1, IF_ID_reg2, ID_EX_regw, ID_FEX_regw, EX_MEM_regw,
   ID_EX_ctrl_regw, EX_MEM_ctrl_regw, ID_FEX_ctrl_regw, ID_EX_ctrl_FpInst, stall,
-  ID_EX_is_load, IF_ID_is_branch, FEX_busy, IF_ID_is_fp_ex, ID_FEX_ctrl_FPIntCvtReg,
+  ID_EX_is_load, IF_ID_is_fp_store, IF_ID_is_branch, FEX_busy, IF_ID_is_fp_ex, ID_FEX_ctrl_FPIntCvtReg,
   FEX_busy_er
 );
 
@@ -11,7 +11,7 @@ input clk;
 input [REGFILE_DEPTH-1:0] IF_ID_reg1, IF_ID_reg2, ID_EX_regw, ID_FEX_regw, EX_MEM_regw;
 input ID_EX_ctrl_regw, EX_MEM_ctrl_regw, ID_FEX_ctrl_regw;
 input ID_EX_ctrl_FpInst;
-input IF_ID_is_branch, ID_EX_is_load;
+input IF_ID_is_branch, ID_EX_is_load, IF_ID_is_fp_store;
 input FEX_busy, IF_ID_is_fp_ex, FEX_busy_er;
 input [1:0] ID_FEX_ctrl_FPIntCvtReg;
 output stall;
@@ -45,8 +45,9 @@ always_ff @ (posedge clk)
   FEX_ctrl_FPIntCvtReg_r <= ID_FEX_ctrl_FPIntCvtReg;
 
 assign stall =  (IF_ID_is_branch & (IF_EX_hazard | IF_MEM_hazard | ((ID_FEX_hazard & ID_FEX_ctrl_FPIntCvtReg[1] | ID_FEX_hazard_r & FEX_ctrl_FPIntCvtReg_r[1]))))
-             |  (ID_EX_is_load & (IF_EX_hazard | IF_FEX_hazard))
+             |  (ID_EX_is_load & (IF_EX_hazard | IF_FEX_hazard))  // Load to EX and Load to FEX hazard
              |  (FEX_busy & IF_ID_is_fp_ex & ~FEX_busy_er)    // FP Instruction decoded and FEX busy
-             |  (ID_FEX_hazard & ID_FEX_ctrl_FPIntCvtReg[1]); // FP writes Int register used in Int execution
+             |  (ID_FEX_hazard & ID_FEX_ctrl_FPIntCvtReg[1])  // FP writes Int register used in Int execution
+             |  (ID_FEX_hazard & IF_ID_is_fp_store);          // FP FEX writes a register which is being used in FP store
 
 endmodule
