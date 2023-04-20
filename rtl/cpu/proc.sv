@@ -815,6 +815,7 @@ import control_defs_pkg::*;
       .FEX_WB_ctrl_MemRead(FEX_WB_ctrl_MemRead_out), .MEM_WB_ctrl_MemToReg(MEM_WB_ctrl_MemToReg_out),
       .FEX_WB_ctrl_FPIntCvtReg(FEX_WB_ctrl_FpIntCvtReg_out), .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
       .IF_ID_ctrl_FPIntCvtReg(IF_ID_ctrl_FPIntCvtReg_ea),
+      .IF_ID_ctrl_FPInst(IF_ID_ctrl_FpInst_ea),
 
       // Outputs
       .frwrd_MEM_EX_opA(frwrd_MEM_EX_opA),.frwrd_MEM_EX_opB(frwrd_MEM_EX_opB),

@@ -1,4 +1,8 @@
 // EX -> FEX
+lbi r7, 0xFFFF
+slbi r7, 0x0000
+fmovi f7, r7
+// EX -> FEX
 lbi r0,4
 fmovi f0,r0
 // EX -> FEX
@@ -20,7 +24,7 @@ beqz r6,.fail
 fst f1,r0,4
 st r8,r0,0
 // FEX -> FEX
-fadd f23,f1,f10
+fadd f23,f10,f1
 fadd f24,f1,f10
 fsub f25,f23,f24
 // FEX -> EX
@@ -34,9 +38,9 @@ imovf r1,f1
 sub r1,r1,r8
 bnez r1,.fail
 // FEX No Stall
-fadd f20,f1,f10
+fadd f20,f10,f1
 nop
-fadd f23,f1,f10
+fmul f23,f7,f1
 imovf r4,f23
 lbi r4,4
 lbi r2,8
@@ -91,6 +95,20 @@ fst f14, r13, 0
 fadd f18, f10, f25
 nop
 fst f18, r13, 0
+lbi r22, 0
+// Bypass should not happen
+fld f22, r17, 0
+nop
+addi r17, r22, 4 
+// Bypass should happen
+addi r18, r17, 4
+nop
+nop
+addi r19, r18, 4
+// Bypass should happen
+fld f22, r17, 0
+nop
+fst f22, r17, 0
 
 .pass:
 lbi r17,1
