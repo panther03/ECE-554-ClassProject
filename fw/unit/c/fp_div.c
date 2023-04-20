@@ -47,5 +47,21 @@ int main() {
     x = 2.54334e34f;
     y = 1e32f;
     out = x/y;
+
+    x = 2.54334e34f;
+    y = 1e16f;
+    out = x/y;
+
+    x = 2.54334e34f;
+    y = 1e8f;
+    out = x/y;
+ 
+    x = 2.54334e34f;
+    y = 1e4f;
+    out = x/y;   
+
+    x = 2.54334e34f;
+    y = 1e2f;
+    out = x/y;
 }
 
