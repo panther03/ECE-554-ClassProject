@@ -1,6 +1,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#define MAX_SIZE 80
+
 /*
     Token structure (An ordered list of tokens forms an equation)
 
