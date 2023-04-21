@@ -32,6 +32,8 @@ logic [DATA_WIDTH-1:0]  inst_mem_to_proc;
 logic [DATA_WIDTH-1:0]  daddr;
 logic [DATA_WIDTH-1:0]  data_mem_to_proc_map;
 logic [DATA_WIDTH-1:0]  data_mem_to_proc_dmem;
+logic [DATA_WIDTH-1:0]  data_mem_to_proc_dmem_muxed;
+logic [DATA_WIDTH-1:0]  data_proc_to_mem_muxed; 
 logic [DATA_WIDTH-1:0]  data_proc_to_mem;
 logic [DATA_WIDTH-1:0]  data_proc_to_mem_be;
 logic [1:0]             data_proc_to_mem_gran;
@@ -98,7 +100,7 @@ imem IMEM (
 // Data memory //
 //////////////// 
 
-// Shift data read from DMEM for sub-word accesses.
+// Shift data write to DMEM for sub-word accesses.
 // ----  Address --->
 // High Byte | Byte | Byte | Low Byte
 logic [4:0] shift_ldb;
@@ -112,7 +114,6 @@ assign shift_ldh = daddr[1:0] == 2'b00 ? 'd16 :
                    daddr[1:0] == 2'b01 ? 'd08 : 'd00 ; // We don't support [1:0] == 2'b11 case
 assign data_proc_to_mem_ldh = data_proc_to_mem << shift_ldh;
 
-logic [DATA_WIDTH-1:0] data_proc_to_mem_muxed; 
 assign data_proc_to_mem_muxed = data_proc_to_mem_gran == 2'b01 ? data_proc_to_mem_ldb : // Byte Access  
                                 data_proc_to_mem_gran == 2'b10 ? data_proc_to_mem_ldh : // Byte Access  
                                                                  data_proc_to_mem     ; // Word Access 
@@ -125,6 +126,30 @@ dmem DMEM (
   .wdata_i(data_proc_to_mem_muxed),
   .rdata_o(data_mem_to_proc_dmem)
 );
+
+// Shift data read from DMEM for sub-word accesses.
+// ----  Address --->
+// High Byte | Byte | Byte | Low Byte
+logic [4:0] rshift_ldb;
+logic [REGFILE_WIDTH-1:0] data_mem_to_proc_ldb;
+assign rshift_ldb = {~daddr[1:0], 3'b000}; // 00 - 24, 01 - 16, 10 - 8, 11 - 0
+assign data_mem_to_proc_ldb = data_mem_to_proc_dmem >> rshift_ldb;
+
+logic [4:0] rshift_ldh;
+logic [REGFILE_WIDTH-1:0] data_mem_to_proc_ldh;
+assign rshift_ldh = daddr[1:0] == 2'b00 ? 'd16 :
+                    daddr[1:0] == 2'b01 ? 'd08 : 'd00 ; // We don't support [1:0] == 2'b11 case
+assign data_mem_to_proc_ldh = data_mem_to_proc_dmem >> rshift_ldh;
+
+always_comb begin
+  data_mem_to_proc_dmem_muxed = 32'h0;
+   casez (data_proc_to_mem_gran)
+      2'b00 : data_mem_to_proc_dmem_muxed = data_mem_to_proc_dmem; // Word Access
+      2'b01 : data_mem_to_proc_dmem_muxed = 32'h000000FF & data_mem_to_proc_ldb; // Byte Access
+      2'b10 : data_mem_to_proc_dmem_muxed = 32'h0000FFFF & data_mem_to_proc_ldh; // Half-Word Access
+      default : begin end // Unsupported Access
+   endcase
+end
 
 ////////////////////////
 // Instantiate SPART //
@@ -215,7 +240,7 @@ always_comb begin
   // Checks that none of the bits are set.
   if (~|daddr[31:14] | (~|daddr[31:15] & ldcr)) begin
     we_dmem = we_map;
-    data_mem_to_proc_map = ldcr ? inst_mem_to_proc : data_mem_to_proc_dmem;
+    data_mem_to_proc_map = ldcr ? inst_mem_to_proc : data_mem_to_proc_dmem_muxed;
   end else begin
     // Otherwise we map to the remaining peripherals
     casez (daddr[15:0])

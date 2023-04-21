@@ -647,25 +647,26 @@ import control_defs_pkg::*;
    // Shift data read from DMEM for sub-word accesses.
    // ----  Address --->
    // High Byte | Byte | Byte | Low Byte
-   logic [4:0] shift_ldb;
-   logic [REGFILE_WIDTH-1:0] data_mem_to_proc_ldb;
-   assign shift_ldb = {~daddr_o[1:0], 3'b000}; // 00 - 24, 01 - 16, 10 - 8, 11 - 0
-   assign data_mem_to_proc_ldb = data_mem_to_proc_i >> shift_ldb;
+   //logic [4:0] shift_ldb;
+   //logic [REGFILE_WIDTH-1:0] data_mem_to_proc_ldb;
+   //assign shift_ldb = {~daddr_o[1:0], 3'b000}; // 00 - 24, 01 - 16, 10 - 8, 11 - 0
+   //assign data_mem_to_proc_ldb = data_mem_to_proc_i >> shift_ldb;
 
-   logic [4:0] shift_ldh;
-   logic [REGFILE_WIDTH-1:0] data_mem_to_proc_ldh;
-   assign shift_ldh = daddr_o[1:0] == 2'b00 ? 'd16 :
-                      daddr_o[1:0] == 2'b01 ? 'd08 : 'd00 ; // We don't support [1:0] == 2'b11 case
-   assign data_mem_to_proc_ldh = data_mem_to_proc_i >> shift_ldh;
-   always_comb begin
-      MEM_WB_mem_out_in = 32'h0;
-      casez (EX_MEM_ctrl_MemGran_out)
-         2'b00 : MEM_WB_mem_out_in = data_mem_to_proc_i; // Word Access
-         2'b01 : MEM_WB_mem_out_in = 32'h000000FF & data_mem_to_proc_ldb; // Byte Access
-         2'b10 : MEM_WB_mem_out_in = 32'h0000FFFF & data_mem_to_proc_ldh; // Half-Word Access
-         default : begin end // Unsupported Access
-      endcase
-   end
+   //logic [4:0] shift_ldh;
+   //logic [REGFILE_WIDTH-1:0] data_mem_to_proc_ldh;
+   //assign shift_ldh = daddr_o[1:0] == 2'b00 ? 'd16 :
+   //                   daddr_o[1:0] == 2'b01 ? 'd08 : 'd00 ; // We don't support [1:0] == 2'b11 case
+   //assign data_mem_to_proc_ldh = data_mem_to_proc_i >> shift_ldh;
+   //always_comb begin
+   //   MEM_WB_mem_out_in = 32'h0;
+   //   casez (EX_MEM_ctrl_MemGran_out)
+   //      2'b00 : MEM_WB_mem_out_in = data_mem_to_proc_i; // Word Access
+   //      2'b01 : MEM_WB_mem_out_in = 32'h000000FF & data_mem_to_proc_ldb; // Byte Access
+   //      2'b10 : MEM_WB_mem_out_in = 32'h0000FFFF & data_mem_to_proc_ldh; // Half-Word Access
+   //      default : begin end // Unsupported Access
+   //   endcase
+   //end
+   assign MEM_WB_mem_out_in = data_mem_to_proc_i;
    assign MEM_WB_writesel_in = EX_MEM_writesel_out;
 
    assign MEM_WB_ctrl_Op_in = EX_MEM_ctrl_Op_out;
