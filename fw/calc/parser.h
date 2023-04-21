@@ -6,7 +6,7 @@
 #include "queue.h"
 #include "stack.h"
 #include "token.h"
-#include "../fp_conversions/str_fp.h"
+#include "str_fp.h"
 
 extern void parse_equation(char * userInput, Queue * output);
 void to_reverse_polish_notation(Queue * input, Queue * output);

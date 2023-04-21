@@ -4,7 +4,6 @@
 
 #include "token.h"
 
-#define MAX_SIZE 20
 
 
 
