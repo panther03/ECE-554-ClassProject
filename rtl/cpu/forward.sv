@@ -75,8 +75,10 @@ assign frwrd_WB_EX_opB = ((MEM_WB_ctrl_regw & ~MEM_WB_ctrl_FpInst) |
                          (~MEM_WB_ctrl_regw & MEM_WB_ctrl_MemToReg & MEM_WB_ctrl_FpInst & ID_EX_ctrl_FpInst)) & (MEM_WB_regw == ID_EX_reg2);
 
 // MEM to FEX forwarding
-assign frwrd_int_WB_EX_opA = (~MEM_WB_ctrl_regw & MEM_WB_ctrl_MemToReg & MEM_WB_ctrl_FpInst & ID_FEX_ctrl_FpInst) & (MEM_WB_regw == ID_FEX_reg1);
-assign frwrd_int_WB_EX_opB = (~MEM_WB_ctrl_regw & MEM_WB_ctrl_MemToReg & MEM_WB_ctrl_FpInst & ID_FEX_ctrl_FpInst) & (MEM_WB_regw == ID_FEX_reg2);
+// 1. FLD -> FEX (Fp Inst using FP Reg)
+// 2. LD -> FEX (FP Inst using Int Reg)
+assign frwrd_int_WB_EX_opA = MEM_WB_ctrl_MemToReg & ((~MEM_WB_ctrl_regw & MEM_WB_ctrl_FpInst & ID_FEX_ctrl_FpInst & ~ID_FEX_ctrl_FPIntCvtReg[0]) | (MEM_WB_ctrl_regw & ~MEM_WB_ctrl_FpInst & ID_FEX_ctrl_FpInst & ID_FEX_ctrl_FPIntCvtReg[0])) & (MEM_WB_regw == ID_FEX_reg1);
+assign frwrd_int_WB_EX_opB = MEM_WB_ctrl_MemToReg & ((~MEM_WB_ctrl_regw & MEM_WB_ctrl_FpInst & ID_FEX_ctrl_FpInst & ~ID_FEX_ctrl_FPIntCvtReg[0]) | (MEM_WB_ctrl_regw & ~MEM_WB_ctrl_FpInst & ID_FEX_ctrl_FpInst & ID_FEX_ctrl_FPIntCvtReg[0])) & (MEM_WB_regw == ID_FEX_reg2);
 
 // Register bypass
 assign bypass_reg1 = (MEM_WB_ctrl_regw & ~MEM_WB_ctrl_FpInst) & (MEM_WB_regw == IF_ID_reg1);

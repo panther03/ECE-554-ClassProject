@@ -109,6 +109,23 @@ addi r19, r18, 4
 fld f22, r17, 0
 nop
 fst f22, r17, 0
+// MEM -> FEX Stall and Forward
+lbi r8, 12
+lbi r9, 8
+st r9, r8, 0        // [12] - 8
+ld r10, r8, 0       // r10 - 8
+fcvti f10, r10      // f10 - 0x41000000
+icvtf r10, f10      // r10 - 8
+subi r11, r10, 8    // r11 - 0
+bnez r11, .fail
+// MEM -> FEX should not stall and forward
+fst f10, r8, 4      // [16] - 0x41000000
+ld r11, r8, 0       // r11 - 8
+fld f11, r8, 4      // f11 - 0x41000000
+fcvti f12, r11      // f12 - 0x41000000 
+fsub f12, f11, f12  // f12 - 0
+imovf r12, f12      // r12 - 0
+bnez r12, .fail
 
 .pass:
 lbi r17,1
