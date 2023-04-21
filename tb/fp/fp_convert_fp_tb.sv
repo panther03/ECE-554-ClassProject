@@ -24,6 +24,8 @@ module fp_convert_fp_tb();
 		
 		testA(clk, A, fp, 32'h80000000, 32'hcf000000);
 		
+		testA(clk, A, fp, 32'h00000005, 32'h40a00000);
+		
 		$stop();
 	end
 
