@@ -35,6 +35,10 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
                   &B_ex && ~|B_m  ? 3'b010 :  // Infinity
                   &B_ex && |B_m   ? 3'b011 :  // NaN
                                     3'b100;   // Normal   
+
+  logic A_NaN, B_NaN;
+  assign A_NaN = ~A_type[2] & &A_type[1:0];
+  assign B_NaN = ~B_type[2] & &B_type[1:0];
   
   /////////////////////////////////////////////////
   ///////////////   Special Cases    //////////////
@@ -55,21 +59,21 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
                           (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_s :  // A = norm or subnorm and B = inf
                           (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_s :  // A = inf and B = norm or subnorm
                           B_type == 3'b010 && A_type == 3'b010 && A_s ~^ B_s         ? A_s :
-                                                                                       1'b1;  // default to 1
+                                                                                       (A_NaN ? A_s : B_s);  // default to sign of NaN
               
   assign S_special_exponent = ~|A_type                                                   ? B_ex :  // A is 0
                               ~|B_type                                                   ? A_ex :  // B is 0
                               (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_ex :  // A = norm or subnorm and B = inf
                               (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_ex :  // A = inf and B = norm or subnorm
                               A_type == 3'b010 && B_type == 3'b010 && A_s == B_s         ? A_ex :  // A = inf and B = inf and same sign
-                                                                                           8'hff;  // default to ff (for NaN result)
+                                                                                           (A_NaN ? A_ex : B_ex);  // default to NaN exponent
 
   assign S_special_mantissa = ~|A_type                                                   ? B_m :        // A is 0
                               ~|B_type                                                   ? A_m :        // B is 0
                               (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_m :        // A = norm or subnorm and B = inf
                               (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_m :        // A = inf and B = norm or subnorm
                               A_type == 3'b010 && B_type == 3'b010 && A_s == B_s         ? A_m :        // A = inf and B = inf and same sign
-                                                                                           23'h000001;  // default to 1 (for NaN result)
+                                                                                           (A_NaN ? A_m : B_m);  // default to NaN mantissa
   
   /////////////////////////////////////////////////
   ///////////////    PRE-ADDER    /////////////////

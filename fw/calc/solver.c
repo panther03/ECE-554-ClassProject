@@ -1,23 +1,26 @@
 #include "solver.h"
-
-#include <stdlib.h> // Used only for debugging. Not actually supported on the board
-#include <stdio.h> // Used only for debugging. Not actually supported on the board
-int main(int argc, char *argv[]){
+/*int main(int argc, char *argv[]){
 
         
+
     Queue equation;
     structureQueue_Queue(&equation);
 
-    parse_equation("1 + 1.2 * 2", &equation);
+    parse_equation("((3.2 * 7.5) + (2.7 / 4.2) - (8.1)) * (((4.1 / 1.7) + 0.5) / (7.3 - 4.6)) ", &equation);
 
     int err;
     float output = solveEquation(&equation, 4.9, &err);
 
-    printf("%f\n", output);
+    float volatile * const p_reg = (float *) 0x1234;
+    *p_reg = output;
+
+    
+
 
 
     return 0;
 }
+*/
 
 
 
@@ -29,9 +32,11 @@ float solveEquation(Queue * equation, float x, int * err){
     }
 
     Stack variableStack;
+    structureStack_Stack(&variableStack);
 
     while(!isEmpty_Queue(equation)){
         if(!peek_Queue(equation).isOperator){
+
             push_Stack(&variableStack, dequeue_Queue(equation));
         }else if ( (char)peek_Queue(equation).value == 'x'){
             dequeue_Queue(equation);
@@ -40,8 +45,11 @@ float solveEquation(Queue * equation, float x, int * err){
             newToken.isOperator = 0;
             push_Stack(&variableStack, newToken);
         }else{ // Next element is operator
+
             float operand1 = pop_Stack(&variableStack).value;
             float operand2 = pop_Stack(&variableStack).value;
+
+            
 
             Token newValue;
             newValue.isOperator = 0;
@@ -63,7 +71,7 @@ float solveEquation(Queue * equation, float x, int * err){
                     break;
                 }
                 default : {
-                    *err = 1;
+                    *err = 2;
                     return 0;   
                 }
             }
@@ -73,18 +81,11 @@ float solveEquation(Queue * equation, float x, int * err){
     }
 
     if(isEmpty_Stack(&variableStack)){
-        *err = 1;
+        *err = 3;
         return 0; 
     }
 
     float output = pop_Stack(&variableStack).value;
-    
-    if(pop_Stack(&variableStack).value && !isEmpty_Stack(&variableStack)){
-        *err = 1;
-        return 0; 
-    }
-
     return output;
-
 
 }

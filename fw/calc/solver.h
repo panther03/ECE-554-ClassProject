@@ -1,9 +1,9 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
-#include "../parser/stack.h"
-#include "../parser/queue.h"
-#include "../parser/parser.h"
+#include "stack.h"
+#include "queue.h"
+#include "parser.h"
 
 
 float solveEquation(Queue * equation, float x, int * err);

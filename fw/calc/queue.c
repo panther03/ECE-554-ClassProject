@@ -30,7 +30,7 @@ Token dequeue_Queue(Queue * queue) {
 
     if(queue->size == 1){
         queue->head = -1;
-        queue->tail = 0;
+        queue->tail = -1;
     } else {
         queue->head = (queue->head + 1) % MAX_SIZE;
     }

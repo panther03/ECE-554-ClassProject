@@ -25,6 +25,7 @@ import wi23_defs::*;
      input logic [1:0] FEX_WB_ctrl_FPIntCvtReg,
      input logic [1:0] ID_FEX_ctrl_FPIntCvtReg,
      input logic [1:0] IF_ID_ctrl_FPIntCvtReg,
+     input logic IF_ID_ctrl_FPInst,
 
      // Outputs
      output logic frwrd_MEM_EX_opA, 
@@ -82,8 +83,8 @@ assign bypass_reg1 = (MEM_WB_ctrl_regw & ~MEM_WB_ctrl_FpInst) & (MEM_WB_regw == 
 assign bypass_reg2 = (MEM_WB_ctrl_regw & ~MEM_WB_ctrl_FpInst) & (MEM_WB_regw == IF_ID_reg2);
 
 // Register bypass for FP -> Int and Int -> Int for FP Mem Pipeline
-assign fp_int_bypass_reg1 = (FEX_WB_ctrl_regw & FEX_WB_ctrl_FpInst) & (FEX_WB_regw == IF_ID_reg1);
-assign fp_int_bypass_reg2 = (FEX_WB_ctrl_regw & FEX_WB_ctrl_FpInst) & (FEX_WB_regw == IF_ID_reg2);
+assign fp_int_bypass_reg1 = FEX_WB_ctrl_regw & ((~FEX_WB_ctrl_FPIntCvtReg[1] & IF_ID_ctrl_FPInst) | (FEX_WB_ctrl_FPIntCvtReg[1])) & (FEX_WB_regw == IF_ID_reg1);
+assign fp_int_bypass_reg2 = FEX_WB_ctrl_regw & ((~FEX_WB_ctrl_FPIntCvtReg[1] & IF_ID_ctrl_FPInst) | (FEX_WB_ctrl_FPIntCvtReg[1])) & (FEX_WB_regw == IF_ID_reg2);
 
 // FP register bypass for FP -> FP and Int -> FP (Int -> FP is only for FP LD/ST which is taken care of by fp_write_in)
 assign fp_bypass_reg1 = (FEX_WB_ctrl_regw) & (FEX_WB_regw == IF_ID_reg1);

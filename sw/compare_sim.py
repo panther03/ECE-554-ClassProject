@@ -29,7 +29,7 @@ def sim_compare (f1, f2):
         if (halt_cnt <= 1):
             sim_trace_lines1.append(line)
     
-    diff_lines = difflib.unified_diff(sv_trace_lines1, sim_trace_lines1, fromfile='wi23_tb_trace.log', tofile='wi23_sim_trace.log', lineterm='')
+    diff_lines = difflib.unified_diff(sv_trace_lines1, sim_trace_lines1, fromfile='wi23_tb_trace.log', tofile='wi23_sim_trace.log', lineterm='', n=0)
 
     diff = False
     for line in diff_lines:

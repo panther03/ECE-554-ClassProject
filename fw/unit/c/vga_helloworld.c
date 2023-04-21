@@ -24,8 +24,8 @@ void vga_print_plain(int x, int y, const char* msg_data) {
 __attribute__((section(".text")))
 int main() {
   vga_print_plain(0,0,"Hello World!");
-  while(1) {
-    continue;
-  }
+  //while(1) {
+  //  continue;
+  //}
   return 0;
 }

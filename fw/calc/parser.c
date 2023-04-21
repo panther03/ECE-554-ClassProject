@@ -123,7 +123,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 Token token;
                 token.value = ')';
                 token.isOperator = 1;
-                lastTokenWasOperator = 1;
+                lastTokenWasOperator = 0;
                 enqueue_Queue(output, token);
                 break;
             }
@@ -155,6 +155,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                     token.isOperator = 0;
                     lastTokenWasOperator = 0;
                     enqueue_Queue(output, token);
+
 
                     userInput++;
 
