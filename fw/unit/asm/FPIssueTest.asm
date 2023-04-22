@@ -126,6 +126,64 @@ fcvti f12, r11      // f12 - 0x41000000
 fsub f12, f11, f12  // f12 - 0
 imovf r12, f12      // r12 - 0
 bnez r12, .fail
+// WB -> FEX bypass
+ld r19, r8, 0       // r19 - 8
+nop
+fcvti f19, r19      // f19 - 0x41000000
+icvtf r19, f19      // r10 - 8
+subi r11, r19, 8    // r11 - 0
+bnez r11, .fail
+// WB -> FEX bypass
+addi r20, r8, 0     // r20 - 12
+nop
+nop
+fcvti f19, r20      // f19 - 0x41400000
+icvtf r19, f19      // r19 - 12
+subi r11, r19, 12   // r11 - 0
+bnez r11, .fail
+// WB -> EX bypass
+icvtf r21, f19      // r21 - 12
+nop
+nop
+addi r20, r21, 0    // r20 - 12
+subi r11, r20, 12   // r11 - 0
+bnez r11, .fail
+// WB -> EX bypass
+addi  r22, r21, 0   // r21 - 12
+nop
+nop
+fcvti f20, r22      // f20 - 0x41400000
+fsub f11, f20, f19  // f11 - 0
+imovf r11, f11      // r11 - 0
+bnez r11, .fail
+// Branching cases test
+// Set defualt to 1
+lbi r20, 1
+lbi r21, 1
+lbi r22, 1
+lbi r23, 1
+lbi r24, 1
+// Make all Int registers 0 using FP->Int convert, check for forwarding and bypass cases to branch
+icvtf r20, f11      // r20 - 0
+bnez r20, .fail
+icvtf r21, f11      // r21 - 0
+nop
+bnez r21, .fail
+icvtf r22, f11      // r22 - 0
+nop
+nop
+bnez r22, .fail
+icvtf r23, f11      // r23 - 0
+nop
+nop
+nop
+bnez r23, .fail
+icvtf r24, f11      // r24 - 0
+nop
+nop
+nop
+nop
+bnez r24, .fail
 
 .pass:
 lbi r17,1
