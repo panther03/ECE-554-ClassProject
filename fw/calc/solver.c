@@ -1,30 +1,38 @@
 #include "solver.h"
-/*int main(int argc, char *argv[]){
+// int main(int argc, char *argv[]){
 
         
 
-    Queue equation;
-    structureQueue_Queue(&equation);
+//     Queue equation;
+//     structureQueue_Queue(&equation);
 
-    parse_equation("((3.2 * 7.5) + (2.7 / 4.2) - (8.1)) * (((4.1 / 1.7) + 0.5) / (7.3 - 4.6)) ", &equation);
+//     parse_equation("((3.2 * 7.5) + (2.7 / 4.2) - (8.1)) * (((4.1 / 1.7) + 0.5) / (7.3 - 4.6)) ", &equation);
 
-    int err;
-    float output = solveEquation(&equation, 4.9, &err);
+//     int err;
+//     float output = solveEquation(&equation, 4.9, &err);
+//     output = solveEquation(&equation, 4.9, &err);
+//     output = solveEquation(&equation, 4.9, &err);
 
-    float volatile * const p_reg = (float *) 0x1234;
-    *p_reg = output;
+//     float volatile * const p_reg = (float *) 0x1234;
+//     *p_reg = output;
 
     
 
 
 
-    return 0;
-}
-*/
+//     return 0;
+// }
+
 
 
 
 float solveEquation(Queue * equation, float x, int * err){
+    // Save initial state of queue
+    int initialHead = equation->head;
+    int initialTail = equation->tail;
+    int initialSize = equation->size;
+
+
     *err = 0;
     if(isEmpty_Queue(equation)){
         *err = 1;
@@ -72,6 +80,12 @@ float solveEquation(Queue * equation, float x, int * err){
                 }
                 default : {
                     *err = 2;
+
+                    // Restore queue
+                    equation->head = initialHead;
+                    equation->tail = initialTail;
+                    equation->size = initialSize;
+
                     return 0;   
                 }
             }
@@ -82,8 +96,18 @@ float solveEquation(Queue * equation, float x, int * err){
 
     if(isEmpty_Stack(&variableStack)){
         *err = 3;
+
+        // Restore queue
+        equation->head = initialHead;
+        equation->tail = initialTail;
+        equation->size = initialSize;
         return 0; 
     }
+
+    // Restore queue
+    equation->head = initialHead;
+    equation->tail = initialTail;
+    equation->size = initialSize;
 
     float output = pop_Stack(&variableStack).value;
     return output;
