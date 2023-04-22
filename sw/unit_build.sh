@@ -8,7 +8,7 @@ LD="wi23-elf-ld"
 RUN="wi23-elf-run"
 OBJDUMP="wi23-elf-objdump"
 OBJCOPY="wi23-elf-objcopy"
-CFLAFS="-fsingle-precision-constant -fno-builtin -fno-inline"
+CFLAGS="-fsingle-precision-constant -fno-builtin -fno-inline"
 
 FW_UNIT_TEST=$1
 OUT_DIR=$2
