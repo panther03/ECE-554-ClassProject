@@ -101,7 +101,6 @@ float str_to_fp(char* str, int* err) {
     int exponentLength = 0;
 
     decode_str(str, &length, &decimalIndx, &sign, &exponent, &exponentLength, err);
-    length -= exponentLength;
 
     if (decimalIndx == -1) {
         pow = length - 1;
