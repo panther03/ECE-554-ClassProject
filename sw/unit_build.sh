@@ -12,6 +12,7 @@ CFLAFS="-fsingle-precision-constant -fno-builtin -fno-inline"
 
 FW_UNIT_TEST=$1
 OUT_DIR=$2
+SIM_TRACE=$3
 
 if [[ "$FW_UNIT_TEST" == *.s ]]; then
     $AS unit/asm/"$FW_UNIT_TEST" -o $OUT_DIR/out.o
@@ -29,4 +30,7 @@ fi
 
 $OBJDUMP -dr -s -S $OUT_DIR/out.elf > $OUT_DIR/exec-out.log
 $OBJCOPY --verilog-data-width 4 $OUT_DIR/out.elf -O verilog $OUT_DIR/out.hex
-#$RUN -t $OUT_DIR/out.elf 2>$OUT_DIR/wi23_sim_trace.log
+if [[ "$SIM_TRACE" == "1" ]]; then
+    echo "Running Simulator on $FW_UNIT_TEST"
+    $RUN -t $OUT_DIR/out.elf 2>$OUT_DIR/wi23_sim_trace.log
+fi

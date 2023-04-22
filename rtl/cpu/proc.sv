@@ -764,12 +764,33 @@ import control_defs_pkg::*;
    // FP LD/ST instruction decoded
    assign IF_ID_is_fp_store = IF_ID_ctrl_FpInst_ea & IF_ID_ctrl_MemWrite_ea;
 
-   hazard iHAZARD (.clk(clk),.IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
-      .IF_ID_is_branch(JType[0]),.ID_EX_is_load(ID_EX_ctrl_MemRead_out), .IF_ID_is_fp_store(IF_ID_is_fp_store), .ID_EX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),
-      .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),.EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out), .ID_FEX_ctrl_regw(ID_FEX_ctrl_RegWrite_out),
-      .ID_EX_regw(writesel),.ID_FEX_regw(fp_writesel),.EX_MEM_regw(EX_MEM_writesel_out), .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
-      .FEX_busy(FEX_busy), .IF_ID_is_fp_ex(IF_ID_is_fp_ex), .FEX_busy_er(FEX_busy_er),
-      .stall(stall));
+   hazard iHAZARD (
+      // Inputs
+      .clk(clk),
+      .IF_ID_reg1(IF_ID_inst_out[25:21]),
+      .IF_ID_reg2(IF_ID_inst_out[20:16]),
+      .IF_ID_is_branch(JType[0]),
+      .IF_ID_is_fp_store(IF_ID_is_fp_store), 
+      .IF_ID_is_fp_ex(IF_ID_is_fp_ex), 
+      .ID_EX_is_load(ID_EX_ctrl_MemRead_out), 
+      .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),
+      .ID_FEX_ctrl_regw(ID_FEX_ctrl_RegWrite_out),
+      .ID_FEX2_ctrl_regw(FEX_WB_ctrl_RegWrite_r),
+      .EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out), 
+      .ID_EX_regw(writesel),
+      .ID_FEX_regw(fp_writesel),
+      .ID_FEX2_regw(FEX_WB_writesel_r),
+      .EX_MEM_regw(EX_MEM_writesel_out), 
+      .ID_FEX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),
+      .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
+      .ID_FEX2_ctrl_FpInst(FEX_WB_ctrl_FpInst_r),
+      .ID_FEX2_ctrl_FPIntCvtReg(FEX_WB_ctrl_FPIntCvtReg_r),
+      .FEX_busy(FEX_busy), 
+      .FEX_busy_er(FEX_busy_er),
+      
+      // Outputs
+      .stall(stall)
+   );
 
    ///////////////////////
    /// Forwarding Unit ///
