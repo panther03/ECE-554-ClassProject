@@ -154,6 +154,7 @@ module PS2_kb(
   // and denote if any keys were pressed that are important to the programmer.
   PS2_scan_trans iPS2_SCT(
     .clk(clk),
+	 .rst_n(rst_n),
     .addr(rx_data),
     .char_o(PS2_CHAR_o),
 	 .kb_shift_o(shf),

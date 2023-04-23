@@ -186,10 +186,9 @@ VGA_display iVGA(
 ////////////////////////
 // Instantiate PS2 KB //
 ////////////////////////
-reg [9:0] debug_PS2_ledr;
-reg [7:0] PS2_key;
-reg [DATA_WIDTH-1:0] PS2_status;
-reg PS2_rdy;
+wire [7:0] PS2_key;
+wire [DATA_WIDTH-1:0] PS2_status;
+wire PS2_rdy;
 
 PS2_kb iPS2_KB(
  .clk(clk),                   
@@ -198,16 +197,12 @@ PS2_kb iPS2_KB(
  .PS2_DAT_i(PS2_DAT),             // Serial line in from the KB
  .PS2_CHAR_o(PS2_key),            // Last key pressed
  .PS2_rdy_o(PS2_rdy),             // signal that a key code is available 
- .PS2_status_o(PS2_status)
+ .PS2_status_o(PS2_status)        // special KB state for programmers w/o outputting ASCII (enter? tab? etc)
 );
 
 ///////////////////////
 // Memory map logic ///
 ///////////////////////
-
-// TODO Aidan - Hoffman doesn't like the always_comb.
-// Probably better to do assigns with individual ternaries.
-// He also commented to use wi23_defs.sv to declare memory addresses.
 wire   in_dmem_range_n = (~|daddr[31:14] | (~|daddr[31:15] & ldcr));
 assign we_dmem              = in_dmem_range_n ? we_map : 0;
 assign data_mem_to_proc_map = in_dmem_range_n ? 
@@ -217,9 +212,9 @@ assign data_mem_to_proc_map = in_dmem_range_n ?
 
 // data going from MMAP to processor
 wire [DATA_WIDTH-1:0] mmap_periph_data;
-assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ?  {24'h0, PS2_key} :
+assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? {24'h0, PS2_key} :
                           (daddr == ADDR_PS2_STATUS_MMAP) ? PS2_status : 
-								  (daddr == ADDR_TIMER_MMAP)      ? 32'h0 : 
+								  (daddr == ADDR_TIMER_MMAP)      ? 0 : 
 								  0;
 								  
 // data going from processor to MMAP
@@ -231,6 +226,6 @@ always_ff @(posedge clk, negedge rst_n)
     vga_mode_sel <= data_proc_to_mem[0];
 
 // debug for PS/2
-assign LEDR = SW[1] ? {2'h0, PS2_key} : 0;
+assign LEDR = {2'b11, PS2_key};
 
 endmodule

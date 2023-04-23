@@ -65,6 +65,9 @@ wi23 iWI23
   // UART
   .RX(RX),
   .TX(TX),
+  // PS2
+  .PS2_CLK(PS2_CLK),
+  .PS2_DAT(PS2_DAT),
   // VGA
   .VGA_CLK(VGA_CLK),
   .VGA_BLANK_N(VGA_BLANK_N),
