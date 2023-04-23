@@ -117,6 +117,18 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to TX
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to RX
 
 #============================================================
+# PS2
+#============================================================
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_CLK
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_CLK2
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_DAT
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_DAT2
+set_location_assignment PIN_AD7 -to PS2_CLK
+set_location_assignment PIN_AD9 -to PS2_CLK2
+set_location_assignment PIN_AE7 -to PS2_DAT
+set_location_assignment PIN_AE9 -to PS2_DAT2
+
+#============================================================
 # VGA
 #============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_BLANK_N
@@ -183,6 +195,8 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 
+set_global_assignment -name VERILOG_FILE ../../rtl/kb/PS2_scan_trans.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/kb/ps2_kb.sv
 set_global_assignment -name VERILOG_FILE ../../rtl/vga/VGA_display.v
 set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/mem/blockram.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/cpu/fp_preadder.sv
@@ -197,10 +211,6 @@ set_global_assignment -name SDC_FILE wi23.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/mem/imem.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/mem/dmem.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/pkg/wi23_defs.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/spart/UART_tx.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/spart/UART_rx.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/spart/spart.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/spart/queue.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/wi23.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/top.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/rst_synch.sv

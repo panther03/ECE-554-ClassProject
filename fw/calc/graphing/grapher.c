@@ -1,14 +1,13 @@
 #include "../solver/solver.h"
 
 #include <stdio.h>
-
-volatile int VGA_GR_BUFF = 0xfffeD400;
+#include "mmap.h"
 
 void plot_x_axis(float lower, float upper) {
     float span = upper - lower;
     int y_offset = (int)((upper / span) * 239);
     
-    int* writeAddr = VGA_GR_BUFF + (int)(y_offset * 320);
+    int* writeAddr = VGA_GRAPH_BUFFER + (int)(y_offset * 320);
 
     int i;
     for (i = 0; i < 320; i++) {
@@ -20,7 +19,7 @@ void plot_y_axis(float lower, float upper) {
     float span = upper - lower;
     int x_offset = (int)((-lower / span) * 319);
     
-    int* writeAddr = VGA_GR_BUFF + (int)(x_offset);
+    int* writeAddr = VGA_GRAPH_BUFFER + (int)(x_offset);
 
     int i;
     int y_offset = 0;
@@ -31,7 +30,7 @@ void plot_y_axis(float lower, float upper) {
 }
 
 void plot_xy(int x, int y) {
-    int *writeAddr = VGA_GR_BUFF + x + (320 * y);
+    int *writeAddr = VGA_GRAPH_BUFFER + x + (320 * y);
     *writeAddr = 0x2;
 }
 

@@ -9,9 +9,6 @@ module top
   // Switches and LEDs
   input  [9:0] SW,
   output [9:0] LEDR,
-  // PS/2
-  input        PS2_CLK,
-  input        PS2_DAT,
   // UART
   input        RX,
   output       TX,
