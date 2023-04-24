@@ -16,7 +16,7 @@ import wi23_defs::*;
   // VGA
   // VGA clock is an input to this module because it is generated in the PLL.
   input        VGA_CLK, // 25MHz
-  output    	VGA_BLANK_N,
+  output       VGA_BLANK_N,
   output [7:0] VGA_B,
   output [7:0] VGA_G,
   output       VGA_HS,
@@ -100,7 +100,7 @@ assign shift_ldh = daddr[1:0] == 2'b00 ? 'd16 :
 assign data_proc_to_mem_ldh = data_proc_to_mem << shift_ldh;
 
 assign data_proc_to_mem_muxed = data_proc_to_mem_gran == 2'b01 ? data_proc_to_mem_ldb : // Byte Access  
-                                data_proc_to_mem_gran == 2'b10 ? data_proc_to_mem_ldh : // Byte Access  
+                                data_proc_to_mem_gran == 2'b10 ? data_proc_to_mem_ldh : // Half-Word Access  
                                                                  data_proc_to_mem     ; // Word Access 
 
 dmem DMEM (
@@ -203,19 +203,17 @@ PS2_kb iPS2_KB(
 ///////////////////////
 // Memory map logic ///
 ///////////////////////
-wire   in_dmem_range_n = (~|daddr[31:14] | (~|daddr[31:15] & ldcr));
-assign we_dmem              = in_dmem_range_n ? we_map : 0;
-assign data_mem_to_proc_map = in_dmem_range_n ? 
-                              (ldcr ? inst_mem_to_proc : data_mem_to_proc_dmem_muxed)
-										// cases where we assign data mem to proc map MMAP'd values
-                              : mmap_periph_data;
+wire   in_mmap_range_n;
+assign in_mmap_range_n  = (~|daddr[31:DMEM_DEPTH] | (~|daddr[31:(IMEM_DEPTH+2)] & ldcr)); // DMEM_DEPTH = 14, IMEM_DEPTH = 13 + 2 (Since IMEM is word-addressable)
+assign we_dmem              = in_mmap_range_n ? we_map : 4'b0;
+assign data_mem_to_proc_map = in_mmap_range_n ? (ldcr ? inst_mem_to_proc : data_mem_to_proc_dmem_muxed) // DMEM or IMEM range 
+                                              : mmap_periph_data ; // cases where we assign data mem to proc map MMAP'd values
 
 // data going from MMAP to processor
 wire [DATA_WIDTH-1:0] mmap_periph_data;
 assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? {24'h0, PS2_key} :
                           (daddr == ADDR_PS2_STATUS_MMAP) ? PS2_status : 
-								  (daddr == ADDR_TIMER_MMAP)      ? 0 : 
-								  0;
+					      (daddr == ADDR_TIMER_MMAP)      ? 32'b0 : 32'b0 ;
 								  
 // data going from processor to MMAP
 // (only one signal)
