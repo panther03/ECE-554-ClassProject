@@ -204,13 +204,13 @@ PS2_kb iPS2_KB(
 // Memory map logic ///
 ///////////////////////
 wire   in_mmap_range_n;
+wire [DATA_WIDTH-1:0] mmap_periph_data;
 assign in_mmap_range_n  = (~|daddr[31:DMEM_DEPTH] | (~|daddr[31:(IMEM_DEPTH+2)] & ldcr)); // DMEM_DEPTH = 14, IMEM_DEPTH = 13 + 2 (Since IMEM is word-addressable)
 assign we_dmem              = in_mmap_range_n ? we_map : 4'b0;
 assign data_mem_to_proc_map = in_mmap_range_n ? (ldcr ? inst_mem_to_proc : data_mem_to_proc_dmem_muxed) // DMEM or IMEM range 
                                               : mmap_periph_data ; // cases where we assign data mem to proc map MMAP'd values
 
 // data going from MMAP to processor
-wire [DATA_WIDTH-1:0] mmap_periph_data;
 assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? {24'h0, PS2_key} :
                           (daddr == ADDR_PS2_STATUS_MMAP) ? PS2_status : 
 					      (daddr == ADDR_TIMER_MMAP)      ? 32'b0 : 32'b0 ;

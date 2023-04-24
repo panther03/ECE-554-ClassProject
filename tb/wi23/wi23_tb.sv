@@ -23,6 +23,9 @@ logic       VGA_HS;
 logic [7:0] VGA_R;
 logic       VGA_SYNC_N;
 logic       VGA_VS;
+// PS2
+logic        PS2_CLK;
+logic        PS2_DAT;
 
 wi23 WI23 (
     .*
