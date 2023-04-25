@@ -1,5 +1,4 @@
 #include "solver.h"
-//#include <stdio.h>
 
 // int main(int argc, char *argv[]){
 
@@ -15,7 +14,7 @@
 //     int err;
 //     float output = solveEquation(&equation, 2, &err);
 
-//     //printf("Output: %f\n", output);
+//     printf("Output: %f\n", output);
 
 //     // float volatile * const p_reg = (float *) 0x1234;
 //     // *p_reg = output;
