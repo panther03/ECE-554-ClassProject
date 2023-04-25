@@ -32,6 +32,7 @@ import wi23_defs::*;
 logic [PC_WIDTH-1:0]    iaddr;
 logic [PC_WIDTH-1:0]    inst;
 logic [DATA_WIDTH-1:0]  inst_mem_to_proc;
+logic [IMEM_DEPTH-1:0]  daddr_im;
 logic [DATA_WIDTH-1:0]  daddr;
 logic [DATA_WIDTH-1:0]  data_mem_to_proc_map;
 logic [DATA_WIDTH-1:0]  data_mem_to_proc_dmem;
@@ -41,10 +42,9 @@ logic [DATA_WIDTH-1:0]  data_proc_to_mem;
 logic [DATA_WIDTH-1:0]  data_proc_to_mem_be;
 logic [1:0]             data_proc_to_mem_gran;
 logic                   ldcr;
-
-logic [3:0] we_map;
-logic [3:0] re_map;
-logic [3:0] we_dmem;
+logic [3:0]             we_map;
+logic [3:0]             re_map;
+logic [3:0]             we_dmem;
 
 ///////////////////////////////
 // Processor instantiation //
@@ -52,16 +52,22 @@ logic [3:0] we_dmem;
 
 proc PROC (
    // Clock and reset
-   .clk(clk), .rst_n(rst_n),
+   .clk                       (clk), 
+   .rst_n                     (rst_n),
    // Error and halt status
-   .err_o(), .halt_o(halt), 
+   .err_o                     (), 
+   .halt_o                    (halt), 
    // Instruction memory signals
-   .iaddr_o(iaddr), .inst_i(inst), .ldcr_o(ldcr),
+   .iaddr_o                   (iaddr), 
+   .inst_i                    (inst), 
+   .ldcr_o                    (ldcr),
    // Data memory signals
-   .daddr_o(daddr), .we_o(we_map), .re_o(re_map),
-   .data_proc_to_mem_o(data_proc_to_mem), 
-   .data_mem_to_proc_i(data_mem_to_proc_map),
-   .data_proc_to_mem_gram_o(data_proc_to_mem_gran)
+   .daddr_o                   (daddr), 
+   .we_o                      (we_map), 
+   .re_o                      (re_map),
+   .data_proc_to_mem_o        (data_proc_to_mem), 
+   .data_mem_to_proc_i        (data_mem_to_proc_map),
+   .data_proc_to_mem_gram_o   (data_proc_to_mem_gran)
 );
 
 /////////////////////////
@@ -69,11 +75,10 @@ proc PROC (
 /////////////////////////
 
 // Word-aligned IMEM. Make daddr word-aligned.
-logic [IMEM_DEPTH-1:0] daddr_im;
 assign daddr_im = daddr >> 2;
 
 imem IMEM (
-  .clk(clk),
+  .clk      (clk),
   // We truncate address here but this is OK. It will just fetch 0s (HALT) if out of range
   .addr_i   (iaddr[IMEM_DEPTH-1:0]),
   .daddr_i  (daddr_im[IMEM_DEPTH-1:0]),
@@ -104,12 +109,12 @@ assign data_proc_to_mem_muxed = data_proc_to_mem_gran == 2'b01 ? data_proc_to_me
                                                                  data_proc_to_mem     ; // Word Access 
 
 dmem DMEM (
-  .clk(clk),
-  .we_i(we_dmem),
+  .clk      (clk),
+  .we_i     (we_dmem),
   // Also OK to truncate address, we have already checked that it's in range (otherwise we would not be enabled).
-  .addr_i(daddr[DMEM_DEPTH-1:0]),
-  .wdata_i(data_proc_to_mem_muxed),
-  .rdata_o(data_mem_to_proc_dmem)
+  .addr_i   (daddr[DMEM_DEPTH-1:0]),
+  .wdata_i  (data_proc_to_mem_muxed),
+  .rdata_o  (data_mem_to_proc_dmem)
 );
 
 // Shift data read from DMEM for sub-word accesses.
@@ -142,9 +147,14 @@ end
 wire [9:0] xpix;					// current X coordinate of VGA
 wire [8:0] ypix;					// current Y coordinate of VGA
 VGA_timing iVGATM(
-	.clk25MHz(VGA_CLK), .rst_n(rst_n), .VGA_BLANK_N(VGA_BLANK_N),
-   .VGA_HS(VGA_HS),.VGA_SYNC_N(VGA_SYNC_N), .VGA_VS(VGA_VS), 
-   .xpix(xpix), .ypix(ypix)
+	.clk25MHz     (VGA_CLK), 
+  .rst_n        (rst_n), 
+  .VGA_BLANK_N  (VGA_BLANK_N),
+  .VGA_HS       (VGA_HS),
+  .VGA_SYNC_N   (VGA_SYNC_N), 
+  .VGA_VS       (VGA_VS), 
+  .xpix         (xpix), 
+  .ypix         (ypix)
 );
         
 //////////////////////
@@ -159,7 +169,8 @@ logic [16:0] daddr_vidmem;
 logic [11:0] daddr_vga_char;
 logic ff_dms;
 
-wire [15:0] daddr_vga_text_raw = (daddr[15:0] - ADDR_TEXT_MMAP[15:0]);
+wire [15:0] daddr_vga_text_raw;
+assign daddr_vga_text_raw = (daddr[15:0] - ADDR_TEXT_MMAP[15:0]);
 
 assign vga_graph_we   = daddr >= ADDR_GRAPH_MMAP & |we_map;
 assign vga_char_we    = daddr >= ADDR_TEXT_MMAP & !vga_graph_we & |we_map;
@@ -167,21 +178,25 @@ assign vga_char_we    = daddr >= ADDR_TEXT_MMAP & !vga_graph_we & |we_map;
 assign daddr_vidmem   = daddr - ADDR_GRAPH_MMAP;
 assign daddr_vga_char = daddr - ADDR_TEXT_MMAP;
 
-
 VGA_display iVGA(
- .clk(clk),
- .rst_n(rst_n),
- .xloc(xpix), .yloc(ypix),
+ .clk             (clk),
+ .rst_n           (rst_n),
+ .xloc            (xpix), 
+ .yloc            (ypix),
  // vga text memory is half-word addressable
- .vga_char_i(data_proc_to_mem[15:0]), .vga_char_addr_i(daddr_vga_text_raw[12:1]), .vga_char_we_i(vga_char_we),
+ .vga_char_i      (data_proc_to_mem[15:0]), 
+ .vga_char_addr_i (daddr_vga_text_raw[12:1]), .vga_char_we_i(vga_char_we),
  // ...but the graph is byte addressable
  // something to be aware of when you are programming!
- .graph_px_i(data_proc_to_mem[3:0]), .graph_addr_i(daddr_vidmem), .graph_we_i(vga_graph_we),
+ .graph_px_i      (data_proc_to_mem[3:0]), 
+ .graph_addr_i    (daddr_vidmem), 
+ .graph_we_i      (vga_graph_we),
  // SW[0] debug for switching between modes
- .draw_mode_sel_i(vga_mode_sel | SW[0]),
- .VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B)
+ .draw_mode_sel_i (vga_mode_sel | SW[0]),
+ .VGA_R           (VGA_R), 
+ .VGA_G           (VGA_G), 
+ .VGA_B           (VGA_B)
 );
-
   
 ////////////////////////
 // Instantiate PS2 KB //
@@ -191,19 +206,19 @@ wire [DATA_WIDTH-1:0] PS2_status;
 wire PS2_rdy;
 
 PS2_kb iPS2_KB(
- .clk(clk),                   
- .rst_n(rst_n),
- .PS2_CLK_i(PS2_CLK),             // The PS/2 KB has a clock of its own
- .PS2_DAT_i(PS2_DAT),             // Serial line in from the KB
- .PS2_CHAR_o(PS2_key),            // Last key pressed
- .PS2_rdy_o(PS2_rdy),             // signal that a key code is available 
- .PS2_status_o(PS2_status)        // special KB state for programmers w/o outputting ASCII (enter? tab? etc)
+  .clk          (clk),                   
+  .rst_n        (rst_n),
+  .PS2_CLK_i    (PS2_CLK),          // The PS/2 KB has a clock of its own
+  .PS2_DAT_i    (PS2_DAT),          // Serial line in from the KB
+  .PS2_CHAR_o   (PS2_key),          // Last key pressed
+  .PS2_rdy_o    (PS2_rdy),          // signal that a key code is available 
+  .PS2_status_o (PS2_status)        // special KB state for programmers w/o outputting ASCII (enter? tab? etc)
 );
 
 ///////////////////////
 // Memory map logic ///
 ///////////////////////
-wire   in_mmap_range_n;
+wire in_mmap_range_n;
 wire [DATA_WIDTH-1:0] mmap_periph_data;
 assign in_mmap_range_n  = (~|daddr[31:DMEM_DEPTH] | (~|daddr[31:(IMEM_DEPTH+2)] & ldcr)); // DMEM_DEPTH = 14, IMEM_DEPTH = 13 + 2 (Since IMEM is word-addressable)
 assign we_dmem              = in_mmap_range_n ? we_map : 4'b0;
@@ -213,7 +228,7 @@ assign data_mem_to_proc_map = in_mmap_range_n ? (ldcr ? inst_mem_to_proc : data_
 // data going from MMAP to processor
 assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? {24'h0, PS2_key} :
                           (daddr == ADDR_PS2_STATUS_MMAP) ? PS2_status : 
-					      (daddr == ADDR_TIMER_MMAP)      ? 32'b0 : 32'b0 ;
+					                (daddr == ADDR_TIMER_MMAP)      ? 32'b0 : 32'b0 ;
 								  
 // data going from processor to MMAP
 // (only one signal)
