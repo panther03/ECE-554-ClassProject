@@ -1,31 +1,31 @@
 #include "solver.h"
 //#include <stdio.h>
 
-int main(int argc, char *argv[]){
+// int main(int argc, char *argv[]){
 
         
 
-    Queue equation;
-    structureQueue_Queue(&equation);
+//     Queue equation;
+//     structureQueue_Queue(&equation);
 
-    parse_equation("x-x*x*x/6+x*x*x*x*x/120-x*x*x*x*x*x*x/5040+x*x*x*x*x*x*x*x*x/362880", &equation);
-    //parse_equation("x/6+x", &equation);
-    //parse_equation("3.2 * 7.5 + 2.7 / 4.2 -8.1 * 4.1 / 1.7 + 0.5 / 7.3 - 4.6", &equation);
+//     parse_equation("x-x*x*x/6+x*x*x*x*x/120-x*x*x*x*x*x*x/5040+x*x*x*x*x*x*x*x*x/362880", &equation);
+//     //parse_equation("x/6+x", &equation);
+//     //parse_equation("3.2 * 7.5 + 2.7 / 4.2 -8.1 * 4.1 / 1.7 + 0.5 / 7.3 - 4.6", &equation);
 
-    int err;
-    float output = solveEquation(&equation, 2, &err);
+//     int err;
+//     float output = solveEquation(&equation, 2, &err);
 
-    //printf("Output: %f\n", output);
+//     //printf("Output: %f\n", output);
 
-    // float volatile * const p_reg = (float *) 0x1234;
-    // *p_reg = output;
+//     // float volatile * const p_reg = (float *) 0x1234;
+//     // *p_reg = output;
 
     
 
 
 
-    return 0;
-}
+//     return 0;
+// }
 
 
 
