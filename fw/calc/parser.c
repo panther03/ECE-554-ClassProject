@@ -1,4 +1,5 @@
 #include "parser.h"
+//#include <stdio.h>
 
 // Input: User input string
 // Output: Array of Tokens in reverse polish notation
@@ -26,8 +27,11 @@ void to_reverse_polish_notation(Queue * input, Queue * output){
 
     // while there are tokens to be read:
     while(!isEmpty_Queue(input)){
+
+
         //read a token
         Token nextToken = dequeue_Queue(input);
+        
         //if the token is:
         // - a number:
         if(!nextToken.isOperator || (char)nextToken.value == 'x'){
@@ -55,7 +59,8 @@ void to_reverse_polish_notation(Queue * input, Queue * output){
             // If just a regular operator
             }else {
                 // while ( there is an operator o2 at the top of the operator stack which is not a left parenthesis, and (o2 has greater precedence than o1 or (o1 and o2 have the same precedence and o1 is left-associative))):
-                while (!isEmpty_Stack(&operatorStack) && !peek_Stack(&operatorStack).isOperator && peek_Stack(&operatorStack).value != '(' && peek_Stack(&operatorStack).precedence >= nextToken.precedence) {
+                while (!isEmpty_Stack(&operatorStack) && peek_Stack(&operatorStack).value != '(' && peek_Stack(&operatorStack).precedence >= nextToken.precedence) {
+                    
                     // pop o2 from the operator stack into the output queue
                     enqueue_Queue(output, pop_Stack(&operatorStack));
                 }
