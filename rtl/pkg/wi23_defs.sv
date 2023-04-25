@@ -26,11 +26,21 @@ package wi23_defs;
     /// MEMORY MAP ///
     //////////////////
 
-	localparam ADDR_GRAPH_MMAP      = 32'hfffed400; // fffed400 - ffffffff
-	localparam ADDR_TEXT_MMAP       = 32'hfffec140; // fffec140 - fffed3ff size 4800 (80*30*2)
-	localparam ADDR_PS2_CHAR_MMAP   = 32'hfffec13c; // all 4 byte words
-	localparam ADDR_PS2_STATUS_MMAP = 32'hfffec138;
-	localparam ADDR_VGA_CONFIG_MMAP = 32'hfffec134;
-	localparam ADDR_TIMER_MMAP      = 32'hfffec130;
+    localparam ADDR_GRAPH_MMAP      = 32'hfffed400; // fffed400 - ffffffff
+    localparam ADDR_TEXT_MMAP       = 32'hfffec140; // fffec140 - fffed3ff size 4800 (80*30*2)
+    localparam ADDR_PS2_CHAR_MMAP   = 32'hfffec13c; // all 4 byte words
+    localparam ADDR_PS2_STATUS_MMAP = 32'hfffec138;
+    localparam ADDR_VGA_CONFIG_MMAP = 32'hfffec134;
+    localparam ADDR_TIMER_MMAP      = 32'hfffec130;
+
+    //////////////////
+    /// SPART MMAP ///
+    //////////////////
+    typedef enum logic [1:0] {
+        ADDR_DBUF = 2'b00,
+        ADDR_SREG = 2'b01,
+        ADDR_DBL  = 2'b10,
+        ADDR_DBH  = 2'b11
+    } spart_ioaddr_t;
 
 endpackage
