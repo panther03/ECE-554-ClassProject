@@ -80,14 +80,20 @@ void to_reverse_polish_notation(Queue * input, Queue * output){
 }
 
 
+/*
+    Convert an equation as a string to an array of tokens
+*/
 void text_to_array_of_tokens(char * userInput, Queue * output){
+    // Used to determine whether negative sign should be treated as negative number or subtraction
     int lastTokenWasOperator = 0;
 
     while (*userInput) {
         switch (*userInput){
+            // Ignore spaces
             case ' ':{
                 break;
             }
+            // Parse character as addition
             case '+':{
                 Token token;
                 token.value = '+';
@@ -97,6 +103,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 enqueue_Queue(output, token);
                 break;
             }
+            // Parse character as subtraction
             case '*':{
                 Token token;
                 token.value = '*';
@@ -106,6 +113,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 enqueue_Queue(output, token);
                 break;
             }
+            // Parse character as division
             case '/':{
                 Token token;
                 token.value = '/';
@@ -115,6 +123,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 enqueue_Queue(output, token);
                 break;
             }
+            // Parse character as open parentheses
             case '(':{
                 Token token;
                 token.value = '(';
@@ -123,6 +132,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 enqueue_Queue(output, token);
                 break;
             }
+            // Parse character as close parentheses
             case ')':{
                 Token token;
                 token.value = ')';
@@ -131,6 +141,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 enqueue_Queue(output, token);
                 break;
             }
+            // Parse character as variable
             case 'x':
             case 'X': {
                 Token token;
@@ -140,6 +151,8 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 enqueue_Queue(output, token);
                 break;
             }
+
+            // Parse character as either number or subtraction
             case '-':
             case '0':
             case '1':
@@ -152,6 +165,8 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
             case '8':
             case '9': {
 
+                // If the char is a digit or if the char is a negative sign coming before an operator, parse the value as a number
+                // Negative numbers will always come at the beginng of the equation or before an operator.
                 if(isEmpty_Queue(output) || lastTokenWasOperator || *userInput != '-'){
                     int err;
                     Token token;
@@ -160,14 +175,17 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                     lastTokenWasOperator = 0;
                     enqueue_Queue(output, token);
 
-
+                    
+                    // Move the pointer to the end of the number
                     userInput++;
-
                     while ((*userInput >= '0' && *userInput <= '9') || *userInput == '.'){
                         userInput++;
                     }
 
+                    // Decrement once because the pointer will be incremented at the end of the loop
                     userInput--;
+
+                // Otherwise, parse this as a subtraction operator
                 }else {
                     Token token;
                     token.value = '-';
@@ -176,11 +194,11 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                     lastTokenWasOperator = 1;
                     enqueue_Queue(output, token);
                 }
-                
 
                 break;
 
             }
+            // If the character was not found, return an empty queue
             default:
             {
                 // Clear queue and return
@@ -191,6 +209,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
             }
         }
 
+        // Increment to the next character
         userInput++;
     }
 
