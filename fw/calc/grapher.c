@@ -1,6 +1,4 @@
-#include "solver.h"
-
-//#include <stdio.h>
+#include "grapher.h"
 
 volatile unsigned char* VGA_GR_BUFF = 0xfffeD400;
 
@@ -119,16 +117,19 @@ void plotLine(int x0, int y0, int x1, int y1) {
     }
 }
 
-__attribute__((section(".text")))
-int main() {
-    float x_lower = -2.0f;
-    float x_upper = 4.0f;
+int graph() {
+    float x_lower = -6.0f;
+    float x_upper = 6.0f;
     // 320 X 240
     float x_step = (x_upper - x_lower) * .003125f; // * 1/320
     int x_coord_step = 1;
 
-    float y_lower = -10.0f;
-    float y_upper = 25.0f;
+    float y_lower = -4.0f;
+    float y_upper = 4.0f;
+
+    if (x_lower >= x_upper || y_lower >= y_upper) {
+        return 1;
+    }
 
     float x = x_lower;
     float y;
@@ -140,13 +141,14 @@ int main() {
     // parse eqs;
     Queue parsedEq;
     structureQueue_Queue(&parsedEq);
-    Queue eqPolishNot;
-    structureQueue_Queue(&eqPolishNot);
-    //char* eq = "x-x*x*x/6+x*x*x*x*x/120";
+
     char* eq = "x-x*x*x/6+x*x*x*x*x/120-x*x*x*x*x*x*x/5040+x*x*x*x*x*x*x*x*x/362880";
     //int i;
     //for (i = 0; i < 4; i++) {
         parse_equation(eq, &parsedEq);
+        if (isEmpty_Queue(&parsedEq)) {
+            return 1;
+        }
         //to_reverse_polish_notation(&parsedEq, &eqPolishNot);
 
         //eq += 80; // eq offset
@@ -187,4 +189,11 @@ int main() {
     }
 
     return 0;
+}
+
+void clearGraph() {
+    int i;
+    for (i = 0; i < 76800; i++) {
+        *(VGA_GR_BUFF + i) = 0;
+    }
 }
