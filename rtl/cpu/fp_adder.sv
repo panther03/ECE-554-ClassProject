@@ -31,7 +31,7 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
                                     3'b100;   // Normal
            
   assign B_type = ~|B_ex && ~|B_m ? 3'b000 :  // Zero
-                   ~|B_ex && |B_m  ? 3'b001 :  // Subnormal
+                   ~|B_ex && |B_m ? 3'b001 :  // Subnormal
                   &B_ex && ~|B_m  ? 3'b010 :  // Infinity
                   &B_ex && |B_m   ? 3'b011 :  // NaN
                                     3'b100;   // Normal   
@@ -54,11 +54,12 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
   assign S_special_unflopped = {S_special_sign, S_special_exponent, S_special_mantissa};
   
   assign is_special_unflopped = (~^A_type | ~^B_type) || A_type == 3'b010 || B_type == 3'b010 ? 1'b1 : 1'b0;
-  assign S_special_sign = ~|A_type                                                   ? B_s :  // A is 0
-                          ~|B_type                                                   ? A_s :  // B is 0
-                          (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_s :  // A = norm or subnorm and B = inf
-                          (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_s :  // A = inf and B = norm or subnorm
-                          B_type == 3'b010 && A_type == 3'b010 && A_s ~^ B_s         ? A_s :
+  assign S_special_sign = ~|A_type & subtract_unflopped                              ? ~B_s :  // A is 0 and subtract (0 - B = -B)
+                          ~|A_type                                                   ? B_s  :  // A is 0 and not subtract
+                          ~|B_type                                                   ? A_s  :  // B is 0
+                          (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_s  :  // A = norm or subnorm and B = inf
+                          (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_s  :  // A = inf and B = norm or subnorm
+                          B_type == 3'b010 && A_type == 3'b010 && A_s ~^ B_s         ? A_s  :
                                                                                        (A_NaN ? A_s : B_s);  // default to sign of NaN
               
   assign S_special_exponent = ~|A_type                                                   ? B_ex :  // A is 0

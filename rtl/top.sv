@@ -16,7 +16,7 @@ module top
   input        RX,
   output       TX,
   // VGA
-  output    	 VGA_BLANK_N,
+  output       VGA_BLANK_N,
   output [7:0] VGA_B,
   output       VGA_CLK,
   output [7:0] VGA_G,
