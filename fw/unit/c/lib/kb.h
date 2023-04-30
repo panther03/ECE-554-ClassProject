@@ -9,8 +9,6 @@ int kb_status() {
   return *PS2_STATUS;
 }
 
-// no way to wipe this (read only)
-// ...so not very useful
 int kb_char_present() {
   return *PS2_STATUS & MASK_RDY;
 }

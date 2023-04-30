@@ -11,10 +11,15 @@ Aidan McEllistrem
 4/22/2023
 */
 
+#ifndef VGA_H
+#define VGA_H
+
 #include "mmap.h"
 
+#define VGA_TEXT_BUFFER_BYTE_SIZE 2400
+
 // print a null-terminated string to the VGA text buffer
-void vga_print(int x, int y, const uint8_t* msg_data, uint8_t c) {
+void vga_print(int x, int y, char* msg_data, uint8_t c) {
   volatile uint16_t* buff_addr = (volatile uint16_t*)VGA_TEXT_BUFFER + (y << 4) + (y << 6) + x;
   int i = 0;
   // assume string is NULL-terminated
@@ -31,7 +36,7 @@ void vga_print(int x, int y, const uint8_t* msg_data, uint8_t c) {
 }
 
 // pretty much the same thing, but for buffers with a constant size known
-void vga_print_buf(int x, int y, const uint8_t* msg_data, uint8_t c, int size) {
+void vga_print_buf(int x, int y, char* msg_data, uint8_t c, int size) {
   volatile uint16_t* buff_addr = (volatile uint16_t*)VGA_TEXT_BUFFER + (y << 4) + (y << 6) + x;
   int i = 0;
   // assume string is NULL-terminated
@@ -48,11 +53,11 @@ void vga_print_buf(int x, int y, const uint8_t* msg_data, uint8_t c, int size) {
 }
 
 // prints data in white
-void vga_print_plain(int x, int y, const uint8_t* msg_data) {
+void vga_print_plain(int x, int y, char* msg_data) {
   vga_print(x, y, msg_data, 0x0f);
 }
 
-void vga_print_plain_buf(int x, int y, const uint8_t* msg_data, int size) {
+void vga_print_plain_buf(int x, int y, char* msg_data, int size) {
   vga_print_buf(x, y, msg_data, 0x0f, size);
 }
 
@@ -60,3 +65,14 @@ void draw_px(int x, int y, uint8_t c) {
  volatile uint8_t* addr = VGA_GRAPH_BUFFER + (y << 6) + (y << 8) + x;
   *(addr) = c; 
 }
+
+void clear_text_buffer() {
+  int i = 0;
+  while (i < VGA_TEXT_BUFFER_BYTE_SIZE) {
+    // set text data
+    *((volatile uint16_t*)(VGA_TEXT_BUFFER) + i) = 0;
+    i++;
+  }
+}
+
+#endif

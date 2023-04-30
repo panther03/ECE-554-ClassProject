@@ -33,7 +33,8 @@ unsigned int MASK_CTRL   = 0x00000020;
 unsigned int MASK_ALT    = 0x00000040;
 unsigned int MASK_ENTER  = 0x00000080;
 unsigned int MASK_SHIFT  = 0x00000100;
-unsigned int MASK_RDY    = 0x00000200;
-unsigned int MASK_CC     = 0x000001FF;  // ANY CC bit set that isn't PS2_RDY
+unsigned int MASK_BACK   = 0x00000200;
+unsigned int MASK_RDY    = 0x40000000;
+unsigned int MASK_CC     = 0x40000000;  // ANY CC bit set that isn't PS2_RDY
 
 #endif

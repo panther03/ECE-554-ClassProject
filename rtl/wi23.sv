@@ -186,18 +186,39 @@ VGA_display iVGA(
 ////////////////////////
 // Instantiate PS2 KB //
 ////////////////////////
-wire [7:0] PS2_key;
-wire [DATA_WIDTH-1:0] PS2_status;
+wire [7:0] PS2_char;
+wire [9:0] PS2_status;
 wire PS2_rdy;
+wire PS2_make;
+wire PS2_mm_read;
 
 PS2_kb iPS2_KB(
  .clk(clk),                   
  .rst_n(rst_n),
  .PS2_CLK_i(PS2_CLK),             // The PS/2 KB has a clock of its own
  .PS2_DAT_i(PS2_DAT),             // Serial line in from the KB
- .PS2_CHAR_o(PS2_key),            // Last key pressed
+ .PS2_CHAR_o(PS2_char),            // Last key pressed
+ .PS2_make_o(PS2_make),           // used by queue to determine if it writes
  .PS2_rdy_o(PS2_rdy),             // signal that a key code is available 
  .PS2_status_o(PS2_status)        // special KB state for programmers w/o outputting ASCII (enter? tab? etc)
+);
+
+
+wire [7:0] mm_char_from_q;
+reg mm_read_char;
+wire char_queue_empty, char_queue_full;
+
+char_queue iCHAR_QUEUE (
+  .clk(clk),
+  .rst_n(rst_n),
+  // only write on MAKE and non-zero char code
+  .write_i(PS2_rdy),  
+  .make_i(PS2_make),
+  .read_i(mm_read_char),
+  .char_i(PS2_char),
+  .char_o(mm_char_from_q),
+  .char_queue_empty_o(char_queue_empty),
+  .char_queue_full_o(char_queue_full)
 );
 
 ///////////////////////
@@ -212,11 +233,12 @@ assign data_mem_to_proc_map = in_dmem_range_n ?
 
 // data going from MMAP to processor
 wire [DATA_WIDTH-1:0] mmap_periph_data;
-assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? {24'h0, PS2_key} :
-                          (daddr == ADDR_PS2_STATUS_MMAP) ? PS2_status : 
+assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? {24'h0, mm_char_from_q} :
+                          (daddr == ADDR_PS2_STATUS_MMAP) ? {1'b0, PS2_rdy, 19'h0, PS2_status} : 
 								  (daddr == ADDR_TIMER_MMAP)      ? 0 : 
 								  0;
 								  
+assign mm_read_char = (daddr == ADDR_PS2_CHAR_MMAP);
 // data going from processor to MMAP
 // (only one signal)
 always_ff @(posedge clk, negedge rst_n)
@@ -226,6 +248,6 @@ always_ff @(posedge clk, negedge rst_n)
     vga_mode_sel <= data_proc_to_mem[0];
 
 // debug for PS/2
-assign LEDR = {2'b11, PS2_key};
+assign LEDR = {2'b11, mm_char_from_q};
 
 endmodule
