@@ -29,11 +29,11 @@ mmap_ptr *TIMER             = (mmap_ptr*)0xfffec130;
 unsigned int MASK_FN_KEY = 0x0000000F;
 unsigned int MASK_TAB    = 0x00000010;
 unsigned int MASK_ESC    = 0x00000020;
-unsigned int MASK_CTRL   = 0x00000020;
-unsigned int MASK_ALT    = 0x00000040;
-unsigned int MASK_ENTER  = 0x00000080;
-unsigned int MASK_SHIFT  = 0x00000100;
-unsigned int MASK_BACK   = 0x00000200;
+unsigned int MASK_CTRL   = 0x00000040;
+unsigned int MASK_ALT    = 0x00000080;
+unsigned int MASK_ENTER  = 0x00000100;
+unsigned int MASK_SHIFT  = 0x00000200;
+unsigned int MASK_BACK   = 0x00000400;
 unsigned int MASK_RDY    = 0x40000000;
 unsigned int MASK_CC     = 0x40000000;  // ANY CC bit set that isn't PS2_RDY
 

@@ -18,6 +18,12 @@ Aidan McEllistrem
 
 #define VGA_TEXT_BUFFER_BYTE_SIZE 2400
 
+void vga_print_char(int x, int y, char msg_data, uint8_t c) {
+  volatile uint16_t* buff_addr = (volatile uint16_t*)VGA_TEXT_BUFFER + (y << 4) + (y << 6) + x;
+  // assume string is NULL-terminated
+  *(buff_addr) = ((uint16_t)(msg_data)) | (((uint16_t)c) << 8);
+}
+
 // print a null-terminated string to the VGA text buffer
 void vga_print(int x, int y, char* msg_data, uint8_t c) {
   volatile uint16_t* buff_addr = (volatile uint16_t*)VGA_TEXT_BUFFER + (y << 4) + (y << 6) + x;
@@ -52,6 +58,16 @@ void vga_print_buf(int x, int y, char* msg_data, uint8_t c, int size) {
   }
 }
 
+void vga_draw_32bit_debug_str(int x, int y, int data) {
+  volatile uint16_t* buff_addr = (volatile uint16_t*)VGA_TEXT_BUFFER + (y << 4) + (y << 6) + x;
+  int i = 0;
+  while (i < 32) {
+    *(buff_addr) = (data & (1 << i)) ? 0x2a31 : 0x4c30;
+    buff_addr++;
+    i++;
+  }
+}
+
 // prints data in white
 void vga_print_plain(int x, int y, char* msg_data) {
   vga_print(x, y, msg_data, 0x0f);
@@ -66,11 +82,11 @@ void draw_px(int x, int y, uint8_t c) {
   *(addr) = c; 
 }
 
-void clear_text_buffer() {
+void set_text_buffer(uint16_t data) {
   int i = 0;
   while (i < VGA_TEXT_BUFFER_BYTE_SIZE) {
     // set text data
-    *((volatile uint16_t*)(VGA_TEXT_BUFFER) + i) = 0;
+    *((volatile uint16_t*)(VGA_TEXT_BUFFER) + i) = data;
     i++;
   }
 }

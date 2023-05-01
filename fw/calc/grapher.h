@@ -3,7 +3,7 @@
 
 #include "solver.h"
 
-int graph();
+int graph(char *eq, char color);
 void clearGraph();
 
 // gcc ../parser/stack.c ../parser/queue.c ../fp_conversions/str_fp.c ../parser/parser.c solver.c

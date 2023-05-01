@@ -10,13 +10,13 @@ and transmits them to the top level.
 module PS2_kb(
     input clk,                   
     input rst_n,
-    input PS2_CLK_i,                 // The PS/2 KB has a clock of its own
-    input PS2_DAT_i,                 // Serial line in from the KB
-    output wire [7:0] PS2_CHAR_o,    // Last key pressed
-    output reg PS2_rdy_o,            // signal that a key code is available for reading,
-                                     // intended to be used by the programmer   
-    output reg PS2_make_o,          // 1: pressed, 0: released                              
-    output wire [9:0] PS2_status_o   // special case bitflags (FN, tab, shift, alt, etc)
+    input PS2_CLK_i,                  // The PS/2 KB has a clock of its own
+    input PS2_DAT_i,                  // Serial line in from the KB
+    output wire [7:0] PS2_CHAR_o,     // Last key pressed
+    output reg PS2_rdy_o,             // signal that a key code is available for reading,
+                                      // intended to be used by the programmer   
+    output reg PS2_make_o,            // 1: pressed, 0: released                              
+    output wire [10:0] PS2_status_o   // special case bitflags (FN, tab, shift, alt, etc)
   );
   
   // Previously a UART based approach was used,

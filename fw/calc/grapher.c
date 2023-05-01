@@ -36,15 +36,15 @@ void plot_y_axis(float lower, float upper) {
     }
 }
 
-void plot_xy(int x, int y) {
+void plot_xy(int x, int y, char color) {
     if (x >= 320 || y >= 240)
         return;
 
     volatile char *writeAddr = VGA_GR_BUFF + x + (y << 6) + (y << 8);
-    *writeAddr = 0x2;
+    *writeAddr = color;
 }
 
-void plotLineLow(int x0, int y0, int x1, int y1) {
+void plotLineLow(int x0, int y0, int x1, int y1, char color) {
     int dx = x1 - x0;
     int dy = y1 - y0;
     int yi = 1;
@@ -58,7 +58,7 @@ void plotLineLow(int x0, int y0, int x1, int y1) {
 
     int x;
     for (x = x0; x <= x1; x++) {
-        plot_xy(x, y);
+        plot_xy(x, y, color);
 
 	if (D > 0) {
             y = y + yi;
@@ -70,7 +70,7 @@ void plotLineLow(int x0, int y0, int x1, int y1) {
     }
 }
 
-void plotLineHigh(int x0, int y0, int x1, int y1) {
+void plotLineHigh(int x0, int y0, int x1, int y1, char color) {
     int dx = x1 - x0;
     int dy = y1 - y0;
     int xi = 1;
@@ -84,7 +84,7 @@ void plotLineHigh(int x0, int y0, int x1, int y1) {
 
     int y;
     for (y = y0; y <= y1; y++) {
-        plot_xy(x, y);
+        plot_xy(x, y, color);
 
 	if (D > 0) {
             x = x + xi;
@@ -96,7 +96,7 @@ void plotLineHigh(int x0, int y0, int x1, int y1) {
     }
 }
 
-void plotLine(int x0, int y0, int x1, int y1) {
+void plotLine(int x0, int y0, int x1, int y1, char color) {
     int yDiff = y1 - y0;
     int xDiff = x1 - x0;
 
@@ -105,19 +105,19 @@ void plotLine(int x0, int y0, int x1, int y1) {
     }
 
     if (yDiff < xDiff) {
-        plotLineLow(x0, y0, x1, y1);
+        plotLineLow(x0, y0, x1, y1, color);
     }
     else {
         if (y0 > y1) {
-            plotLineHigh(x1, y1, x0, y0);
+            plotLineHigh(x1, y1, x0, y0, color);
         }
 	else {
-            plotLineHigh(x0, y0, x1, y1);
+            plotLineHigh(x0, y0, x1, y1, color);
         }
     }
 }
 
-int graph() {
+int graph(char *eq, char color) {
     float x_lower = -6.0f;
     float x_upper = 6.0f;
     // 320 X 240
@@ -142,7 +142,6 @@ int graph() {
     Queue parsedEq;
     structureQueue_Queue(&parsedEq);
 
-    char* eq = "x-x*x*x/6+x*x*x*x*x/120-x*x*x*x*x*x*x/5040+x*x*x*x*x*x*x*x*x/362880";
     //int i;
     //for (i = 0; i < 4; i++) {
         parse_equation(eq, &parsedEq);
@@ -177,7 +176,7 @@ int graph() {
         y_coord = 239 - (int)((y - y_lower) * y_multiplier);
 
         if (err == 0 && ((last_y >= y_lower && last_y <= y_upper) || (y >= y_lower && y <= y_upper))) {
-            plotLine(last_x_coord, last_y_coord, x_coord, y_coord);
+            plotLine(last_x_coord, last_y_coord, x_coord, y_coord, color);
         }
 
 

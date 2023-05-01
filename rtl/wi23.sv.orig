@@ -147,7 +147,7 @@ end
 wire [9:0] xpix;					// current X coordinate of VGA
 wire [8:0] ypix;					// current Y coordinate of VGA
 VGA_timing iVGATM(
-  .clk25MHz     (VGA_CLK), 
+	.clk25MHz     (VGA_CLK), 
   .rst_n        (rst_n), 
   .VGA_BLANK_N  (VGA_BLANK_N),
   .VGA_HS       (VGA_HS),
@@ -156,17 +156,6 @@ VGA_timing iVGATM(
   .xpix         (xpix), 
   .ypix         (ypix)
 );
-
-// count clock cycles for the clock peripheral
-reg [DATA_WIDTH-1:0] clk_time;
-
-always_ff @(posedge VGA_VS, negedge rst_n)
-  if (!rst_n)
-    clk_time <= 0;
-  else if(VGA_VS)
-    clk_time <= clk_time + 1;
-  else
-    clk_time <= clk_time; 
         
 //////////////////////
 // Instantiate VGA //
@@ -213,20 +202,30 @@ VGA_display iVGA(
 // Instantiate PS2 KB //
 ////////////////////////
 wire [7:0] PS2_char;
-wire [10:0] PS2_status;
+wire [9:0] PS2_status;
 wire PS2_rdy;
 wire PS2_make;
 wire PS2_mm_read;
 
 PS2_kb iPS2_KB(
-  .clk(clk),                   
-  .rst_n(rst_n),
-  .PS2_CLK_i(PS2_CLK),               // The PS/2 KB has a clock of its own
-  .PS2_DAT_i(PS2_DAT),               // Serial line in from the KB
-  .PS2_CHAR_o(PS2_char),             // Last key pressed
-  .PS2_make_o(PS2_make),             // used by queue to determine if it writes
-  .PS2_rdy_o(PS2_rdy),               // signal that a key code is available 
-  .PS2_status_o(PS2_status)          // special KB state for programmers w/o outputting ASCII (enter? tab? etc)
+<<<<<<< HEAD
+ .clk(clk),                   
+ .rst_n(rst_n),
+ .PS2_CLK_i(PS2_CLK),             // The PS/2 KB has a clock of its own
+ .PS2_DAT_i(PS2_DAT),             // Serial line in from the KB
+ .PS2_CHAR_o(PS2_char),            // Last key pressed
+ .PS2_make_o(PS2_make),           // used by queue to determine if it writes
+ .PS2_rdy_o(PS2_rdy),             // signal that a key code is available 
+ .PS2_status_o(PS2_status)        // special KB state for programmers w/o outputting ASCII (enter? tab? etc)
+=======
+  .clk          (clk),                   
+  .rst_n        (rst_n),
+  .PS2_CLK_i    (PS2_CLK),          // The PS/2 KB has a clock of its own
+  .PS2_DAT_i    (PS2_DAT),          // Serial line in from the KB
+  .PS2_CHAR_o   (PS2_key),          // Last key pressed
+  .PS2_rdy_o    (PS2_rdy),          // signal that a key code is available 
+  .PS2_status_o (PS2_status)        // special KB state for programmers w/o outputting ASCII (enter? tab? etc)
+>>>>>>> 1a0a5b53ce36c265cc0a524dd26f6d4980ada62e
 );
 
 
@@ -258,11 +257,18 @@ assign data_mem_to_proc_map = in_mmap_range_n ? (ldcr ? inst_mem_to_proc : data_
                                               : mmap_periph_data ; // cases where we assign data mem to proc map MMAP'd values
 
 // data going from MMAP to processor
+<<<<<<< HEAD
+wire [DATA_WIDTH-1:0] mmap_periph_data;
 assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? {24'h0, mm_char_from_q} :
                           (daddr == ADDR_PS2_STATUS_MMAP) ? {1'b0, PS2_rdy, 19'h0, PS2_status} : 
-								  (daddr == ADDR_TIMER_MMAP)      ? clk_time : 
+								  (daddr == ADDR_TIMER_MMAP)      ? 0 : 
 								  0;
-
+=======
+assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? {24'h0, PS2_key} :
+                          (daddr == ADDR_PS2_STATUS_MMAP) ? PS2_status : 
+					                (daddr == ADDR_TIMER_MMAP)      ? 32'b0 : 32'b0 ;
+>>>>>>> 1a0a5b53ce36c265cc0a524dd26f6d4980ada62e
+								  
 assign mm_read_char = (daddr == ADDR_PS2_CHAR_MMAP);
 // data going from processor to MMAP
 // (only one signal)
