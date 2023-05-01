@@ -284,8 +284,7 @@ int main() {
       // proper line is plot(eq_lines[curr_eq_line].buf, eq_lines[curr_eq_line].color);
       //
       // proposed behavior: have a infinite loop, break when try to switch screen
-      //                    before enter loop, have the if statement to check if equation input
-      //                    clear screen,
+      //                    before enter loop, have the if statement to check if equation input and clear screen
       //                    then in the loop: draw the 4 lines once, and keep polling for input to switch screens
       if (!has_eq_to_plot()) {
          vga_draw_box(12,4,48,8,0x0f,0x0f);
