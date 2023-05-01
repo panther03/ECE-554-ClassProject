@@ -6,6 +6,7 @@ void plot_x_axis(float lower, float upper) {
     float span = upper - lower;
     int y_offset = (int)((upper / span) * 239.0f);
     
+    // ensure that if 0 is a bound, axis is still drawn, but otherwise is offset right
     if (((int)upper) != 0 && ((int)lower) != 0) {
         y_offset += 1;
     }
@@ -22,6 +23,7 @@ void plot_y_axis(float lower, float upper) {
     float span = upper - lower;
     int x_offset = (int)((-lower / span) * 319.0f);
 
+    // ensure that if 0 is a bound, axis is still drawn, but otherwise is offset right
     if (((int)upper) != 0 && ((int)lower) != 0) {
         x_offset += 1;
     }
@@ -127,7 +129,7 @@ int graph(char *eq, char color) {
     float y_lower = -4.0f;
     float y_upper = 4.0f;
 
-    if (x_lower >= x_upper || y_lower >= y_upper) {
+    if (x_lower >= x_upper || y_lower >= y_upper) { // bounds are impossible
         return 1;
     }
 
@@ -141,17 +143,10 @@ int graph(char *eq, char color) {
     // parse eqs;
     Queue parsedEq;
     structureQueue_Queue(&parsedEq);
-
-    //int i;
-    //for (i = 0; i < 4; i++) {
-        parse_equation(eq, &parsedEq);
-        if (isEmpty_Queue(&parsedEq)) {
-            return 1;
-        }
-        //to_reverse_polish_notation(&parsedEq, &eqPolishNot);
-
-        //eq += 80; // eq offset
-    //}
+    parse_equation(eq, &parsedEq);
+    if (isEmpty_Queue(&parsedEq)) { // error when parsing
+        return 1;
+    }
 
     // axis
     if (x_lower <= 0 && x_upper >= 0) {

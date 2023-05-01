@@ -49,10 +49,10 @@ int eq_err = 0;
 int has_eq_result = 0;
 // ... and four lines for the equations
 struct line_buf_t eq_lines[] = {
-  [0] = {.i = 0, .color = 0x01},
-  [1] = {.i = 0, .color = 0x04},
+  [0] = {.i = 0, .color = 0x09},
+  [1] = {.i = 0, .color = 0x0c},
   [2] = {.i = 0, .color = 0x02},
-  [3] = {.i = 0, .color = 0x05}
+  [3] = {.i = 0, .color = 0x0d}
 };
 int curr_eq_line = 0;
 
@@ -282,6 +282,11 @@ int main() {
     else if (window_state == STATE_GRAPH) {
       //plot(0x02);
       // proper line is plot(eq_lines[curr_eq_line].buf, eq_lines[curr_eq_line].color);
+      //
+      // proposed behavior: have a infinite loop, break when try to switch screen
+      //                    before enter loop, have the if statement to check if equation input
+      //                    clear screen,
+      //                    then in the loop: draw the 4 lines once, and keep polling for input to switch screens
       if (!has_eq_to_plot()) {
          vga_draw_box(12,4,48,8,0x0f,0x0f);
          vga_print_plain(13,5,"No equation to plot!");
@@ -292,8 +297,9 @@ int main() {
          while (i < 4) {
            // if there is text in a buffer (has something to graph)...
            if (eq_lines[i].buf[0]) {
-             // graph(char *eq, char color)
-             graph(eq_lines[last_eq_line_sel].buf, eq_lines[last_eq_line_sel].color);
+             // graph(char *eq, char color) 
+	     // include error handling for parsing equations (graph will return 1 if there is an error)
+             graph(eq_lines[i].buf, eq_lines[i].color);
            }
            i++;
          }
