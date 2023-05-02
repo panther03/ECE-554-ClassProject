@@ -50,9 +50,9 @@ void decode_str(char* str, int* length, int* decimalIndx, int* sign, int* expone
     while (!check_end(*str)) {
         if (*str == '.') {
             *decimalIndx = *length;
-	    decimalCount++;
+            decimalCount++;
 
-	    if (decimalCount != 1) {
+            if (decimalCount != 1) {
                 *err = 1;
             }
         }
@@ -105,6 +105,7 @@ float str_to_fp(char* str, int* err) {
     int sign = 1;
     int exponent = 0;
     int exponentLength = 0;
+    *err = 0;
 
     decode_str(str, &length, &decimalIndx, &sign, &exponent, &exponentLength, err);
 
