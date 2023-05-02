@@ -186,7 +186,6 @@ module fp_multiplier(A, B, P);
   
   assign inf_overflow = exponent_after_shift[7] & ~A_exponent_sign & ~B_exponent_sign;
   assign underflow = ~exponent_after_shift[7] & A_exponent_sign & B_exponent_sign;
-  // assign zeroed = underflow && (
   
   // make sure exponent_after_shift must be greater than -127
   
