@@ -68,8 +68,6 @@ module PS2_kb(
       last_code <= 1;
     else if (break_code)
       last_code <= 0;
-    else
-      last_code <= last_code;
   
   
   always_ff @(posedge clk, negedge rst_n, posedge kb_shift_hi, posedge kb_shift_lo)
@@ -79,8 +77,6 @@ module PS2_kb(
       kb_shift_key <= 1;
     else if (kb_shift_lo)
       kb_shift_key <= 0;
-    else
-      kb_shift_key <= kb_shift_key;
   
   
   /////////////////////
@@ -119,7 +115,7 @@ module PS2_kb(
       last_ps2_clk <= ps2_clk;
     end
 	
-	assign ps2_clk_negedge = (ps2_clk == 0 && last_ps2_clk == 1) ? 1 : 0;
+	assign ps2_clk_negedge = (ps2_clk == 0 && last_ps2_clk == 1) ? 1'b1 : 1'b0;
 	
   // shifting mechanism
   always_ff @(posedge clk,negedge rst_n)
@@ -142,7 +138,7 @@ module PS2_kb(
     else
       case ({start,shift})
         2'b00 :   kb_shift_cnt <= kb_shift_cnt;
-        2'b01 :   kb_shift_cnt <= kb_shift_cnt + 1;
+        2'b01 :   kb_shift_cnt <= kb_shift_cnt + 4'h1;
         default:  kb_shift_cnt <= 0;
       endcase
   

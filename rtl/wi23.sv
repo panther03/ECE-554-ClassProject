@@ -230,7 +230,7 @@ PS2_kb iPS2_KB(
 );
 
 
-wire [7:0] mm_char_from_q;
+wire [DATA_WIDTH-1:0] mm_char_from_q;
 reg mm_read_char;
 wire char_queue_empty, char_queue_full;
 
@@ -241,8 +241,8 @@ char_queue iCHAR_QUEUE (
   .write_i(PS2_rdy),  
   .make_i(PS2_make),
   .read_i(mm_read_char),
-  .char_i(PS2_char),
-  .char_o(mm_char_from_q),
+  .entry_i({PS2_status, PS2_char}),
+  .entry_o(mm_char_from_q),
   .char_queue_empty_o(char_queue_empty),
   .char_queue_full_o(char_queue_full)
 );
@@ -258,8 +258,8 @@ assign data_mem_to_proc_map = in_mmap_range_n ? (ldcr ? inst_mem_to_proc : data_
                                               : mmap_periph_data ; // cases where we assign data mem to proc map MMAP'd values
 
 // data going from MMAP to processor
-assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? {24'h0, mm_char_from_q} :
-                          (daddr == ADDR_PS2_STATUS_MMAP) ? {1'b0, PS2_rdy, 19'h0, PS2_status} : 
+assign mmap_periph_data = (daddr == ADDR_PS2_CHAR_MMAP)   ? mm_char_from_q :
+                          (daddr == ADDR_PS2_STATUS_MMAP) ? mm_char_from_q : 
 								  (daddr == ADDR_TIMER_MMAP)      ? clk_time : 
 								  0;
 

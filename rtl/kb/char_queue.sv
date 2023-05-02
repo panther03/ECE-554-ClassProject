@@ -1,11 +1,12 @@
+import wi23_defs::*;
 module char_queue(
   input clk,
   input rst_n,
   input write_i,
   input read_i,
   input make_i,
-  input [7:0] char_i,
-  output wire [7:0] char_o,
+  input [17:0] entry_i,
+  output wire [DATA_WIDTH-1:0] entry_o,
   output wire char_queue_empty_o,
   output wire char_queue_full_o
 );
@@ -21,8 +22,8 @@ module char_queue(
   // only do a write when we HAVE a character!
   // (ccs dont count)
   reg can_write_to_q;
-  wire [7:0] queue_data;
-  reg  [7:0] sustain_data;
+  wire [DATA_WIDTH-1:0] queue_data;
+  reg  [DATA_WIDTH-1:0] sustain_data;
   
   reg attempt_read_empty;
   
@@ -33,7 +34,7 @@ module char_queue(
     .enable(can_write_to_q),
     .raddr(read_ptr),
     .waddr(write_ptr),
-    .wdata(char_i),
+    .wdata({13'h0, make_i, entry_i}),
     .rdata(queue_data)
   );
   
@@ -53,8 +54,8 @@ module char_queue(
       write_ptr <= 0;
     end
     else begin
-      read_ptr  <= read_ptr_inc  ? read_ptr + 1 : read_ptr;
-      write_ptr <= write_ptr_inc ? write_ptr + 1 : write_ptr; 
+      read_ptr  <= read_ptr_inc  ? read_ptr + 3'b001 : read_ptr;
+      write_ptr <= write_ptr_inc ? write_ptr + 3'b001 : write_ptr; 
     end
     
   // ff for sustaining output
@@ -63,12 +64,10 @@ module char_queue(
       sustain_data <= 0;
     else if(set_output)
       sustain_data <= queue_data;
-    else
-      sustain_data <= sustain_data;
   
   
   // output proper
-  assign char_o = !attempt_read_empty ? sustain_data : 0;
+  assign entry_o = !attempt_read_empty ? sustain_data : 0;
   
   always_comb begin
     can_write_to_q = 0;
@@ -83,8 +82,10 @@ module char_queue(
       default: begin // idle
         if (write_i) begin
           // can't push onto a full stack
-          // also don't push a cc char (zero), but push on break
-          if (!char_queue_full_o & !(&char_i) & !make_i) begin
+			 // don't push an entry if it has no status bits AND no ascii data
+			 // push an entry on make AND break, up to the user to determine how to use this info
+			 // the conditional term is & !make if you wish to revert this behavior
+          if (!char_queue_full_o & !(&entry_i)) begin
             nxt_state = PUSH;
           end else begin
             nxt_state = IDLE;

@@ -1,19 +1,20 @@
+import wi23_defs::*;
 module queue (
    input         clk,
    input         enable,
    input  [1:0]  raddr,
    input  [1:0]  waddr,
-   input  [7:0]  wdata,
-   output [7:0]  rdata
+   input  [DATA_WIDTH-1:0]  wdata,
+   output [DATA_WIDTH-1:0]  rdata
 );
-  reg [0:7] mem [7:0];
-  reg [7:0] rdata_r;
+  reg [DATA_WIDTH-1:0] mem[3:0];
+  reg [DATA_WIDTH-1:0] rdata_r;
 
   integer i;
 
   initial begin
-    for (i = 0; i < 8; i += 1) begin
-       mem[i] <= 8'h00;
+    for (i = 0; i < 4; i += 1) begin
+       mem[i] <= 0;
     end
   end
 
