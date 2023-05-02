@@ -175,6 +175,14 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                     lastTokenWasOperator = 0;
                     enqueue_Queue(output, token);
 
+                    // If str_to_fp returned an error code, return an empty queue
+                    if (err){
+                        while(!isEmpty_Queue(output)){
+                            dequeue_Queue(output);
+                        }
+                        return;
+                    }
+
                     
                     // Move the pointer to the end of the number
                     userInput++;
