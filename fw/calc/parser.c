@@ -178,7 +178,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                     
                     // Move the pointer to the end of the number
                     userInput++;
-                    while ((*userInput >= '0' && *userInput <= '9') || *userInput == '.' || *userInput == 'e' || *userInput == 'E'){
+                    while ((*userInput >= '0' && *userInput <= '9') || *userInput == '.' || *userInput == 'e' || *userInput == 'E' || (*userInput == '-' && (*(userInput-1) == 'e' || *(userInput-1) == 'E'))){
                         userInput++;
                     }
 
