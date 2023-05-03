@@ -119,15 +119,15 @@ void plotLine(int x0, int y0, int x1, int y1, char color) {
     }
 }
 
-int graph(char *eq, char color) {
-    float x_lower = -6.0f;
-    float x_upper = 6.0f;
+int graph(char *eq, char color, float x1, float x2, float y1, float y2) {
+    float x_lower = x1;
+    float x_upper = x2;
     // 320 X 240
     float x_step = (x_upper - x_lower) * .003125f; // * 1/320
     int x_coord_step = 1;
 
-    float y_lower = -4.0f;
-    float y_upper = 4.0f;
+    float y_lower = y1;
+    float y_upper = y2;
 
     if (x_lower >= x_upper || y_lower >= y_upper) { // bounds are impossible
         return 1;

@@ -50,7 +50,7 @@ module PS2_kb(
   
   // What PS2 scan translation outputs
   // in terms of special flags
-  reg shf, enter, alt, ctrl, esc, tab;
+  reg back, shf, enter, alt, ctrl, esc, tab;
   reg [3:0] fn;
   
   // make or break always equal to 

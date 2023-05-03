@@ -273,6 +273,6 @@ always_ff @(posedge clk, negedge rst_n)
     vga_mode_sel <= data_proc_to_mem[0];
 
 // debug for PS/2
-assign LEDR = {2'b11, mm_char_from_q};
+assign LEDR = {PS2_make, PS2_status[8:0]};
 
 endmodule

@@ -5,7 +5,7 @@ module char_queue(
   input write_i,
   input read_i,
   input make_i,
-  input [17:0] entry_i,
+  input [18:0] entry_i,
   output wire [DATA_WIDTH-1:0] entry_o,
   output wire char_queue_empty_o,
   output wire char_queue_full_o
@@ -34,7 +34,7 @@ module char_queue(
     .enable(can_write_to_q),
     .raddr(read_ptr),
     .waddr(write_ptr),
-    .wdata({13'h0, make_i, entry_i}),
+    .wdata({12'h0, make_i, entry_i}),
     .rdata(queue_data)
   );
   

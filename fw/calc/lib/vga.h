@@ -18,6 +18,14 @@ Aidan McEllistrem
 
 #define VGA_TEXT_BUFFER_BYTE_SIZE 2400
 
+#define TOP_BORDER           0xCD
+#define SIDE_BORDER          0xBA
+#define TOP_LEFT_BORDER      0xC9
+#define TOP_RIGHT_BORDER     0xBB
+#define BOTTOM_LEFT_BORDER   0xC8
+#define BOTTOM_RIGHT_BORDER  0xBC
+#define W_SHADOW             0xB0
+
 void vga_print_char(int x, int y, char msg_data, uint8_t c) {
   volatile uint16_t* buff_addr = (volatile uint16_t*)VGA_TEXT_BUFFER + (y << 4) + (y << 6) + x;
   // assume string is NULL-terminated
@@ -39,6 +47,58 @@ void vga_print(int x, int y, char* msg_data, uint8_t c) {
     // increment msg byte
     i++;
   }
+}
+
+// fancy VGA text mode boxes
+void vga_draw_box(int x1, int y1, int x2, int y2, uint8_t c, uint8_t sh) {
+  int i = (x2 - x1);
+  int p = 1;
+  // draw top and bottom side
+  while (i > 1) {
+    vga_print_char(p + x1, y1, TOP_BORDER, c);
+    vga_print_char(p + x1, y2, TOP_BORDER, c);
+    p++;
+    i--;
+  }
+  
+  i = (y2 - y1);
+  p = 1;
+  // draw left and right side
+  while (i > 1) {
+    vga_print_char(x1, p + y1, SIDE_BORDER, c);
+    vga_print_char(x2, p + y1, SIDE_BORDER, c);
+    p++;
+    i--;
+  }
+  
+  // draw shadow
+  i = (x2 - x1);
+  p = 1;
+  while (i > 0) {
+    vga_print_char(p + x1, y2 + 1, W_SHADOW, sh);
+    p++;
+    i--;
+  }
+
+  i = (y2 - y1) + 1;
+  p = 1;
+  while (i > 0) {
+    vga_print_char(x2 + 1, p + y1, W_SHADOW, sh);
+    p++;
+    i--;
+  } 
+
+  // draw top left corner
+  vga_print_char(x1, y1, TOP_LEFT_BORDER, c);
+
+  // draw top right corner
+  vga_print_char(x2, y1, TOP_RIGHT_BORDER, c);
+
+  // draw bottom left corner
+  vga_print_char(x1, y2, BOTTOM_LEFT_BORDER, c);
+
+  // draw bottom right corner
+  vga_print_char(x2, y2, BOTTOM_RIGHT_BORDER, c);
 }
 
 // pretty much the same thing, but for buffers with a constant size known

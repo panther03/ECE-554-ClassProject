@@ -16,8 +16,8 @@
 // all byte addressable 
 mmap_ptr *VGA_GRAPH_BUFFER  = (mmap_ptr*)0xfffed400;
 mmap_ptr *VGA_TEXT_BUFFER   = (mmap_ptr*)0xfffec140;
-mmap_ptr *PS2_KEY           = (mmap_ptr*)0xfffec13c;
-mmap_ptr *PS2_STATUS        = (mmap_ptr*)0xfffec138;
+volatile unsigned int *PS2_KEY    = (volatile unsigned int*)0xfffec13c;
+volatile unsigned int *PS2_STATUS = (volatile unsigned int*)0xfffec138;
 mmap_ptr *VGA_CONFIG        = (mmap_ptr*)0xfffec134;
 mmap_ptr *TIMER             = (mmap_ptr*)0xfffec130;
 
