@@ -17,6 +17,8 @@ int check_end(char c) {
         return 1;
     if (c == ')')
         return 1;
+    if (c == '^')
+        return 1;
     return 0;
 }
 

@@ -6,19 +6,13 @@
 //     Queue equation;
 //     structureQueue_Queue(&equation);
 
-//     parse_equation("x-x*x*x/6+x*x*x*x*x/120-x*x*x*x*x*x*x/5040+x*x*x*x*x*x*x*x*x/362880", &equation);
+//     parse_equation("-2^(1)", &equation);
 
 //     int err;
 //     float output = solveEquation(&equation, 2, &err);
 
-//     printf("Output: %f\n", output);
-
 //     float volatile * const p_reg = (float *) 0x1234;
 //     *p_reg = output;
-
-    
-
-
 
 //     return 0;
 // }
@@ -84,6 +78,11 @@ float solveEquation(Queue * equation, float x, int * err){
                 }
                 case '/':{
                     newValue.value = operand2 / operand1;
+                    break;
+                }
+                case '^':{
+
+                    newValue.value = __builtin_powif(operand2, (int)operand1);
                     break;
                 }
                 // If the operation was not found, restore the queue and return an error code

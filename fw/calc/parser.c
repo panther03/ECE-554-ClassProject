@@ -123,6 +123,16 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 enqueue_Queue(output, token);
                 break;
             }
+            // Parse character as exponent
+            case '^':{
+                Token token;
+                token.value = '^';
+                token.precedence = 3;
+                token.isOperator = 1;
+                lastTokenWasOperator = 1;
+                enqueue_Queue(output, token);
+                break;
+            }
             // Parse character as open parentheses
             case '(':{
                 Token token;
