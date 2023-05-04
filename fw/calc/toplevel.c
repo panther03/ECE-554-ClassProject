@@ -20,14 +20,29 @@ Aidan McEllistrem
 #define STATE_TETRIS     5
 int window_state = STATE_WELCOME;
 
-#define MAX_LINE_SIZE      40
-#define MAX_EQ_LINE_SIZE   30
+#define MAX_LINE_SIZE         78
+#define MAX_EQ_LINE_SIZE      70
+#define MAX_EQ_OUT_LINE_SIZE  20
+#define MAX_SETTING_LINE_SIZE 10
 
 const char SPIN_CURSOR[4] = {0x5C, 0xB3, 0x2F, 0xC4};
+
+void draw_state_bar(int st) {
+  vga_print(0,0, "CALCULATE (F1) ",                  (st == STATE_CALC     ? 0x60 : 0x4E));
+  vga_print(15,0,"\xB3",                             0x4E);
+  vga_print(16,0," EQUATIONS (F2) ",                 (st == STATE_EQUATION ? 0x60 : 0x4E));
+  vga_print(32,0,"\xB3",                             0x4E);
+  vga_print(33,0," GRAPHER (F3) ",                   (st == STATE_GRAPH    ? 0x60 : 0x4E));
+  vga_print(46,0,"\xB3",                             0x4E);
+  vga_print(47,0," SETTINGS (F4) ",                  (st == STATE_SETTINGS ? 0x60 : 0x4E));
+  vga_print(62,0,"\xB3",                             0x4E);
+  vga_print(63,0," TETRIS (F5)     ",                (st == STATE_TETRIS ? 0x60 : 0x4E));
+}
 
 /////////////////////////////////////
 // now, for the entirety of tetris //
 /////////////////////////////////////
+
 // stuck in frontend.c so we assume we have everything we need included
 int last_time = 0;
 // should cap out at 19
@@ -540,6 +555,10 @@ void tetris_window() {
   vga_draw_hex_debug_str(0,12,tetris_lines);   vga_print_plain(9,12,"#LINES");
   vga_draw_hex_debug_str(0,13,tetris_pieces);   vga_print_plain(9,13,"#DROPS");
   */
+  // draw state window to make sure the user understands they can
+  // switch to another state while playing tetris
+  draw_state_bar(STATE_TETRIS);
+  
   // draw line count
   vga_draw_box(34,1,45,3,0x0f,0x0f);
   //write_integer(tetris_lines, tetris_line_buf);
@@ -576,15 +595,16 @@ void tetris_window() {
 ///////////////
 // MAIN LOOP //
 ///////////////
-void tetris(char c) {
+int tetris(char c) {
   // we are already in a loop
   // wait for time to change
   // we set last_time to init to 0, should always run at least once
+  int input = 0;
   int time = *TIMER;
   if (time != last_time) {
     // we HAVE to poll input sparingly
     volatile unsigned int *KEY    = (volatile unsigned int*)0xfffec13c;
-    int input = *KEY;
+    input = *KEY;
     // we only get a char and status on break
     uint8_t c = (input & 0xffffff00) ? (char)input : 0x00;
       
@@ -601,25 +621,35 @@ void tetris(char c) {
     // reset time
     last_time = *TIMER;
   }
+  
+  // return key to see if the user requests to switch to another state
+  return input;
 }
+
+
 
 //////////////////////
 // ACTUAL FRONTEND  //
 //////////////////////
 
 
+
 struct line_buf_t {
-  char buf[40];
+  char buf[80];
   int i;
   uint8_t color;
 };
 int fn_status = 0;
 int last_status = 0;
-int last_eq_line_sel = 0;
 
 // one line for the calc...
 struct line_buf_t calc_line = {.color = 0x0f};
-char eq_output[40];
+
+// reserve space for up to 10 lines of equation history
+char eq_output[10][20];
+uint8_t eq_output_colors[10];
+int eq_hist_size = 0;
+#define EQ_HIST_MAX 10
 int eq_err = 0;
 int has_eq_result = 0;
 // ... and four lines for the equations
@@ -640,7 +670,7 @@ struct line_buf_t setting_lines[] = {
 };
 int setting_err = 0;
 int curr_setting_line = 0;
-int last_setting_line_sel = 0;
+int line_sel = 0;
 
 // for editing lines
 void add_char(struct line_buf_t *line, uint8_t c, int max) {
@@ -652,21 +682,32 @@ void add_char(struct line_buf_t *line, uint8_t c, int max) {
 
 void remove_char(struct line_buf_t *line) {
   if(line->i > 0) {
+    int back = (line->i-1);
     line->buf[line->i] = 0;
-    line->buf[line->(i-1)] = 0;
+    line->buf[back] = 0;
     line->i--;
   }
 }
 
 void clear_line(struct line_buf_t *line) {
-  for(int i = 0; i < MAX_LINE_SIZE; i++) {
+  int i = 0;
+  while (i < MAX_LINE_SIZE) {
     line->buf[i] = 0x00;
+    i++;
   }
   line->i = 0;
 }
 
-void draw_line_box(int x, int y, int sel, int draw_color, char* header, int header_len, struct line_buf_t *line) {
-  vga_draw_box(x,y,x+40,y+2,0x0f,0x0f);
+void strncpy(char *dst, char *src, int len) {
+  int i = 0;
+  while (i < len) {
+    *(dst+i) = *(src+i);
+    i++;
+  }
+}
+
+void draw_line_box(int x, int y, int box_w, int sel, int draw_color, char* header, int header_len, struct line_buf_t *line) {
+  vga_draw_box(x,y,x+box_w,y+2,0x0f,0x0f);
   
   if (draw_color) {
     vga_print_char(x+1,y+1,0xdb,line->color);
@@ -709,15 +750,7 @@ void sw_state(int st) {
   set_text_buffer(0x0000);
 
   // show the current "window"
-  vga_print(0,0, "CALCULATE (F1) ",                  (st == STATE_CALC     ? 0x60 : 0x4E));
-  vga_print(15,0,"\xB3",                             0x4E);
-  vga_print(16,0," EQUATIONS (F2) ",                 (st == STATE_EQUATION ? 0x60 : 0x4E));
-  vga_print(32,0,"\xB3",                             0x4E);
-  vga_print(33,0," GRAPHER (F3) ",                   (st == STATE_GRAPH    ? 0x60 : 0x4E));
-  vga_print(46,0,"\xB3",                             0x4E);
-  vga_print(47,0," SETTINGS (F4) ",                  (st == STATE_SETTINGS ? 0x60 : 0x4E));
-  vga_print(62,0,"\xB3",                             0x4E);
-  vga_print(63,0," TETRIS (F5)     ",                (st == STATE_TETRIS ? 0x60 : 0x4E));
+  draw_state_bar(window_state);
 
   char ws_sig[6] = "012345";
   vga_print_char(79,0,ws_sig[window_state],0x6f);
@@ -763,59 +796,82 @@ int main() {
     }
 
     if (window_state == STATE_WELCOME) {
-      vga_draw_box(5,20,75,28,0x0f,0x0f);
-      vga_print_plain(6,21,"-WISC-23 GRAPHING CALCULATOR-");
-      vga_print_plain(6,23,"Julien de Castelnau        WI-23 Compiler, ISA");
-      vga_print_plain(6,24,"Ayaz Franz                 Floating Point + Grapher");
-      vga_print_plain(6,25,"Elan Graupe                Equation Parser");
-      vga_print_plain(6,26,"Aidan McEllistrem \x01        Peripherals + Frontend, Tetris");
-      vga_print_plain(6,27,"Madhav Rathi               FP Pipeline, ISA");
-      // any key is fine
+      // draw credits
+      vga_draw_box(5,6,75,14,0x0f,0x0f);
+      vga_print_plain(6,7,"-WISC-23 GRAPHING CALCULATOR-");
+      vga_print_plain(6,8,"Julien de Castelnau        WI-23 Compiler, ISA");
+      vga_print_plain(6,9,"Ayaz Franz                 Floating Point + Grapher");
+      vga_print_plain(6,10,"Elan Graupe                Equation Parser");
+      vga_print_plain(6,11,"Aidan McEllistrem \x01        Peripherals + Frontend, Tetris");
+      vga_print_plain(6,12,"Madhav Rathi               FP Pipeline, ISA");
+      
+      // print general info
+      vga_print_plain(6,17,"\x07State-of-the-art dual-issue floating point RISC processor");
+      vga_print_plain(6,18,"\x07Blazing-fast equation evaluation");
+      vga_print_plain(6,19,"\x07Vibrant 16-color display with instantaneous graphing");
+      vga_print_plain(6,20,"\x07Astounding entertainment software");
+      
+      // any key is fine, don't go back to this state
       if (input) {
         sw_state(STATE_CALC);
         window_state = STATE_CALC;
       }
     }
     else if (window_state == STATE_CALC) {
-      vga_print_plain(0,21,"-KB INPUT-");
-      vga_print_plain(0,6,"Please enter in an equation, and press = to evaluate.");
-      //if (input)
-      //  vga_draw_32bit_debug_str(0,22,input);
+      vga_print_plain(0,1,"Enter in an equation, and press = to evaluate.");
+      
+      kb_stroke_to_buf(&calc_line, input, MAX_EQ_LINE_SIZE); 
+      if((status & MASK_ENTER) && (calc_line.buf[0] != 0x00)) {
+        Queue equation;
+        structureQueue_Queue(&equation);
+        parse_equation(calc_line.buf, &equation);
         
-      //if (c != 0) {
-        // route key input to the line which will modify it accordingly
-        kb_stroke_to_buf(&calc_line, input, MAX_EQ_LINE_SIZE); 
-        if((status & MASK_ENTER) && (calc_line.buf[0] != 0x00)) {
-          Queue equation;
-          structureQueue_Queue(&equation);
-          parse_equation(calc_line.buf, &equation);
-          
-          // grab default x from settings
-          int x_err = 0;
-          float use_x = get_line_constant(&setting_lines[4], &x_err);
-          
-          float output = 0.0;
-          if (!x_err)
-            output = solveEquation(&equation, use_x, &eq_err);
-          else
-            eq_err = 1;
-          //output result on next line
-          fp_to_str(output, eq_output);
-          //remove all chars in line, reset the cursor
-          clear_line(&calc_line);
-          if (!eq_err) {
-            vga_print_char(0,2,'=',0x02);
-            vga_print_buf(1,2,eq_output,0x02,MAX_LINE_SIZE-1);
-          } else {
-            vga_print(0,2,"SYNTAX ERROR",0x04);
+        // grab default x from settings
+        int x_err = 0;
+        float use_x = get_line_constant(&setting_lines[4], &x_err);
+        
+        float output = 0.0;
+        if (!x_err)
+          output = solveEquation(&equation, use_x, &eq_err);
+        else
+          eq_err = 1;
+        
+        //remove all chars in line, reset the cursor
+        clear_line(&calc_line);
+        
+        //output result on next line
+        if (!eq_err) {
+          eq_output_colors[0] = 0x02;
+          // set buffer to output
+          fp_to_str(output, eq_output[0]);
+          // max of 10 entries in the history table
+          if (eq_hist_size < EQ_HIST_MAX)
+              eq_hist_size++;
+          // add output to history
+          for(int i = eq_hist_size-1; i > 0; i--) {
+            strncpy(eq_output[i], eq_output[i-1], MAX_EQ_OUT_LINE_SIZE);
+            eq_output_colors[i] = eq_output_colors[i-1];
           }
-          // clear equation data after use
-          for (int i = 0; i < MAX_LINE_SIZE; i++)
-            eq_output[i] = 0;
+        } else {
+          strncpy(eq_output[0], "SYNTAX ERROR       ", MAX_EQ_OUT_LINE_SIZE);
+          eq_output_colors[0] = 0x04;
         }
-      //}
-      // display the current line
-      vga_print_buf(0,1,calc_line.buf,0x0f,MAX_LINE_SIZE);
+        vga_print_char(0,3,'=',eq_output_colors[0]);
+        vga_print_buf(1,3,eq_output[0],eq_output_colors[0],MAX_EQ_OUT_LINE_SIZE);
+      }
+      
+      // display blinking cursor
+      char carat = ((*TIMER) & 0x08) ? 0x3E : 0x20;
+      vga_print_char(0,2,carat,0x0f);
+      // display current line     
+      vga_print_buf(2,2,calc_line.buf,0x0f,MAX_LINE_SIZE);
+      
+      // print history (if we have any)
+      vga_print_plain(0,5,"-HISTORY-");
+      for (int i = 0; i < eq_hist_size; i++) {
+        vga_print_char(0,6,'=',eq_output_colors[i]);
+        vga_print_buf(1,6,eq_output[i],eq_output_colors[i],MAX_EQ_OUT_LINE_SIZE);
+      }
       
     }
     else if (window_state == STATE_EQUATION) {
@@ -823,18 +879,15 @@ int main() {
       vga_print_plain(1,3,"PLEASE ENTER AN EQUATION:");
       vga_print_plain(1,4,"(F9 - F12 selects the graph row)");
       
-      // draw boxes
-      draw_line_box(0,10,last_eq_line_sel == 0,1,"Y1 = ", 5, &eq_lines[0]);
-      draw_line_box(0,15,last_eq_line_sel == 1,1,"Y2 = ", 5, &eq_lines[1]);
-      draw_line_box(0,20,last_eq_line_sel == 2,1,"Y3 = ", 5, &eq_lines[2]);
-      draw_line_box(0,25,last_eq_line_sel == 3,1,"Y4 = ", 5, &eq_lines[3]);
+      // draw equation boxes
+      draw_line_box(0,10,80,line_sel == 0,1,"Y1 = ", 5, &eq_lines[0]);
+      draw_line_box(0,15,80,line_sel == 1,1,"Y2 = ", 5, &eq_lines[1]);
+      draw_line_box(0,20,80,line_sel == 2,1,"Y3 = ", 5, &eq_lines[2]);
+      draw_line_box(0,25,80,line_sel == 3,1,"Y4 = ", 5, &eq_lines[3]);
 
-      if (fn_status >= 9 && fn_status <= 12) {
-        last_eq_line_sel = fn_status - 9; 
-      }
       // route key input to the line which will modify it accordingly
-      kb_stroke_to_buf(&eq_lines[last_eq_line_sel], input, MAX_EQ_LINE_SIZE); 
-
+      kb_stroke_to_buf(&eq_lines[line_sel], input, MAX_EQ_LINE_SIZE); 
+      
       // delete with ESC (DELETE isn't mapped for some reason)
       if (status & MASK_ESC) {
         int i = 0;
@@ -843,7 +896,6 @@ int main() {
           i++;
         }
       }
-      
     }
     else if (window_state == STATE_GRAPH) {
       // proposed behavior: have a infinite loop, break when try to switch screen
@@ -884,26 +936,22 @@ int main() {
          }
       }
     } else if (window_state == STATE_SETTINGS) {
-      vga_draw_box(0,2,60,4,0x0f,0x0f);
+      vga_draw_box(0,2,60,5,0x0f,0x0f);
       vga_print_plain(1,3,"USER DEFINED SETTINGS - GRAPHING");
+      vga_print_plain(1,3,"(F9 - F12 selects the setting entry)");
 
-      draw_line_box(0,6,last_eq_line_sel == 0, 0,"-x: ", 5, &setting_lines[0]);
-      draw_line_box(0,11,last_eq_line_sel == 1,0,"+x: ", 5, &setting_lines[1]);
-      draw_line_box(0,16,last_eq_line_sel == 2, 0,"-y: ", 5, &setting_lines[2]);
-      draw_line_box(0,21,last_eq_line_sel == 3,0,"+y: ", 5, &setting_lines[3]);
+      draw_line_box(0,7,18, line_sel == 0, 0,"-x: ", 5, &setting_lines[0]);
+      draw_line_box(20,7,18,line_sel == 1,0,"+x: ", 5,  &setting_lines[1]);
+      draw_line_box(40,7,18,line_sel == 2, 0,"-y: ", 5, &setting_lines[2]);
+      draw_line_box(60,7,18,line_sel == 3,0,"+y: ", 5,  &setting_lines[3]);
 
-      vga_print_plain(0,25,"-Value to use for 'x' when parsing (F8)-");
-      draw_line_box(0,26,last_eq_line_sel == 4, 0,"x=? ", 5, &setting_lines[4]);
+      vga_print_plain(0,10,"-Value to use for 'x' when parsing (F8)-");
+      draw_line_box(0,11,80,line_sel == 4, 0,"x=? ", 5, &setting_lines[4]);
 
-      if (fn_status >= 9 && fn_status <= 12) {
-        last_setting_line_sel = fn_status - 9; 
-      } else if (fn_status == 8) {
-        last_setting_line_sel = 4;
-      }
       // route key input to the line which will modify it accordingly
-      kb_stroke_to_buf(&setting_lines[last_setting_line_sel], input, MAX_EQ_LINE_SIZE); 
+      kb_stroke_to_buf(&setting_lines[line_sel], input, MAX_SETTING_LINE_SIZE); 
 
-      // delete with ESC (DELETE isn't mapped for some reason)E
+      // delete with ESC (DELETE isn't mapped for some reason)
       if (status & MASK_ESC) {
         int i = 0;
         while(i < 4) {
@@ -918,28 +966,51 @@ int main() {
       }
    
     } else if (window_state == STATE_TETRIS) {
-      if (!tetris_lost)
-        tetris(0);
-      else {
+      int tetris_input = 0;
+      int tetris_status = 0;
+      int tetris_goto = 0;
+      if (!tetris_lost) {
+        // tetris consumes input in its state function
+        // this is required as it only checks input on VBLANK
+        tetris_input = tetris(0);
+      } else {
         tetris_game_over();
-        int tetris_key = *KEY;
-        int tetris_status = (tetris_key & 0xffffff00) >> 8;
-        if(tetris_key) {
-          if (!(tetris_status & MASK_FN_KEY)) {
-            tetris_reset();
-            tetris_lost = 0;
-          } else {
-            sw_state(tetris_status & MASK_FN_KEY);
-          }
+        tetris_input = *KEY;
+      }
+      
+      // check if we pressed FN
+      tetris_status = (tetris_input & 0xffffff00) >> 8;
+      tetris_goto = (tetris_status & MASK_FN_KEY);
+      
+      if(tetris_input) {
+        if (!(tetris_status & MASK_FN_KEY)) {
+          tetris_reset();
+          tetris_lost = 0;
+        } else {
+          if (tetris_goto >= 0 && tetris_goto <= 5)
+            sw_state(tetris_goto);
         }
       }
     }
 
     // pressing FN 1-5 will cycle states
     fn_status = status & MASK_FN_KEY;
-    if (fn_status != last_status && fn_status > 0 && fn_status <= 5) {
-      last_status = fn_status;
+    if (fn_status > 0 && fn_status <= 5) {
+      //last_status = fn_status;
       sw_state(fn_status);
+    } else {
+      // pressing FN 9-12 will change the selected box
+      if (fn_status >= 9 && fn_status <= 12) {
+        line_sel = fn_status - 9; 
+      // only let the 5th select be set if in settings
+      } else if (fn_status == 8 && window_state == STATE_SETTINGS) {
+        line_sel = 4;
+      }
+    }
+    
+    // pressing TAB also cycles states
+    if (status & MASK_TAB) {
+      sw_state((window_state + 1) % 6);
     }
     
   }
