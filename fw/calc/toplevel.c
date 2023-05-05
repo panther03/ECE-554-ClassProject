@@ -866,10 +866,10 @@ int main() {
       vga_print_plain(6,12,"Madhav Rathi               FP Pipeline, ISA");
       
       // print general info
-      vga_print_plain(6,17,"\x07State-of-the-art dual-issue floating point RISC processor");
-      vga_print_plain(6,18,"\x07Blazing-fast equation evaluation");
-      vga_print_plain(6,19,"\x07Vibrant 16-color display with instantaneous graphing");
-      vga_print_plain(6,20,"\x07Astounding entertainment software");
+      vga_print_plain(6,17,"- State-of-the-art dual-issue floating point RISC processor");
+      vga_print_plain(6,18,"- Blazing-fast equation evaluation");
+      vga_print_plain(6,19,"- Vibrant 16-color display with instantaneous graphing");
+      vga_print_plain(6,20,"- Astounding entertainment software");
       
       // any key is fine, don't go back to this state
       if (input) {
