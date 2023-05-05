@@ -33,7 +33,7 @@ float solveEquation(Queue * equation, float x, int * err){
     // (this can be caused by an equation that was improperly parsed)
     *err = 0;
     if(isEmpty_Queue(equation)){
-        *err = 1;
+        *err = ERR_SOLVER_EMPTY;
         return 0;   
     }
 
@@ -81,13 +81,12 @@ float solveEquation(Queue * equation, float x, int * err){
                     break;
                 }
                 case '^':{
-
                     newValue.value = __builtin_powif(operand2, (int)operand1);
                     break;
                 }
                 // If the operation was not found, restore the queue and return an error code
                 default : {
-                    *err = 2;
+                    *err = ERR_SOLVER_BADCHAR;
                     // Restore queue
                     equation->head = initialHead;
                     equation->tail = initialTail;
@@ -105,7 +104,7 @@ float solveEquation(Queue * equation, float x, int * err){
     // If the stack is empty at the end of the algorithm, there is now result available so the equation was invalid
     // Restore the queue and return an error code
     if(isEmpty_Stack(&variableStack)){
-        *err = 3;
+        *err = ERR_SOLVER_BADSTACK;
 
         // Restore queue
         equation->head = initialHead;

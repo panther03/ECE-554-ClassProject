@@ -13,11 +13,11 @@ int check_end(char c) {
         return 1;
     if (c == '/')
         return 1;
+    if (c == '^')
+        return 1;
     if (c == '(')
         return 1;
     if (c == ')')
-        return 1;
-    if (c == '^')
         return 1;
     return 0;
 }
@@ -42,7 +42,6 @@ float pow_10(int pow) {
 }
 
 void decode_str(char* str, int* length, int* decimalIndx, int* sign, int* exponent, int* exponentLength, int* err) {
-    int decimalCount = 0;
 
     if (*str == '-') {
         *sign = -1;
@@ -52,11 +51,6 @@ void decode_str(char* str, int* length, int* decimalIndx, int* sign, int* expone
     while (!check_end(*str)) {
         if (*str == '.') {
             *decimalIndx = *length;
-            decimalCount++;
-
-            if (decimalCount != 1) {
-                *err = 1;
-            }
         }
 	else if (*str == 'e') {
             int expLength = -1;
@@ -107,7 +101,6 @@ float str_to_fp(char* str, int* err) {
     int sign = 1;
     int exponent = 0;
     int exponentLength = 0;
-    *err = 0;
 
     decode_str(str, &length, &decimalIndx, &sign, &exponent, &exponentLength, err);
 

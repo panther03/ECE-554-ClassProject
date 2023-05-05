@@ -34,11 +34,10 @@ module textVideoMem(
   wire [7:0] BMP_ROM_text_char;
   wire [11:0] char_idx;
   wire [11:0] char_y;
-  wire [15:0] vga_char;
+  reg [15:0] vga_char;
   // Calc text cell index from the x and y offsets given
   assign char_y =   {7'b0000000, yloc_i[8:4]};
   assign char_idx = (char_y << 6) + (char_y << 4) + {5'b00000, xloc_i[9:3]};
-  assign vga_char = framebuffer[char_idx];
   // Use lower four bits of the y index to calculate the row offset
   BMP_ROM_IBM_VGA_8x16 iBMP_ROM(.clk(clk),.addr({vga_char[7:0],yloc_i[3:0]}),.dout(BMP_ROM_text_char));
   
@@ -63,6 +62,7 @@ module textVideoMem(
   always @(posedge clk) begin
     if (we)
       framebuffer[vga_char_waddr_i] <= vga_char_i;
+    vga_char <= framebuffer[char_idx];
     pal_o <= ascii_px_present ? fg_pal : bg_pal;
   end
 

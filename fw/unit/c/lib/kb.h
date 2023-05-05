@@ -1,3 +1,6 @@
+#ifndef KB_H
+#define KB_H
+
 #include "mmap.h"
 
 // will return 0 if there is no key available
@@ -9,8 +12,14 @@ int kb_status() {
   return *PS2_STATUS;
 }
 
+// no way to wipe this (read only)
+// ...so not very useful
 int kb_char_present() {
   return *PS2_STATUS & MASK_RDY;
+}
+
+int kb_back() {
+  return *PS2_STATUS & MASK_BACK;
 }
 
 int kb_enter() {
@@ -20,3 +29,5 @@ int kb_enter() {
 int kb_tab() {
   return *PS2_STATUS & MASK_TAB;
 }
+
+#endif

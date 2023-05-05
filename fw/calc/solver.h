@@ -5,6 +5,9 @@
 #include "queue.h"
 #include "parser.h"
 
+#define ERR_SOLVER_EMPTY    1
+#define ERR_SOLVER_BADCHAR  2
+#define ERR_SOLVER_BADSTACK 3
 
 float solveEquation(Queue * equation, float x, int * err);
 
