@@ -71,8 +71,8 @@ const int TETRIS_LINE_SCORES[] = {40, 100, 300, 1200};
 
 // drop rates (slightly off NES)
 const int TETRIS_G_TABLE[] = 
-    {48, 43, 38, 33, 28, 23, 18, 13, 8, 6, //0-9
-    5, 5, 5, 4, 4, 4, 3, 3, 2, 2, 1}; //10-19
+    {56, 48, 43, 38, 33, 28, 23, 18, 13, 8, 6, //0-10
+    5, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1}; //11-20
 // track index
 int tetris_curr_g = 0;
 int tetris_held_down = 0;
@@ -456,7 +456,7 @@ int tetris_move_piece_down() {
 
       // award lines on line clear, will advance the level if > (level * 10)
       tetris_lines += rows_cleared;
-      if (tetris_lines > (tetris_level * 10) && tetris_level < TETRIS_MAX_LEVEL)
+      if (tetris_lines > ((tetris_level+1) * 10) && tetris_level < TETRIS_MAX_LEVEL)
         tetris_level++;
       
       // award points on row clear (if any)
@@ -493,6 +493,8 @@ void tetris_apply_gravity() {
   // did we get the right amount of frames? move the piece down then
   if (tetris_curr_g > TETRIS_G_TABLE[tetris_level]) {
     tetris_curr_g = 0;
+    // one point for the piece moving down
+    tetris_score++;
     tetris_move_piece_down();
   }
 }
@@ -542,16 +544,21 @@ void tetris_control(uint8_t c, int make) {
   }
 
   // drop at 1/2G like in NES tetris
-  if (tetris_held_down && (tetris_curr_g < TETRIS_G_TABLE[tetris_level]-1))
+  if (tetris_held_down && (tetris_curr_g < TETRIS_G_TABLE[tetris_level]-1)) {
     tetris_curr_g = TETRIS_G_TABLE[tetris_level]-1;
+    // one point per frame for softdropping
+    tetris_score++;
+  }
 }
 
 
 // display a "GAME OVER!" message
 void tetris_game_over() {
-  vga_draw_box(47,21,56,24,0x0f,0x0f);
+  vga_draw_box(47,21,57,28,0x0f,0x0f);
   vga_print_plain(48,22,"GAME");
   vga_print_plain(49,23,"OVER!");
+  vga_print_plain(48,25,"Press");
+  vga_print_plain(49,26,"ENTER");
 }
 
 
@@ -605,9 +612,10 @@ void tetris_window() {
   vga_print_plain(0,4,"S   - Soft drop piece");
   vga_print_plain(0,5,"K,L - Rotate piece");
   
-  vga_print_plain(0,7,"Clear lines by filling up an entire row.");
-  vga_print_plain(0,8,"You lose if a piece is ");
-  vga_print_plain(0,9,"placed above the well!");
+  vga_print_plain(0,7,"Clear lines by filling");
+  vga_print_plain(0,8,"up an entire row.");
+  vga_print_plain(0,9,"You lose if a piece is ");
+  vga_print_plain(0,10,"placed above the well!");
   
   // draw line count
   vga_draw_box(34,1,45,3,0x0f,0x0f);
@@ -700,7 +708,7 @@ int eq_err = 0;
 struct line_buf_t calc_line = {.color = 0x0f, .i = 0};
 
 // reserve space for up to 10 lines of equation history
-char eq_output[40][20];
+char eq_output[20][40];
 uint8_t eq_output_colors[20];
 int eq_hist_size = 0;
 #define EQ_HIST_MAX 20
@@ -814,9 +822,6 @@ void sw_state(int st) {
   // show the current "window"
   draw_state_bar(window_state);
 
-  char ws_sig[6] = "012345";
-  vga_print_char(79,0,ws_sig[window_state],0x6f);
-
   window_state = st;
 }
 
@@ -885,12 +890,12 @@ int main() {
         parse_equation(calc_line.buf, &equation);
         
         // grab default x from settings
-        //int x_err = 0;
-        //float use_x = str_to_fp(setting_lines[4].buf, &x_err);
+        int x_err = 0;
+        float use_x = str_to_fp(setting_lines[4].buf, &x_err);
 
 	int calc_err = 0;
-        //float output = solveEquation(&equation, x_err ? 0.0f : use_x, &calc_err);
-        float output = solveEquation(&equation, 0.0f, &calc_err);
+        float output = solveEquation(&equation, x_err ? 0.0f : use_x, &calc_err);
+        //float output = solveEquation(&equation, 0.0f, &calc_err);
         
         //remove all chars in line, reset the cursor
         //clear_line(&calc_line);
@@ -910,6 +915,12 @@ int main() {
           }
         } else {
           strncpy(eq_output[0], "SYNTAX ERROR                  ", MAX_EQ_OUT_LINE_SIZE);
+          if (calc_err == ERR_SOLVER_EMPTY)
+            strncpy((eq_output[0]+13),"(Parser failed) ",15);
+          else if (calc_err == ERR_SOLVER_BADCHAR)
+            strncpy((eq_output[0]+13),"(Invalid char) ",14);
+          else if (calc_err == ERR_SOLVER_BADSTACK)
+            strncpy((eq_output[0]+13),"(Invalid input) ",15);
           eq_output_colors[0] = 0x04;
         }
         vga_print_char(0,3,'=',eq_output_colors[0]);
@@ -970,10 +981,14 @@ int main() {
             float x2 = str_to_fp(setting_lines[1].buf, &read_err);
             float y1 = str_to_fp(setting_lines[2].buf, &read_err);
             float y2 = str_to_fp(setting_lines[3].buf, &read_err);
-            int err = graph(eq_lines[idx].buf, eq_lines[idx].color, x1, x2, y1, y2);
-            if (err) {
-              eq_err = 1;
-              offending_line = idx;
+            if (read_err) {
+              setting_err = 1;
+            } else {
+              int err = graph(eq_lines[idx].buf, eq_lines[idx].color, x1, x2, y1, y2);
+              if (err) {
+                eq_err = 1;
+                offending_line = idx;
+              }
             }
           }
         idx++;
@@ -992,6 +1007,7 @@ int main() {
             vga_print_plain(13,6,"Equation recieved, but there was an error parsing.");
             vga_print_char(13,7,'#',0x0f);
             vga_print_char(14,7,offending_line+0x30,0x0f);
+            vga_print(16,7,"(offending line)",0x04);
           } else if(setting_err) {
             vga_print(13,5,"Settings Syntax Error!",0x04);
             vga_print_plain(13,6,"Please check that the bounds are valid numbers.");
