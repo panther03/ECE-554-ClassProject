@@ -159,7 +159,7 @@ void fp_to_str(float fp, char *buff) {
         fp = -fp;	
     }
 
-    if (fp - fp != 0) { // is inf
+    if ((int)(fp - fp) != 0) { // is inf
         *buff++ = 'i';
         *buff++ = 'n';
         *buff++ = 'f';
