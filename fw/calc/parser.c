@@ -178,7 +178,7 @@ void text_to_array_of_tokens(char * userInput, Queue * output){
                 // If the char is a digit or if the char is a negative sign coming before an operator, parse the value as a number
                 // Negative numbers will always come at the beginng of the equation or before an operator.
                 if(isEmpty_Queue(output) || lastTokenWasOperator || *userInput != '-'){
-                    int err;
+                    int err = 0;
                     Token token;
                     token.value = str_to_fp(userInput, &err);
                     token.isOperator = 0;
