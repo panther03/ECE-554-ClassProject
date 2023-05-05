@@ -966,13 +966,15 @@ int main() {
 	    // include error handling for parsing equations (graph will return 1 if there is an error)
             // get all four x/y bounds
             int read_err = 0;
-            //float x1 = str_to_fp(setting_lines[0].buf, &read_err);
-            //float x2 = str_to_fp(setting_lines[1].buf, &read_err);
-            //float y1 = str_to_fp(setting_lines[2].buf, &read_err);
-            //float y2 = str_to_fp(setting_lines[3].buf, &read_err);
-            eq_err = graph(eq_lines[idx].buf, eq_lines[idx].color, -10.0f, 10.0f, -10.0f, 10.0f);
-            //else
-            //  graph(eq_lines[idx].buf, eq_lines[idx].color, x1, x2, y1, y2);
+            float x1 = str_to_fp(setting_lines[0].buf, &read_err);
+            float x2 = str_to_fp(setting_lines[1].buf, &read_err);
+            float y1 = str_to_fp(setting_lines[2].buf, &read_err);
+            float y2 = str_to_fp(setting_lines[3].buf, &read_err);
+            int err = graph(eq_lines[idx].buf, eq_lines[idx].color, x1, x2, y1, y2);
+            if (err) {
+              eq_err = 1;
+              offending_line = idx;
+            }
           }
         idx++;
         }
