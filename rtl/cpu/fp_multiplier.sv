@@ -78,7 +78,10 @@ module fp_multiplier(A, B, P);
                               A_type == 3'b010                         ? A_mantissa :  // A = inf
                               (A_type == 3'b001) && (B_type == 3'b001) ? 23'h0 :       // two subnorms multiply to 0
                                                                          (A_NaN ? A_mantissa : B_mantissa);  // default to NaN mantissa
-  
+
+  /////////////////////////////////////////////////
+  //////////////   Normal Cases    ////////////////
+  /////////////////////////////////////////////////
   ///////////////////////
   //  Multiplication  //
   /////////////////////
