@@ -82,7 +82,7 @@ import wi23_defs::*;
   logic mantissa_lt, mantissa_eq;
   logic isNaN;
   
-  assign isNaN = (~A_type & (&A_type[1:0])) || (~B_type & (&B_type[1:0]));
+  assign isNaN = (~A_type[2] & (&A_type[1:0])) || (~B_type[2] & (&B_type[1:0]));
   assign eq = isNaN ? 1'b0 : A == B;
   
   assign exponent_lt = A_exponent < B_exponent;

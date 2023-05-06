@@ -31,45 +31,52 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
                                     3'b100;   // Normal
            
   assign B_type = ~|B_ex && ~|B_m ? 3'b000 :  // Zero
-                   ~|B_ex && |B_m  ? 3'b001 :  // Subnormal
+                   ~|B_ex && |B_m ? 3'b001 :  // Subnormal
                   &B_ex && ~|B_m  ? 3'b010 :  // Infinity
                   &B_ex && |B_m   ? 3'b011 :  // NaN
                                     3'b100;   // Normal   
+
+  logic A_NaN, B_NaN;
+  assign A_NaN = ~A_type[2] & &A_type[1:0];
+  assign B_NaN = ~B_type[2] & &B_type[1:0];
   
   /////////////////////////////////////////////////
   ///////////////   Special Cases    //////////////
   /////////////////////////////////////////////////
   // Special case signals
-  logic [31:0] S_special;
+  logic [31:0] S_special_unflopped;
   logic S_special_sign;
   logic [7:0] S_special_exponent;
   logic [22:0] S_special_mantissa;
   
-  logic is_special;
+  logic is_special_unflopped;
   
-  assign S_special = {S_special_sign, S_special_exponent, S_special_mantissa};
+  assign S_special_unflopped = {S_special_sign, S_special_exponent, S_special_mantissa};
   
-  assign is_special = (~^A_type | ~^B_type) || A_type == 3'b010 || B_type == 3'b010 ? 1'b1 : 1'b0;
-  assign S_special_sign = ~|A_type                                                   ? B_s :  // A is 0
-                          ~|B_type                                                   ? A_s :  // B is 0
-                          (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_s :  // A = norm or subnorm and B = inf
-                          (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_s :  // A = inf and B = norm or subnorm
-                          B_type == 3'b010 && A_type == 3'b010 && A_s ~^ B_s         ? A_s :
-                                                                                       1'b1;  // default to 1
+  assign is_special_unflopped = (~^A_type | ~^B_type) || A_type == 3'b010 || B_type == 3'b010 ? 1'b1 : 1'b0;
+  assign S_special_sign = ~|A_type & subtract_unflopped                              ? ~B_s :  // A is 0 and subtract (0 - B = -B)
+                          ~|A_type                                                   ? B_s  :  // A is 0 and not subtract
+                          ~|B_type                                                   ? A_s  :  // B is 0
+                          (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_s  :  // A = norm or subnorm and B = inf
+                          (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_s  :  // A = inf and B = norm or subnorm
+                          B_type == 3'b010 && A_type == 3'b010 && A_s ~^ B_s         ? A_s  :
+                                                                                       (A_NaN ? A_s : B_s);  // default to sign of NaN
               
   assign S_special_exponent = ~|A_type                                                   ? B_ex :  // A is 0
                               ~|B_type                                                   ? A_ex :  // B is 0
                               (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_ex :  // A = norm or subnorm and B = inf
                               (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_ex :  // A = inf and B = norm or subnorm
                               A_type == 3'b010 && B_type == 3'b010 && A_s == B_s         ? A_ex :  // A = inf and B = inf and same sign
-                                                                                           8'hff;  // default to ff (for NaN result)
+                                                                                           (A_NaN ? A_ex : B_ex);  // default to NaN exponent
 
-  assign S_special_mantissa = ~|A_type                                                   ? B_m :        // A is 0
-                              ~|B_type                                                   ? A_m :        // B is 0
-                              (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_m :        // A = norm or subnorm and B = inf
-                              (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_m :        // A = inf and B = norm or subnorm
-                              A_type == 3'b010 && B_type == 3'b010 && A_s == B_s         ? A_m :        // A = inf and B = inf and same sign
-                                                                                           23'h000001;  // default to 1 (for NaN result)
+  assign S_special_mantissa = ~|A_type                                                                 ? B_m   :        // A is 0
+                              ~|B_type                                                                 ? A_m   :        // B is 0
+                              (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010               ? B_m   :        // A = norm or subnorm and B = inf
+                              (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010               ? A_m   :        // A = inf and B = norm or subnorm
+                              A_type == 3'b010 && B_type == 3'b010 && A_s == B_s && subtract_unflopped ? 23'h1 :        // A = inf and B = inf and same sign and subtract output should be subnormal
+                              A_type == 3'b010 && B_type == 3'b010 && A_s == B_s                       ? A_m   :        // A = inf and B = inf and same sign
+                              A_type == 3'b010 && B_type == 3'b010 && A_s != B_s                       ? 23'h1 :        // A = inf and B = inf and same sign
+                                                                                                         (A_NaN ? A_m : B_m);  // default to NaN mantissa
   
   /////////////////////////////////////////////////
   ///////////////    PRE-ADDER    /////////////////
@@ -93,6 +100,8 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
   logic swp;
   logic is_subnormal;
   logic subtract;
+  logic is_special;
+  logic [31:0] S_special;
   
   always_ff @(posedge clk) begin
     A_sign <= A_sign_unflopped;
@@ -104,6 +113,8 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
     swp <= swp_unflopped;
     is_subnormal <= is_subnormal_unflopped;
     subtract <= subtract_unflopped;
+    is_special <= is_special_unflopped;
+    S_special <= S_special_unflopped;
   end
   
   /////////////////////////////////////////////////
@@ -117,11 +128,13 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
   logic Sign_out;
   logic subtract_mod;
   logic [27:0] A_mantissa, B_mantissa;
+  logic eq;
   
   // logic
   assign B_sign_with_op = B_sign ^ subtract;
+  assign eq = A_mantissa_preadder == B_mantissa_preadder;
   
-  assign Sign_out = subtract ? (A_sign & (~swp)) | (~A_sign & swp) :
+  assign Sign_out = subtract ? (A_sign & (~swp) & (~eq | (eq & B_sign_with_op))) | (~A_sign & swp) :
                                (A_sign & (B_sign_with_op | comp)) | (~A_sign & B_sign_with_op & ~comp);
   
   assign A_mantissa = A_mantissa_preadder;

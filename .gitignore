@@ -20,5 +20,7 @@ fw/**/*.elf
 
 transcript
 
+*.sv.bak
+
 __pycache__/
 *.py[cod]

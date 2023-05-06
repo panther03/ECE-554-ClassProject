@@ -34,15 +34,18 @@ module fp_convert_int(A, intgr);
   logic [31:0] negative_intgr;
   logic [31:0] positive_intgr;
   logic overflow;
+  logic inf;
   
   assign overflow = (exponent_unbiased > 8'h1f);
+  assign inf_nan = &A_exponent;
   assign negative_intgr = overflow ? 32'h80000000 : 
                                      ~round_int[31:0] + 1'b1;
                                      
   assign positive_intgr = overflow ? 32'h7fffffff : 
                                      round_int[31:0];
   
-  assign intgr = exponent_unbiased[7] ? 32'h0 :
+  assign intgr = inf_nan              ? 32'h7fffffff :
+                 exponent_unbiased[7] ? 32'h0 :
                  A_sign               ? negative_intgr :
                                         positive_intgr;
   

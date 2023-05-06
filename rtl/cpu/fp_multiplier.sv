@@ -32,6 +32,10 @@ module fp_multiplier(A, B, P);
                   &B_exponent && ~|B_mantissa  ? 3'b010 :  // Infinity
                   &B_exponent && |B_mantissa   ? 3'b011 :  // NaN
                                                  3'b100;   // Normal   
+  
+  logic A_NaN, B_NaN;
+  assign A_NaN = ~A_type[2] & &A_type[1:0];
+  assign B_NaN = ~B_type[2] & &B_type[1:0];
                                         
   /////////////////
   //  Sign_Out  //
@@ -61,19 +65,19 @@ module fp_multiplier(A, B, P);
                           (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_sign :  // A = norm or subnorm and B = inf
                           (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_sign :  // A = inf and B = norm or subnorm
                           A_type == 3'b010 && B_type == 3'b010 && A_sign == B_sign   ? 1'b0 :    // both inf and same sign
-                                                                                       1'b1;     // default to 1
+                                                                                       (A_NaN ? A_sign : B_sign);  // default to sign of NaN
               
   assign P_special_exponent = ~|A_type                                 ? A_exponent :  // A is 0
                               ~|B_type                                 ? B_exponent :  // B is 0
                               (A_type == 3'b001) && (B_type == 3'b001) ? A_exponent :  // two subnorms multiply to 0
-                                                                         8'hff;        // default to ff (for NaN result)
+                                                                         (A_NaN ? A_exponent : B_exponent);  // default to NaN exponent
 
   assign P_special_mantissa = ~|A_type                                 ? A_mantissa :  // A is 0
                               ~|B_type                                 ? B_mantissa :  // B is 0
                               B_type == 3'b010                         ? B_mantissa :  // B = inf
                               A_type == 3'b010                         ? A_mantissa :  // A = inf
                               (A_type == 3'b001) && (B_type == 3'b001) ? 23'h0 :       // two subnorms multiply to 0
-                                                                         23'h000001;   // default to 1 (for NaN result)
+                                                                         (A_NaN ? A_mantissa : B_mantissa);  // default to NaN mantissa
   
   ///////////////////////
   //  Multiplication  //
@@ -182,7 +186,6 @@ module fp_multiplier(A, B, P);
   
   assign inf_overflow = exponent_after_shift[7] & ~A_exponent_sign & ~B_exponent_sign;
   assign underflow = ~exponent_after_shift[7] & A_exponent_sign & B_exponent_sign;
-  // assign zeroed = underflow && (
   
   // make sure exponent_after_shift must be greater than -127
   

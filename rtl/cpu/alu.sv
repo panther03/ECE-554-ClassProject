@@ -31,11 +31,12 @@ import wi23_defs::*;
 
    logic SEQ, SLE, SLT;
    logic USLE, USLT;
-   logic Ofl, EqU_n;
+   logic Ofl;
+   logic [REGFILE_WIDTH-1:0] EqU_n;
 
    assign Ofl = (S[REGFILE_WIDTH-1] & ~A_inv[REGFILE_WIDTH-1] & ~B[REGFILE_WIDTH-1]) | (~S[REGFILE_WIDTH-1] & A_inv[REGFILE_WIDTH-1] & B[REGFILE_WIDTH-1]);
 
-   assign SEQ = ~|S;
+   assign SEQ = ~|S[REGFILE_WIDTH-1:0];
    assign SLE = (~S[REGFILE_WIDTH-1] ^ Ofl);
    assign SLT = SLE & ~SEQ; 
 

@@ -23,7 +23,7 @@ module VGA_display(
   input wire vga_char_we_i,            // MM'd write enable
   
   input wire [3:0]  graph_px_i,        // Graph palette pixel data to write into buffer from MM'd value
-  input wire [18:0] graph_addr_i,      // Address to put pixel data in  
+  input wire [16:0] graph_addr_i,      // Address to put pixel data in  
   input wire graph_we_i,               // MM'd write enable
   
   input wire draw_mode_sel_i,          // Chooses framebuffer output

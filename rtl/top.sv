@@ -9,11 +9,14 @@ module top
   // Switches and LEDs
   input  [9:0] SW,
   output [9:0] LEDR,
+  // PS/2
+  input        PS2_CLK,
+  input        PS2_DAT,
   // UART
   input        RX,
   output       TX,
   // VGA
-  output    	 VGA_BLANK_N,
+  output       VGA_BLANK_N,
   output [7:0] VGA_B,
   output       VGA_CLK,
   output [7:0] VGA_G,
@@ -62,6 +65,9 @@ wi23 iWI23
   // UART
   .RX(RX),
   .TX(TX),
+  // PS2
+  .PS2_CLK(PS2_CLK),
+  .PS2_DAT(PS2_DAT),
   // VGA
   .VGA_CLK(VGA_CLK),
   .VGA_BLANK_N(VGA_BLANK_N),

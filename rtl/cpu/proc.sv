@@ -19,6 +19,7 @@ import wi23_defs::*;
    output logic [3:0]            we_o,
    output logic [3:0]            re_o,
    output logic [DATA_WIDTH-1:0] data_proc_to_mem_o,
+   output logic [1:0]            data_proc_to_mem_gram_o,
    // Error and Halt status
    output logic                  err_o,
    output logic                  halt_o
@@ -167,12 +168,14 @@ import control_defs_pkg::*;
    logic EX_MEM_ctrl_FpInst_in, EX_MEM_ctrl_FpInst_out;
    logic [1:0] EX_MEM_ctrl_FPIntCvtReg_in, EX_MEM_ctrl_FPIntCvtReg_out;
    logic [1:0] EX_MEM_ctrl_MemGran_in, EX_MEM_ctrl_MemGran_out;
+   logic [PC_WIDTH-1:0] EX_MEM_pc_inc_in, EX_MEM_pc_inc_out;
 
    logic EX_MEM_ctrl_Halt_in, EX_MEM_ctrl_Halt_out;
 
    logic [REGFILE_WIDTH-1:0] EX_MEM_alu_out_in,  EX_MEM_alu_out_out;
    logic [REGFILE_WIDTH-1:0] EX_MEM_reg2_in, EX_MEM_reg2_out;
    logic [REGFILE_DEPTH-1:0] EX_MEM_writesel_in, EX_MEM_writesel_out;
+   logic [PC_WIDTH-1:0] EX_MEM_inst_in, EX_MEM_inst_out;
 
    ///////////////////////////////
    /// MEM_WB Transition wires ///
@@ -184,12 +187,15 @@ import control_defs_pkg::*;
    logic MEM_WB_ctrl_FpInst_in, MEM_WB_ctrl_FpInst_out;
    logic [1:0] MEM_WB_ctrl_FPIntCvtReg_in, MEM_WB_ctrl_FPIntCvtReg_out;
    logic [1:0] MEM_WB_ctrl_MemGran_in, MEM_WB_ctrl_MemGran_out;
+   logic MEM_WB_ctrl_MemWrite_in, MEM_WB_ctrl_MemWrite_out;
+   logic [PC_WIDTH-1:0] MEM_WB_pc_inc_in, MEM_WB_pc_inc_out;
 
    logic MEM_WB_ctrl_Halt_in, MEM_WB_ctrl_Halt_out;
 
    logic [REGFILE_DEPTH-1:0] MEM_WB_writesel_in, MEM_WB_writesel_out;
    logic [REGFILE_WIDTH-1:0] MEM_WB_alu_out_in, MEM_WB_alu_out_out;
    logic [REGFILE_WIDTH-1:0] MEM_WB_mem_out_in, MEM_WB_mem_out_out;
+   logic [PC_WIDTH-1:0] MEM_WB_inst_in, MEM_WB_inst_out;
 
    ///////////////////////////////
    /// FEX_WB Transition wires ///
@@ -313,6 +319,11 @@ import control_defs_pkg::*;
    ////////////////////
    /// Decode Block ///
    ////////////////////
+
+   logic WB_IntRegWrite;
+   logic WB_FPRegWrite;
+   assign WB_IntRegWrite = MEM_WB_ctrl_RegWrite_out | FEX_WB_ctrl_FpIntCvtReg_out[1];
+   assign WB_FPRegWrite = FEX_WB_ctrl_RegWrite_out & ~FEX_WB_ctrl_FpIntCvtReg_out[1]; 
    
    decode iDECODE(.clk(clk), .rst_n(rst_n), .decode_err(decode_err),
       .inst(IF_ID_inst_out), .writesel(MEM_WB_writesel_out), .fp_writesel(FEX_WB_writesel_out),
@@ -322,7 +333,7 @@ import control_defs_pkg::*;
       .write_in(write_in), .reg1(reg1), .reg2(reg2), .imm(imm), .ofs(ofs),
       .fp_write_in(fp_write_in), .fp_reg1(fp_reg1), .fp_reg2(fp_reg2),
       .InstFmt(InstFmt), .JType(JType), .XtendSel(XtendSel), 
-      .RegWrite(MEM_WB_ctrl_RegWrite_out), .FPRegWrite(FEX_WB_ctrl_RegWrite_out),
+      .RegWrite(WB_IntRegWrite), .FPRegWrite(WB_FPRegWrite),
       .FPInst(FPInst), .FPIntCvtReg(FPIntCvtReg), .MemRead(MemRead), .MemWrite(MemWrite), .UnsignedOp(UnsignedOp));
 
    ////////////////////////
@@ -537,6 +548,7 @@ import control_defs_pkg::*;
 	assign EX_MEM_ctrl_FpInst_in = ID_EX_ctrl_FpInst_out;
 	assign EX_MEM_ctrl_FPIntCvtReg_in = ID_EX_ctrl_FPIntCvtReg_out;
    assign EX_MEM_ctrl_MemGran_in = ID_EX_ctrl_MemGran_out;
+   assign EX_MEM_pc_inc_in = ID_EX_pc_inc_out;
 
    assign EX_MEM_ctrl_Halt_in = ID_EX_ctrl_Halt_out;
   
@@ -545,6 +557,7 @@ import control_defs_pkg::*;
    assign EX_MEM_writesel_in = writesel;
 
    assign EX_MEM_ctrl_Op_in = ID_EX_ctrl_Op_out;
+   assign EX_MEM_inst_in = ID_EX_inst_out;
 
    always @(posedge clk, negedge rst_n)
       if (!rst_n) begin
@@ -561,6 +574,8 @@ import control_defs_pkg::*;
 			EX_MEM_ctrl_FpInst_out <= 0;
 			EX_MEM_ctrl_FPIntCvtReg_out <= 0;
          EX_MEM_ctrl_MemGran_out <= 0;
+         EX_MEM_inst_out <= 0;
+         EX_MEM_pc_inc_out <= 0;
       end else begin
          EX_MEM_ctrl_Op_out <= EX_MEM_ctrl_Op_in;
          EX_MEM_ctrl_RegWrite_out <= EX_MEM_ctrl_RegWrite_in;
@@ -575,6 +590,8 @@ import control_defs_pkg::*;
 			EX_MEM_ctrl_FpInst_out <= EX_MEM_ctrl_FpInst_in;
 			EX_MEM_ctrl_FPIntCvtReg_out <= EX_MEM_ctrl_FPIntCvtReg_in;
          EX_MEM_ctrl_MemGran_out <= EX_MEM_ctrl_MemGran_in;
+         EX_MEM_inst_out <= EX_MEM_inst_in;
+         EX_MEM_pc_inc_out <= EX_MEM_pc_inc_in;
       end
 
    ////////////////////
@@ -583,6 +600,7 @@ import control_defs_pkg::*;
 
    assign daddr_o = EX_MEM_alu_out_out;
    assign data_proc_to_mem_o = EX_MEM_reg2_out;
+   assign data_proc_to_mem_gram_o = EX_MEM_ctrl_MemGran_out;
    always_comb begin
       we_o = 4'h0;
       casez (EX_MEM_ctrl_MemGran_out)
@@ -621,21 +639,13 @@ import control_defs_pkg::*;
    assign MEM_WB_ctrl_MemToReg_in = EX_MEM_ctrl_MemToReg_out;
    assign MEM_WB_ctrl_Halt_in = EX_MEM_ctrl_Halt_out;
    assign MEM_WB_ctrl_MemGran_in = EX_MEM_ctrl_MemGran_out;
-
+   assign MEM_WB_inst_in = EX_MEM_inst_out;
+   assign MEM_WB_ctrl_MemWrite_in = EX_MEM_ctrl_MemWrite_out;
+   assign MEM_WB_pc_inc_in = EX_MEM_pc_inc_out;
    assign MEM_WB_alu_out_in = EX_MEM_alu_out_out;
-   always_comb begin
-      MEM_WB_mem_out_in = 32'h0;
-      casez (EX_MEM_ctrl_MemGran_out)
-         2'b00 : MEM_WB_mem_out_in = data_mem_to_proc_i; // Word Access
-         2'b01 : MEM_WB_mem_out_in = 32'h000000FF & data_mem_to_proc_i; // Byte Access
-         2'b10 : MEM_WB_mem_out_in = 32'h0000FFFF & data_mem_to_proc_i; // Half-Word Access
-         default : begin end // Unsupported Access
-      endcase
-   end
+   assign MEM_WB_mem_out_in = data_mem_to_proc_i;
    assign MEM_WB_writesel_in = EX_MEM_writesel_out;
-
    assign MEM_WB_ctrl_Op_in = EX_MEM_ctrl_Op_out;
-	
 	assign MEM_WB_ctrl_FpInst_in = EX_MEM_ctrl_FpInst_out;
 	assign MEM_WB_ctrl_FPIntCvtReg_in = EX_MEM_ctrl_FPIntCvtReg_out;
   
@@ -651,6 +661,9 @@ import control_defs_pkg::*;
 			MEM_WB_ctrl_FpInst_out <= 0;
 			MEM_WB_ctrl_FPIntCvtReg_out <= 0;
          MEM_WB_ctrl_MemGran_out <= 0;
+         MEM_WB_inst_out <= 0;
+         MEM_WB_ctrl_MemWrite_out <= 0;
+         MEM_WB_pc_inc_out <= 0;
       end else begin
          MEM_WB_ctrl_Op_out <= MEM_WB_ctrl_Op_in;
          MEM_WB_ctrl_RegWrite_out <= MEM_WB_ctrl_RegWrite_in;
@@ -662,6 +675,9 @@ import control_defs_pkg::*;
 			MEM_WB_ctrl_FpInst_out <= MEM_WB_ctrl_FpInst_in;
 			MEM_WB_ctrl_FPIntCvtReg_out <= MEM_WB_ctrl_FpInst_out;
          MEM_WB_ctrl_MemGran_out <= MEM_WB_ctrl_MemGran_in;
+         MEM_WB_inst_out <= MEM_WB_inst_in;
+         MEM_WB_ctrl_MemWrite_out <= MEM_WB_ctrl_MemWrite_in;
+         MEM_WB_pc_inc_out <= MEM_WB_pc_inc_in;
       end
    
    /////////////////////////
@@ -741,17 +757,40 @@ import control_defs_pkg::*;
    /// Hazard Detection Unit ///
    /////////////////////////////
 
-   logic IF_ID_is_fp_ex;
+   logic IF_ID_is_fp_ex, IF_ID_is_fp_store;
 	
-   // FP instruction to FEX a) FP Inst b) Non-LD/ST FP Inst
+   // FP FEX instruction decoded (non LD/ST)
    assign IF_ID_is_fp_ex = IF_ID_ctrl_FpInst_ea & ~(IF_ID_ctrl_MemRead_ea | IF_ID_ctrl_MemWrite_ea);
+   // FP LD/ST instruction decoded
+   assign IF_ID_is_fp_store = IF_ID_ctrl_FpInst_ea & IF_ID_ctrl_MemWrite_ea;
 
-   hazard iHAZARD (.clk(clk),.IF_ID_reg1(IF_ID_inst_out[25:21]),.IF_ID_reg2(IF_ID_inst_out[20:16]),
-      .IF_ID_is_branch(JType[0]),.ID_EX_is_load(ID_EX_ctrl_MemRead_out), .ID_EX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),
-      .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),.EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out), .ID_FEX_ctrl_regw(ID_FEX_ctrl_RegWrite_out),
-      .ID_EX_regw(writesel),.ID_FEX_regw(fp_writesel),.EX_MEM_regw(EX_MEM_writesel_out), .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
-      .FEX_busy(FEX_busy), .IF_ID_is_fp_ex(IF_ID_is_fp_ex), .FEX_busy_er(FEX_busy_er),
-      .stall(stall));
+   hazard iHAZARD (
+      // Inputs
+      .clk(clk),
+      .IF_ID_reg1(IF_ID_inst_out[25:21]),
+      .IF_ID_reg2(IF_ID_inst_out[20:16]),
+      .IF_ID_is_branch(JType[0]),
+      .IF_ID_is_fp_store(IF_ID_is_fp_store), 
+      .IF_ID_is_fp_ex(IF_ID_is_fp_ex), 
+      .ID_EX_is_load(ID_EX_ctrl_MemRead_out), 
+      .ID_EX_ctrl_regw(ID_EX_ctrl_RegWrite_out),
+      .ID_FEX_ctrl_regw(ID_FEX_ctrl_RegWrite_out),
+      .ID_FEX2_ctrl_regw(FEX_WB_ctrl_RegWrite_r),
+      .EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out), 
+      .ID_EX_regw(writesel),
+      .ID_FEX_regw(fp_writesel),
+      .ID_FEX2_regw(FEX_WB_writesel_r),
+      .EX_MEM_regw(EX_MEM_writesel_out), 
+      .ID_FEX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),
+      .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
+      .ID_FEX2_ctrl_FpInst(FEX_WB_ctrl_FpInst_r),
+      .ID_FEX2_ctrl_FPIntCvtReg(FEX_WB_ctrl_FPIntCvtReg_r),
+      .FEX_busy(FEX_busy), 
+      .FEX_busy_er(FEX_busy_er),
+      
+      // Outputs
+      .stall(stall)
+   );
 
    ///////////////////////
    /// Forwarding Unit ///
@@ -768,10 +807,12 @@ import control_defs_pkg::*;
       .ID_EX_reg1(ID_EX_inst_out[25:21]),.ID_EX_reg2(ID_EX_inst_out[20:16]),
       .ID_FEX_reg1(ID_FEX_inst_out[25:21]),.ID_FEX_reg2(ID_FEX_inst_out[20:16]),
       .EX_MEM_ctrl_regw(EX_MEM_ctrl_RegWrite_out),.MEM_WB_ctrl_regw(MEM_WB_ctrl_RegWrite_out), .FEX_WB_ctrl_regw(FEX_WB_ctrl_RegWrite_out),
+      .ID_EX_ctrl_MemWrite(ID_EX_ctrl_MemWrite_out),
       .ID_EX_ctrl_FpInst(ID_EX_ctrl_FpInst_out),.ID_FEX_ctrl_FpInst(ID_FEX_ctrl_FpInst_out),.EX_MEM_ctrl_FpInst(EX_MEM_ctrl_FpInst_out),.MEM_WB_ctrl_FpInst(MEM_WB_ctrl_FpInst_out),.FEX_WB_ctrl_FpInst(FEX_WB_ctrl_FpInst_out), 
       .FEX_WB_ctrl_MemRead(FEX_WB_ctrl_MemRead_out), .MEM_WB_ctrl_MemToReg(MEM_WB_ctrl_MemToReg_out),
       .FEX_WB_ctrl_FPIntCvtReg(FEX_WB_ctrl_FpIntCvtReg_out), .ID_FEX_ctrl_FPIntCvtReg(ID_FEX_ctrl_FPIntCvtReg_out),
       .IF_ID_ctrl_FPIntCvtReg(IF_ID_ctrl_FPIntCvtReg_ea),
+      .IF_ID_ctrl_FPInst(IF_ID_ctrl_FpInst_ea),
 
       // Outputs
       .frwrd_MEM_EX_opA(frwrd_MEM_EX_opA),.frwrd_MEM_EX_opB(frwrd_MEM_EX_opB),

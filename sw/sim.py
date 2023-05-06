@@ -18,6 +18,7 @@ from pathlib import Path
 
 from generate_control import gen_control
 from generate_dec_tasks import gen_dec_tasks
+from compare_sim import sim_compare
 
 # too lazy to put it in the json
 BLACKLIST = ["top.sv", "rst_synch.sv"]
@@ -65,10 +66,6 @@ def clean(tb_dir, tb_name):
     control_pkg_file = "control_defs_pkg.sv"
     rtl_cpu_dir = "rtl/cpu"
     rtl_pkg_dir = "rtl/pkg"
-    dec_tasks_file = "decode_tasks_pkg.sv"
-    tb_pkg_dir = "tb/pkg"
-    if os.path.exists(os.path.join(tb_pkg_dir, dec_tasks_file)):
-        os.remove(os.path.join(tb_pkg_dir, dec_tasks_file))
     if os.path.exists(os.path.join(rtl_cpu_dir, control_file)):
         os.remove(os.path.join(rtl_cpu_dir, control_file))
     if os.path.exists(os.path.join(rtl_pkg_dir, control_pkg_file)):
@@ -128,10 +125,10 @@ def run_flow(flow, tb, tb_cfg):
 
     control_file = "control.sv"
     control_pkg_file = "control_defs_pkg.sv"
+    sim_trace_file = "sim_trace_compare.log"
+
     rtl_cpu_dir = "rtl/cpu"
     rtl_pkg_dir = "rtl/pkg"
-    dec_tasks_file = "decode_tasks_pkg.sv"
-    tb_pkg_dir = "tb/pkg"
 
     if not os.path.exists(tb_dir):
         raise RuntimeError(f"tb directory {tb_dir} doesn't exist. Quitting.")
@@ -157,13 +154,6 @@ def run_flow(flow, tb, tb_cfg):
         os.remove(os.path.join(rtl_pkg_dir, control_pkg_file))
     shutil.move(control_pkg_file,os.path.join(rtl_pkg_dir, control_pkg_file))
     shutil.move(control_file,os.path.join(rtl_cpu_dir, control_file))
-
-    # Generate the decode_tasks.pkg
-    gen_dec_tasks(orders)
-    if os.path.exists(os.path.join(tb_pkg_dir, dec_tasks_file)):
-        os.remove(os.path.join(tb_pkg_dir, dec_tasks_file))
-    shutil.move(dec_tasks_file,os.path.join(tb_pkg_dir, dec_tasks_file))
-    
     instr_file.close()
 
     # quit here if we're just doing a clean
@@ -174,11 +164,23 @@ def run_flow(flow, tb, tb_cfg):
         return
     # otherwise assume proj by default
     proj(tb_dir, tb, fileset, tb_pkgs)
+    flow_res = 0
     if flow == "gui":
         gui(tb_dir, tb)
     elif flow == "test":
-        return test(tb_dir, tb, top)
+         flow_res =  test(tb_dir, tb, top)
+    
+    # Compare simulation traces
+    tb_trace = open(f'tb/{tb}/wi23_tb_trace.log', 'r')
+    sim_trace = open('out/wi23_sim_trace.log', 'r')
+    sim_compare(tb_trace, sim_trace)
+    if os.path.exists(os.path.join(tb_dir, sim_trace_file)):
+        os.remove(os.path.join(tb_dir, sim_trace_file))
+    shutil.move(sim_trace_file,os.path.join(tb_dir, sim_trace_file))
+    tb_trace.close()
+    sim_trace.close()
 
+    return flow_res
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

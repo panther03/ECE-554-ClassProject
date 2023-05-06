@@ -5,11 +5,14 @@
 CC="wi23-elf-gcc"
 AS="wi23-elf-as"
 LD="wi23-elf-ld"
+RUN="wi23-elf-run"
 OBJDUMP="wi23-elf-objdump"
 OBJCOPY="wi23-elf-objcopy"
+CFLAGS="-fsingle-precision-constant -fno-builtin -fno-inline"
 
 FW_UNIT_TEST=$1
 OUT_DIR=$2
+SIM_TRACE=$3
 
 if [[ "$FW_UNIT_TEST" == *.s ]]; then
     $AS unit/asm/"$FW_UNIT_TEST" -o $OUT_DIR/out.o
@@ -19,11 +22,15 @@ elif [[ "$FW_UNIT_TEST" == *.asm ]]; then
     $LD -o $OUT_DIR/out.elf $OUT_DIR/out.o
     rm $OUT_DIR/out.o
 elif [[ "$FW_UNIT_TEST" == *.c ]]; then
-    $CC -O2 -g unit/c/"$FW_UNIT_TEST" -o $OUT_DIR/out.elf
+    $CC $CFLAGS -O2 -g unit/c/"$FW_UNIT_TEST" -o $OUT_DIR/out.elf
 else
     echo "Error: Invalid file extension for FW_UNIT_TEST: $FW_UNIT_TEST"
     exit 1
 fi
 
-$OBJDUMP -dr -S $OUT_DIR/out.elf > $OUT_DIR/exec-out.log
-$OBJCOPY --verilog-data-width 4 $OUT_DIR/out.elf  -O verilog $OUT_DIR/out.hex
+$OBJDUMP -dr -s -S $OUT_DIR/out.elf > $OUT_DIR/exec-out.log
+$OBJCOPY --verilog-data-width 4 $OUT_DIR/out.elf -O verilog $OUT_DIR/out.hex
+if [[ "$SIM_TRACE" == "1" ]]; then
+    echo "Running Simulator on $FW_UNIT_TEST"
+    $RUN -t $OUT_DIR/out.elf 2>$OUT_DIR/wi23_sim_trace.log
+fi
