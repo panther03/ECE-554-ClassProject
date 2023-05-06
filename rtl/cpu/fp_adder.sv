@@ -69,12 +69,14 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
                               A_type == 3'b010 && B_type == 3'b010 && A_s == B_s         ? A_ex :  // A = inf and B = inf and same sign
                                                                                            (A_NaN ? A_ex : B_ex);  // default to NaN exponent
 
-  assign S_special_mantissa = ~|A_type                                                   ? B_m :        // A is 0
-                              ~|B_type                                                   ? A_m :        // B is 0
-                              (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010 ? B_m :        // A = norm or subnorm and B = inf
-                              (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010 ? A_m :        // A = inf and B = norm or subnorm
-                              A_type == 3'b010 && B_type == 3'b010 && A_s == B_s         ? A_m :        // A = inf and B = inf and same sign
-                                                                                           (A_NaN ? A_m : B_m);  // default to NaN mantissa
+  assign S_special_mantissa = ~|A_type                                                                 ? B_m   :        // A is 0
+                              ~|B_type                                                                 ? A_m   :        // B is 0
+                              (~A_type[1] & (A_type[2] ^ A_type[0])) && B_type == 3'b010               ? B_m   :        // A = norm or subnorm and B = inf
+                              (~B_type[1] & (B_type[2] ^ B_type[0])) && A_type == 3'b010               ? A_m   :        // A = inf and B = norm or subnorm
+                              A_type == 3'b010 && B_type == 3'b010 && A_s == B_s && subtract_unflopped ? 23'h1 :        // A = inf and B = inf and same sign and subtract output should be subnormal
+                              A_type == 3'b010 && B_type == 3'b010 && A_s == B_s                       ? A_m   :        // A = inf and B = inf and same sign
+                              A_type == 3'b010 && B_type == 3'b010 && A_s != B_s                       ? 23'h1 :        // A = inf and B = inf and same sign
+                                                                                                         (A_NaN ? A_m : B_m);  // default to NaN mantissa
   
   /////////////////////////////////////////////////
   ///////////////    PRE-ADDER    /////////////////
@@ -126,11 +128,11 @@ module fp_adder(clk, A, B, subtract_unflopped, S);
   logic Sign_out;
   logic subtract_mod;
   logic [27:0] A_mantissa, B_mantissa;
-	logic eq;
+  logic eq;
   
   // logic
   assign B_sign_with_op = B_sign ^ subtract;
-	assign eq = A_mantissa_preadder == B_mantissa_preadder;
+  assign eq = A_mantissa_preadder == B_mantissa_preadder;
   
   assign Sign_out = subtract ? (A_sign & (~swp) & (~eq | (eq & B_sign_with_op))) | (~A_sign & swp) :
                                (A_sign & (B_sign_with_op | comp)) | (~A_sign & B_sign_with_op & ~comp);

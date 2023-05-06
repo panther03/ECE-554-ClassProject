@@ -65,6 +65,10 @@ module fp_adder_tb();
     
     testA_B(clk, A, B, subtract, S, 32'h40600000, 32'h40600000, 1'b1, 32'h00000000); // 28. 3.5 - 3.5 = 0
     
+    testA_B(clk, A, B, subtract, S, 32'h00000000, 32'h00000000, 1'b1, 32'h80000000); // 29. 0 - 0 = 0
+    
+    testA_B(clk, A, B, subtract, S, 32'h7f800000, 32'h7f800000, 1'b1, 32'h7f800001); // 30. inf - inf = nan
+    
     $stop();
   end
 
